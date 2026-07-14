@@ -9,8 +9,8 @@ AI作成の判定を主張せず、メンテナーのレビュー負荷を減ら
 | プロファイル | トークン権限 | 効果 |
 | --- | --- | --- |
 | `observe`（既定） | 読み取り専用 | job summaryのみ。シグナルと誤検知を測定 |
-| `balanced` | PR書き込み | `needs-human-review`のみ追加。コメント、close、lockなし |
-| `hardened` | ジョブごと | `balanced`に依存関係レビューとワークフロー静的解析を追加 |
+| `balanced` | 読み取り専用 | 名前付きquality status checkを失敗させる。コメント、ラベル、close、lockなし |
+| `hardened` | 読み取り専用 | `balanced`に依存関係レビューとワークフロー静的解析を追加 |
 
 すべてのプロファイルは、`en`、`vi`、`ja`のIssueフォーム、PRテンプレート、ポリシー、プレイブック、ラベル仕様、導入記録をインストールします。
 
@@ -24,11 +24,7 @@ python3 scripts/install_kit.py --target /path/to/project --profile observe --lan
 python3 scripts/install_kit.py --target /path/to/project --verify
 ```
 
-`balanced`または`hardened`を使う前に、中立的なキュー用ラベルを作成します。
-
-```bash
-gh label create needs-human-review --repo OWNER/REPOSITORY --color D4C5F9 --description "メンテナー確認用の中立的なキュー"
-```
+特権的な`pull_request_target`設計は、zizmorが危険なtrust boundaryを検出したため削除しました。`balanced`は読み取り専用の`pull_request`を使い、制御された`result`出力を`PR quality gate` status checkに変換します。十分に測定した後だけ、GitHubのネイティブrulesetでこのcheckをrequiredにしてください。同梱ラベル仕様は手動triage用で、前提条件ではありません。
 
 ## ロールバック
 

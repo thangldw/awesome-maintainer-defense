@@ -78,7 +78,7 @@ def label_spec(language: str) -> bytes:
                 "name": "needs-human-review",
                 "color": "D4C5F9",
                 "description": descriptions[language],
-                "required_by": ["balanced", "hardened"],
+                "optional_for_manual_triage": ["balanced", "hardened"],
             }
         ]
     }

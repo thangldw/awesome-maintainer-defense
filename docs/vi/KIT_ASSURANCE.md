@@ -9,14 +9,14 @@
 - `observe` dùng sự kiện `pull_request`, token chỉ đọc, không checkout code PR và không comment, gắn nhãn, close hay lock.
 - Installer mặc định dry-run, kiểm tra conflict trước khi ghi, không overwrite, lưu SHA-256 và ownership trong manifest.
 - Uninstall chỉ xóa file installer tạo và dừng nếu file đã sửa; đường dẫn vượt repository, manifest độc hại và symlink đều bị từ chối.
-- `balanced` và `hardened` chỉ có thể thêm `needs-human-review`; không comment, close, lock, merge hay chạy code PR.
+- `balanced` và `hardened` chỉ có thể làm fail một status check có tên; không comment, gắn nhãn, close, lock, merge hay chạy code PR.
 - Baseline tắt rõ ràng các proxy về username, tuổi tài khoản, số lần fork, profile công khai/đầy đủ, lịch sử merge toàn cục, emoji và danh tính commit author.
 - Mọi Action dùng commit SHA đầy đủ, có record trong `pins.json`; tag upstream và trạng thái commit verified được kiểm tra định kỳ.
 - Ma trận end-to-end kiểm tra 3 profile × 3 ngôn ngữ, cùng conflict, rollback, file đã sửa, file có sẵn, manifest độc hại và symlink.
 
 ## Sửa lỗi từ audit lần hai
 
-Workflow cũ có thể comment lặp lại ở sự kiện `edited`/`synchronize`, việc gắn nhãn có thể thất bại âm thầm khi nhãn chưa tồn tại, và default upstream chứa nhiều proxy danh tính/lịch sử không phù hợp nguyên tắc quality-first. Bản mới bỏ comment công khai, chỉ chạy profile có quyền ghi khi mở/mở lại PR, yêu cầu tạo nhãn rõ ràng, tắt các proxy đó và đặt `observe` chỉ đọc làm mặc định. Issue form cũng không còn phụ thuộc vào nhãn chưa khai báo.
+Workflow cũ có thể comment lặp lại, việc gắn nhãn có thể thất bại âm thầm và default upstream chứa nhiều proxy danh tính/lịch sử không phù hợp quality-first. Bản sửa label-only đầu tiên vẫn dùng `pull_request_target`; zizmor đã từ chối đúng vì trust boundary đặc quyền. Thiết kế cuối dùng `pull_request` chỉ đọc, không comment/gắn nhãn, tắt các proxy và biến output được kiểm soát thành status gate. Issue form cũng không còn phụ thuộc nhãn chưa khai báo.
 
 ## Chưa được đảm bảo
 
@@ -29,6 +29,6 @@ Workflow cũ có thể comment lặp lại ở sự kiện `edited`/`synchronize
 
 ## Cổng chấp nhận production
 
-Chỉ chuyển khỏi `observe` khi đã: rà soát native control; chỉ định owner, review SLA, kênh khiếu nại và người tắt khẩn cấp; ghi baseline; tạo và test nhãn; review false positive bằng người thật; và tất cả verification/CI đều pass.
+Chỉ chuyển khỏi `observe` khi đã: rà soát native control; chỉ định owner, review SLA, kênh khiếu nại và người tắt khẩn cấp; ghi baseline; test status gate cả trường hợp fail và hồi phục; review false positive bằng người thật; và tất cả verification/CI đều pass.
 
 Kết luận trung thực: **cài đặt, quyền, rollback, pinning và localization đã được test; hiệu quả kiểm duyệt ngoài thực tế chưa được đảm bảo**.

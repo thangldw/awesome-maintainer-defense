@@ -18,7 +18,7 @@ Use GitHub's own repository and organization controls before adding third-party 
 | --- | --- |
 | Baseline not reviewed | Do not install yet; fix repository settings first |
 | Baseline set, effectiveness unknown | `observe` |
-| Measured review queue is needed and label exists | `balanced` |
+| A measured, recoverable status gate is needed | `balanced`; make the check required only after observation |
 | Dependency and workflow supply-chain checks are also required | `hardened` |
 | Active abuse flood | Use time-bounded native interaction or PR access controls; do not improvise permanent automation during the incident |
 
