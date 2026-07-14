@@ -1,7 +1,10 @@
-.PHONY: kit-test links metadata pins render validate
+.PHONY: kit-test links metadata pins render standalone validate
 
 kit-test:
 	python3 scripts/test_install_kit.py
+
+standalone:
+	python3 scripts/build_standalone.py
 
 links:
 	python3 scripts/check_links.py

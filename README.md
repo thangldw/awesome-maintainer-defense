@@ -12,17 +12,22 @@ Open source should stay open without requiring maintainers to absorb unlimited s
 
 This project is **anti-abuse, not anti-AI**. It favors transparent signals, reversible actions, least privilege, and a documented appeal path over unreliable claims that a tool can perfectly identify AI-generated content.
 
-## Install the Maintainer Defense Kit
+## Try in 60 seconds
 
-Preview a read-only English installation; nothing is written without `--apply`:
+No clone and no package-manager trust required. Download the standalone v1.0.0 CLI from GitHub Releases, verify it, preview the read-only `observe` profile, then apply only if the diff is right:
 
 ```bash
-python3 scripts/install_kit.py --target /path/to/project --profile observe --language en --repo OWNER/REPOSITORY
-python3 scripts/install_kit.py --target /path/to/project --profile observe --language en --repo OWNER/REPOSITORY --apply
-python3 scripts/install_kit.py --target /path/to/project --verify
+gh release download v1.0.0 -R thangldw/awesome-maintainer-defense -p 'maintainer-defense-kit.py*'
+shasum -a 256 -c maintainer-defense-kit.py.sha256
+python3 maintainer-defense-kit.py --target . --profile observe --language en --repo OWNER/REPOSITORY
+python3 maintainer-defense-kit.py --target . --profile observe --language en --repo OWNER/REPOSITORY --apply
 ```
 
-The [installable kit](kits/maintainer-defense-kit) includes `observe`, `balanced`, and `hardened` profiles, safe uninstall, and complete `en`, `vi`, and `ja` deployment assets. Its [assurance case](docs/KIT_ASSURANCE.md) distinguishes tested engineering guarantees from moderation effectiveness that has not yet been field-proven.
+The CLI is one dependency-free Python file with 25 embedded, versioned assets. It makes no network or GitHub API calls. Run `python3 maintainer-defense-kit.py --target . --verify` after installation and `--uninstall` for a guarded rollback.
+
+![35-second terminal demo: dry-run, install observe, verify, then uninstall](assets/demo.gif)
+
+The [installable kit](kits/maintainer-defense-kit) includes `observe`, `balanced`, and `hardened` profiles, safe uninstall, and complete `en`, `vi`, and `ja` deployment assets. Its [assurance case](docs/KIT_ASSURANCE.md) distinguishes tested engineering guarantees from moderation effectiveness that has not yet been field-proven. See the [v1.0.0 changelog](CHANGELOG.md) for the audit trail behind the safe defaults.
 
 ## Start here
 
