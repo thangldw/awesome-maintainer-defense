@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+"""Check catalog links without adding a third-party CI dependency."""
+
+from __future__ import annotations
+
+import json
+import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
+
+ROOT = Path(__file__).resolve().parents[1]
+def check(item: dict) -> tuple[str, int | None, str]:
+    headers = {
+        "Accept": "text/html,application/xhtml+xml",
+        "User-Agent": "awesome-maintainer-defense-link-checker",
+    }
+    request = Request(item["url"], headers=headers, method="GET")
+    try:
+        with urlopen(request, timeout=20) as response:
+            return item["id"], response.status, ""
+    except HTTPError as exc:
+        return item["id"], exc.code, str(exc.reason)
+    except (URLError, TimeoutError) as exc:
+        return item["id"], None, str(exc)
+
+
+def main() -> None:
+    data = json.loads((ROOT / "catalog.json").read_text(encoding="utf-8"))
+    failures: list[str] = []
+    warnings: list[str] = []
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        futures = {pool.submit(check, item): item for item in data["resources"]}
+        for future in as_completed(futures):
+            item = futures[future]
+            resource_id, status, reason = future.result()
+            if status in {404, 410}:
+                failures.append(f"{resource_id}: HTTP {status} ({item['url']})")
+            elif status is None or status >= 400:
+                warnings.append(
+                    f"{resource_id}: {f'HTTP {status}' if status else 'network error'}"
+                    f" {reason} ({item['url']})"
+                )
+            else:
+                print(f"OK {status}: {resource_id}")
+
+    for warning in sorted(warnings):
+        print(f"WARNING: {warning}", file=sys.stderr)
+    if failures:
+        for failure in sorted(failures):
+            print(f"ERROR: {failure}", file=sys.stderr)
+        raise SystemExit(1)
+    print(f"Checked {len(data['resources'])} links; {len(warnings)} transient warning(s)")
+
+
+if __name__ == "__main__":
+    main()

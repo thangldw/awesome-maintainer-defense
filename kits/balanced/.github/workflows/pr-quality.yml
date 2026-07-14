@@ -1,0 +1,27 @@
+name: PR quality triage
+
+on:
+  pull_request_target:
+    types: [opened, reopened, edited, synchronize]
+
+# This workflow intentionally does not check out or execute pull-request code.
+permissions:
+  contents: read
+  issues: read
+  pull-requests: write
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check submission quality signals
+        uses: peakoss/anti-slop@57858eead489d08b255fab2af45a506c2ca6eab2 # v0
+        with:
+          max-failures: 4
+          close-pr: false
+          lock-pr: false
+          failure-add-pr-labels: needs-human-review
+          failure-pr-message: >-
+            Automated checks found several signals that need maintainer review.
+            This label is not a judgment about authorship or intent. A maintainer
+            will review the scope, evidence, tests, and project fit.
