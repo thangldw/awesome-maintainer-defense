@@ -4,8 +4,9 @@ This log records material corrections to the catalog. Routine wording and link m
 
 ## 2026-07-14 — Maintainer Defense Kit assurance audit
 
-- Found that the earlier triage workflow could create repeated failure comments on `edited` and `synchronize` events; removed public comments and limited the write-enabled workflow to `opened` and `reopened`.
-- Confirmed from upstream source that a missing configured label only produces a warning. Made label provisioning an explicit acceptance gate and made the default `observe` profile fully read-only.
+- Found that the earlier triage workflow could create repeated failure comments on `edited` and `synchronize` events; removed public comments.
+- Confirmed from upstream source that a missing configured label only produces a warning; removed automated labeling rather than accepting a silent failure mode.
+- Zizmor then rejected the remaining `pull_request_target` trust boundary. Replaced it with a read-only `pull_request` status gate instead of suppressing the finding.
 - Disabled upstream username, account-age, fork-rate, public-profile, profile-completeness, global-history, emoji, and commit-author proxy heuristics so the baseline follows the project's quality-not-authorship principle.
 - Removed undeclared default labels from the issue form because GitHub does not apply labels that do not already exist.
 - Added an installer with dry-run default, conflict refusal, ownership and SHA-256 manifest, verification, modified-file-safe uninstall, repository-bound paths, symlink rejection, and atomic manifest creation.

@@ -48,7 +48,7 @@ The defended system is an open-source repository that accepts public issues, pul
 
 Never fetch and execute untrusted pull-request code in a job that has repository secrets or a privileged token. GitHub documents that `pull_request_target` runs with the base repository's trust and becomes dangerous when a workflow fetches a fork's code and executes build scripts, dependencies, or configuration. See [Securely using `pull_request_target`](https://docs.github.com/en/actions/reference/security/securely-using-pull_request_target).
 
-The balanced starter kit uses `pull_request_target` only for metadata triage, pins the third-party Action to a full commit SHA, grants limited permissions, and does not check out PR code. This reduces risk; it does not eliminate the need to review upstream Action changes before updating the pin.
+The balanced starter kit does **not** use `pull_request_target`. It uses the unprivileged `pull_request` event, read-only permissions, a full-SHA Action pin, and no checkout of PR code. Quality results become a status check; any merge enforcement is configured separately through a native ruleset. This reduces risk but does not eliminate the need to review upstream Action changes before updating the pin.
 
 ## Non-goals
 

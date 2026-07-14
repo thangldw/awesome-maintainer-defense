@@ -253,17 +253,27 @@ def validate_kit_safety() -> None:
     if any(value in observe for value in forbidden_observe):
         fail("observe profile contains a contributor-visible mutation or checkout")
     required_balanced = (
-        "pull_request_target:",
-        "types: [opened, reopened]",
-        "pull-requests: write",
-        "failure-add-pr-labels: needs-human-review",
+        "pull_request:",
+        "types: [opened, reopened, edited, synchronize]",
+        "pull-requests: read",
+        "id: triage",
+        "if: steps.triage.outputs.result == 'failed'",
+        "exit 1",
         "close-pr: false",
         "lock-pr: false",
     )
     if any(value not in balanced for value in required_balanced):
         fail("balanced profile is missing a review-first safety invariant")
-    if "failure-pr-message" in balanced or "actions/checkout" in balanced:
-        fail("balanced profile must not comment or execute pull-request code")
+    forbidden_balanced = (
+        "pull_request_target:",
+        "failure-pr-message",
+        "failure-add-pr-labels",
+        "success-add-pr-labels",
+        "actions/checkout",
+        "pull-requests: write",
+    )
+    if any(value in balanced for value in forbidden_balanced):
+        fail("balanced profile must be a read-only status gate")
     disabled_proxies = (
         "detect-spam-usernames: false",
         "min-account-age: 0",

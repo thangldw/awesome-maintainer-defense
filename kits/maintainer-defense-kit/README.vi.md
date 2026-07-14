@@ -9,8 +9,8 @@ Baseline có thể cài và rollback để giảm tải review nhưng không tuy
 | Profile | Quyền token | Tác động |
 | --- | --- | --- |
 | `observe` (mặc định) | chỉ đọc | Chỉ ghi job summary; dùng để đo tín hiệu và false positive |
-| `balanced` | ghi PR | Chỉ thêm `needs-human-review`; không comment, close hay lock |
-| `hardened` | theo từng job | `balanced` cộng dependency review và phân tích tĩnh workflow |
+| `balanced` | chỉ đọc | Làm fail quality status check có tên; không comment, gắn nhãn, close hay lock |
+| `hardened` | chỉ đọc | `balanced` cộng dependency review và phân tích tĩnh workflow |
 
 Mọi profile đều cài issue form, PR template, policy, playbook, đặc tả nhãn và hồ sơ triển khai bằng `en`, `vi` hoặc `ja`.
 
@@ -24,11 +24,7 @@ python3 scripts/install_kit.py --target /duong/dan/du-an --profile observe --lan
 python3 scripts/install_kit.py --target /duong/dan/du-an --verify
 ```
 
-Trước khi dùng `balanced` hoặc `hardened`, tạo nhãn trung lập mà workflow yêu cầu:
-
-```bash
-gh label create needs-human-review --repo OWNER/REPOSITORY --color D4C5F9 --description "Hàng đợi trung lập để maintainer review"
-```
+Thiết kế dùng `pull_request_target` có đặc quyền đã bị loại bỏ sau khi zizmor phát hiện trust boundary nguy hiểm. `balanced` dùng `pull_request` chỉ đọc và chuyển output `result` được kiểm soát thành status check `PR quality gate`. Chỉ sau khi đo đủ, maintainer mới nên đặt check này thành required bằng GitHub ruleset native. Đặc tả nhãn đi kèm chỉ dành cho triage thủ công, không phải prerequisite.
 
 ## Rollback
 

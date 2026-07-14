@@ -1,28 +1,27 @@
-name: PR quality triage
+name: PR quality gate
 
 on:
-  pull_request_target:
-    # Avoid posting the same triage result after every edit or new commit.
-    types: [opened, reopened]
+  pull_request:
+    types: [opened, reopened, edited, synchronize]
 
-# This workflow intentionally does not check out or execute pull-request code.
+# Read-only gate. This workflow never checks out or executes pull-request code.
 permissions:
   contents: read
   issues: read
-  pull-requests: write
+  pull-requests: read
 
 jobs:
   triage:
     runs-on: ubuntu-latest
     steps:
       - name: Check submission quality signals
+        id: triage
         uses: peakoss/anti-slop@57858eead489d08b255fab2af45a506c2ca6eab2 # v0
         with:
           max-failures: 4
           close-pr: false
           lock-pr: false
           exempt-draft-prs: true
-          failure-add-pr-labels: needs-human-review
           # Disable identity/history heuristics and style proxies in the baseline.
           # Keep triage focused on scope, reproducibility, and repository hygiene.
           detect-spam-usernames: false
@@ -37,3 +36,9 @@ jobs:
           max-code-references: 0
           blocked-paths: ""
           max-added-comments: 0
+      - name: Mark submissions that need human review
+        if: steps.triage.outputs.result == 'failed'
+        run: |
+          echo "Quality signals exceeded the configured threshold." >> "$GITHUB_STEP_SUMMARY"
+          echo "This is not a judgment about authorship or intent." >> "$GITHUB_STEP_SUMMARY"
+          exit 1

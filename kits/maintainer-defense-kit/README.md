@@ -9,8 +9,8 @@ An installable, reversible baseline for reducing maintainer review load without 
 | Profile | GitHub token | Repository effect | Intended use |
 | --- | --- | --- | --- |
 | `observe` (default) | read-only | Job summary only | Measure signals and false positives before changing contributor-visible state. |
-| `balanced` | PR write | Adds `needs-human-review`; no comment, close, or lock | Human-review queue after an observation period. |
-| `hardened` | mixed, per job | Balanced triage plus dependency review and workflow static analysis | Repositories with dependency or Actions supply-chain exposure. |
+| `balanced` | read-only | Fails a named quality status check; no comment, label, close, or lock | Optional ruleset gate after an observation period. |
+| `hardened` | read-only | Balanced gate plus dependency review and workflow static analysis | Repositories with dependency or Actions supply-chain exposure. |
 
 All profiles also install a structured bug form, PR template, contribution policies, an operations playbook, a label specification, and an adoption record. English (`en`), Vietnamese (`vi`), and Japanese (`ja`) are complete deployment languages—not README-only translations.
 
@@ -24,13 +24,7 @@ python3 scripts/install_kit.py --target /path/to/project --profile observe --lan
 python3 scripts/install_kit.py --target /path/to/project --verify
 ```
 
-After an observation period, switch profiles by uninstalling the current profile and installing another. For `balanced` or `hardened`, create the required neutral queue label before enabling the workflow:
-
-```bash
-gh label create needs-human-review --repo OWNER/REPOSITORY --color D4C5F9 --description "Neutral queue for maintainer review"
-```
-
-The upstream triage Action logs a warning rather than failing if the label is absent, so this prerequisite is intentional and testable.
+After an observation period, switch profiles by uninstalling the current profile and installing another. The write-enabled `pull_request_target` design was removed after zizmor flagged its privileged trust boundary. `balanced` now uses `pull_request` with read-only permissions and turns the Action's controlled `result` output into a named status check. If measured performance is acceptable, a maintainer may make `PR quality gate` required in a native GitHub ruleset. The included label specification is optional and manual only.
 
 ## Roll back
 

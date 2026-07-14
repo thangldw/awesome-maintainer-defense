@@ -34,7 +34,7 @@ The [installable kit](kits/maintainer-defense-kit) includes `observe`, `balanced
 | Harassment or coordinated abuse | Preserve evidence and limit interactions | Use Niubi Guard in dry-run mode before applying actions |
 | Suspicious workflow change | Do not run untrusted code with write tokens | Run zizmor, pin Actions, and restrict `GITHUB_TOKEN` permissions |
 
-The `balanced` profile is deliberately review-first: it labels submissions for human review but does not comment, close, or lock them. The default `observe` profile does not change contributor-visible state.
+The `balanced` profile is deliberately review-first: it exposes a read-only quality status gate but does not comment, label, close, or lock submissions. The default `observe` profile only records results in the job summary.
 
 Before adopting a tool, review [native GitHub controls](docs/NATIVE_CONTROLS.md), then read the evidence-backed [resource audit](docs/RESOURCE_AUDIT.md), [evaluation method](docs/EVALUATION.md), and [threat model](docs/THREAT_MODEL.md).
 
