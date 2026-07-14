@@ -14,6 +14,23 @@ An installable, reversible baseline for reducing maintainer review load without 
 
 All profiles also install a structured bug form, PR template, contribution policies, an operations playbook, a label specification, and an adoption record. English (`en`), Vietnamese (`vi`), and Japanese (`ja`) are complete deployment languages—not README-only translations.
 
+## Choose a profile
+
+```mermaid
+flowchart TD
+    A{Native controls ready?}
+    A -- No --> B[Review native controls]
+    B --> C[Install observe]
+    A -- Yes --> C
+    C --> D{Evidence sufficient?}
+    D -- No --> C
+    D -- Yes --> E{Need a required quality check?}
+    E -- No --> F[Stay on observe]
+    E -- Yes --> G{Need supply-chain checks?}
+    G -- No --> H[Use balanced]
+    G -- Yes --> I[Use hardened]
+```
+
 ## Install safely
 
 Run these commands from this repository. The first command only previews changes:
