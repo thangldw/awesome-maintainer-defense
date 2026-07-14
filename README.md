@@ -14,11 +14,11 @@ This project is **anti-abuse, not anti-AI**. It favors transparent signals, reve
 
 ## Try in 60 seconds
 
-No signup, clone, or package-manager trust required. Download the standalone v1.0.0 CLI directly from GitHub Releases, verify it, preview the read-only `observe` profile, then apply only if the diff is right. The download is never piped into a shell:
+No signup, clone, or package-manager trust required. Download the standalone v1.0.1 CLI directly from GitHub Releases, verify it, preview the read-only `observe` profile, then apply only if the diff is right. Python 3.10+ is required. The download is never piped into a shell:
 
 ```bash
-curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0.0/maintainer-defense-kit.py
-curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0.0/maintainer-defense-kit.py.sha256
+curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0.1/maintainer-defense-kit.py
+curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0.1/maintainer-defense-kit.py.sha256
 
 sha256sum -c maintainer-defense-kit.py.sha256
 # macOS: shasum -a 256 -c maintainer-defense-kit.py.sha256
@@ -31,7 +31,7 @@ The CLI is one dependency-free Python file with 25 embedded, versioned assets. I
 
 ![35-second terminal demo: dry-run, install observe, verify, then uninstall](assets/demo.gif)
 
-The [installable kit](kits/maintainer-defense-kit) includes `observe`, `balanced`, and `hardened` profiles, safe uninstall, and complete `en`, `vi`, and `ja` deployment assets. Its [assurance case](docs/KIT_ASSURANCE.md) distinguishes tested engineering guarantees from moderation effectiveness that has not yet been field-proven. See the [v1.0.0 changelog](CHANGELOG.md) for the audit trail behind the safe defaults.
+The [installable kit](kits/maintainer-defense-kit) includes `observe`, `balanced`, and `hardened` profiles, safe uninstall, and structurally complete `en`, `vi`, and `ja` deployment assets; independent native security/legal review of Vietnamese and Japanese wording is still pending. Its [signal contract](docs/PROFILE_SIGNALS.md) exposes every active threshold and disabled proxy. The [assurance case](docs/KIT_ASSURANCE.md) distinguishes tested engineering guarantees from moderation effectiveness that has not yet been field-proven. See the [v1.0.1 changelog](CHANGELOG.md) for the latest audit corrections.
 
 ## Start here
 
@@ -135,7 +135,7 @@ Set expectations before problems arrive and respond consistently when they do.
 
 ## Ready-to-use defenses
 
-- [Installable Maintainer Defense Kit](kits/maintainer-defense-kit) — tested profiles, manifest verification, safe rollback, and three complete deployment languages.
+- [Installable Maintainer Defense Kit](kits/maintainer-defense-kit) — tested profiles, manifest verification, safe rollback, and structurally complete assets in three deployment languages.
 - [Balanced starter kit](kits/balanced) — PR template, issue form, and review-first PR quality workflow.
 - [Workflow-hardening starter kit](kits/workflow-hardening) — pinned dependency review and GitHub Actions static analysis.
 - [AI contribution policy](policies/AI_CONTRIBUTIONS.md) — allows responsible assistance while keeping humans accountable.
@@ -152,6 +152,7 @@ Operational depth:
 - [Maturity model](docs/MATURITY_MODEL.md) — a five-level path from reactive moderation to resilient operations.
 - [Audit log](docs/AUDIT_LOG.md) — material corrections and scope changes, including removed entries.
 - [Kit assurance case](docs/KIT_ASSURANCE.md) — tested claims, corrected flaws, limits, and the production acceptance gate.
+- [PR quality signal contract](docs/PROFILE_SIGNALS.md) — exact checks, thresholds, disabled proxies, exemptions, and profile effects.
 - [Native-control baseline](docs/NATIVE_CONTROLS.md) — repository settings to prefer before third-party automation.
 - [Visual diagram guidelines](docs/VISUAL_STYLE.md) — Miro-inspired rules for purposeful, consistent, multilingual diagrams.
 

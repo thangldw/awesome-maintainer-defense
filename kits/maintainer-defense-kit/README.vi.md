@@ -12,7 +12,7 @@ Baseline có thể cài và rollback để giảm tải review nhưng không tuy
 | `balanced` | chỉ đọc | Làm fail quality status check có tên; không comment, gắn nhãn, close hay lock |
 | `hardened` | chỉ đọc | `balanced` cộng dependency review và phân tích tĩnh workflow |
 
-Mọi profile đều cài issue form, PR template, policy, playbook, đặc tả nhãn và hồ sơ triển khai bằng `en`, `vi` hoặc `ja`.
+Mọi profile đều cài issue form, PR template, policy, playbook, đặc tả nhãn và hồ sơ triển khai đầy đủ về cấu trúc bằng `en`, `vi` hoặc `ja`. Nội dung Việt/Nhật chưa được chuyên gia bảo mật/pháp lý bản ngữ review độc lập.
 
 ## Chọn profile
 
@@ -33,7 +33,7 @@ flowchart TD
 
 ## Cài đặt an toàn
 
-Chạy từ repository này. Lệnh đầu chỉ xem trước:
+Yêu cầu Python 3.10+; CI kiểm tra Linux (3.10, 3.12, 3.14) và macOS (3.12). Chạy từ repository này. Lệnh đầu chỉ xem trước:
 
 ```bash
 python3 scripts/install_kit.py --target /duong/dan/du-an --profile observe --language vi --repo OWNER/REPOSITORY
@@ -51,4 +51,4 @@ python3 scripts/install_kit.py --target /duong/dan/du-an --uninstall
 
 Uninstall chỉ xóa file installer đã tạo và từ chối nếu file đó đã bị sửa. Installer không gọi GitHub API, tạo nhãn, đổi setting hay commit code. Action được ghim bằng commit SHA và theo dõi trong [`pins.json`](../../pins.json).
 
-Đây là baseline đã được test kỹ thuật, không phải chứng nhận bảo mật. [Hồ sơ đảm bảo](../../docs/vi/KIT_ASSURANCE.md) nêu rõ phần đã đảm bảo và phần chưa có bằng chứng thực địa.
+Đây là baseline đã được test kỹ thuật, không phải chứng nhận bảo mật. Đọc [hợp đồng signal PR](../../docs/PROFILE_SIGNALS.md) và [hồ sơ đảm bảo](../../docs/vi/KIT_ASSURANCE.md) để biết chính xác phần đã đảm bảo và phần chưa có bằng chứng thực địa.

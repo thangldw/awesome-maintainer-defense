@@ -32,3 +32,5 @@ Workflow cũ có thể comment lặp lại, việc gắn nhãn có thể thất 
 Chỉ chuyển khỏi `observe` khi đã: rà soát native control; chỉ định owner, review SLA, kênh khiếu nại và người tắt khẩn cấp; ghi baseline; test status gate cả trường hợp fail và hồi phục; review false positive bằng người thật; và tất cả verification/CI đều pass.
 
 Kết luận trung thực: **cài đặt, quyền, rollback, pinning và localization đã được test; hiệu quả kiểm duyệt ngoài thực tế chưa được đảm bảo**.
+
+Installer hỗ trợ Python 3.10+; CI kiểm tra Linux với Python 3.10, 3.12, 3.14 và macOS với Python 3.12. Signal, threshold và proxy bị tắt được công bố trong [`PROFILE_SIGNALS.md`](../PROFILE_SIGNALS.md). Có thể gửi kết quả tổng hợp đã khử dữ liệu nhạy cảm qua [field-report issue form](https://github.com/thangldw/awesome-maintainer-defense/issues/new?template=field-report.yml); không cần tên repository, danh tính contributor hay dữ liệu PR thô.

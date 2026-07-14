@@ -15,8 +15,9 @@ This document defines exactly what the kit currently guarantees, how those claim
 | Reduced proxy bias | Baseline explicitly disables username, account-age, fork-rate, public-profile, profile-completeness, global-merge-history, emoji, code-reference, and commit-author identity heuristics | Static workflow inspection |
 | Immutable dependencies | Every Action reference is a full commit SHA with a matching `pins.json` record | Repository validator |
 | Upstream provenance is monitored | Each documented tag resolved to the recorded SHA and each commit was reported verified by GitHub on 2026-07-14 | `scripts/verify_pins.py`, run on the weekly evidence workflow |
-| Deployable translations | Every profile installs complete English, Vietnamese, or Japanese intake templates, policies, playbook, and adoption record | 3 profiles × 3 languages end-to-end matrix |
+| Deployable translations | Every profile installs structurally complete English, Vietnamese, or Japanese intake templates, policies, playbook, and adoption record; independent native review of Vietnamese and Japanese wording remains pending | 3 profiles × 3 languages end-to-end matrix |
 | Workflow regression detection | Workflow safety invariants, zizmor, and install tests run in CI | Quality and Workflow security workflows |
+| Runtime support | The installer supports Python 3.10+ and is tested on Linux with Python 3.10, 3.12, and 3.14 and on macOS with Python 3.12 | Quality workflow matrix |
 
 ## Corrected findings from the second audit
 
@@ -52,3 +53,5 @@ Treat the kit as production-ready for a specific repository only after all of th
 6. Installation verification, repository CI, and workflow security analysis pass.
 
 Until field evidence exists, the honest answer is: the kit's **installation, permissions, reversibility, pinning, and localization are tested**; its real-world moderation effectiveness is **not yet guaranteed**.
+
+The exact checks, thresholds, disabled proxies, and profile effects are recorded in [`PROFILE_SIGNALS.md`](PROFILE_SIGNALS.md). Maintainers may contribute privacy-sanitized aggregate results through the [field-report issue form](https://github.com/thangldw/awesome-maintainer-defense/issues/new?template=field-report.yml); raw PR data and contributor identities are neither requested nor needed.

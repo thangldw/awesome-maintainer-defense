@@ -18,10 +18,32 @@ jobs:
         id: triage
         uses: peakoss/anti-slop@57858eead489d08b255fab2af45a506c2ca6eab2 # v0
         with:
+          # Six submission-quality checks. Four failures are required to flag a PR.
           max-failures: 4
+          blocked-source-branches: ""
+          max-changed-files: 50
+          max-changed-lines: 10000
+          require-maintainer-can-modify: true
+          require-description: true
+          max-commit-message-length: 500
+          require-final-newline: true
           close-pr: false
           lock-pr: false
           exempt-draft-prs: true
+          exempt-bots: |
+            actions-user
+            autofix-ci[bot]
+            dependabot[bot]
+            renovate[bot]
+            github-actions[bot]
+          exempt-users: ""
+          exempt-author-association: OWNER,MEMBER,COLLABORATOR
+          exempt-label: ""
+          exempt-pr-label: ""
+          exempt-all-milestones: false
+          exempt-all-pr-milestones: false
+          exempt-milestones: ""
+          exempt-pr-milestones: ""
           # Disable identity/history heuristics and style proxies in the baseline.
           # Keep triage focused on scope, reproducibility, and repository hygiene.
           detect-spam-usernames: false
@@ -29,6 +51,8 @@ jobs:
           max-daily-forks: 0
           require-public-profile: false
           min-profile-completeness: 0
+          min-repo-merged-prs: 0
+          min-repo-merge-ratio: 0
           min-global-merge-ratio: 0
           require-commit-author-match: false
           max-description-length: 0

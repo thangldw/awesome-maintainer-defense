@@ -12,7 +12,7 @@ An installable, reversible baseline for reducing maintainer review load without 
 | `balanced` | read-only | Fails a named quality status check; no comment, label, close, or lock | Optional ruleset gate after an observation period. |
 | `hardened` | read-only | Balanced gate plus dependency review and workflow static analysis | Repositories with dependency or Actions supply-chain exposure. |
 
-All profiles also install a structured bug form, PR template, contribution policies, an operations playbook, a label specification, and an adoption record. English (`en`), Vietnamese (`vi`), and Japanese (`ja`) are complete deployment languages—not README-only translations.
+All profiles also install a structured bug form, PR template, contribution policies, an operations playbook, a label specification, and an adoption record. English (`en`), Vietnamese (`vi`), and Japanese (`ja`) have structurally complete deployment assets—not README-only translations. Vietnamese and Japanese wording has not yet received independent native security/legal review.
 
 ## Choose a profile
 
@@ -33,7 +33,7 @@ flowchart TD
 
 ## Install safely
 
-Run these commands from this repository. The first command only previews changes:
+Python 3.10+ is required and tested on Linux (3.10, 3.12, 3.14) and macOS (3.12). Run these commands from this repository. The first command only previews changes:
 
 ```bash
 python3 scripts/install_kit.py --target /path/to/project --profile observe --language en --repo OWNER/REPOSITORY
@@ -53,6 +53,6 @@ Uninstall removes only files that this installer created. It refuses to proceed 
 
 ## Trust boundary
 
-The installer makes local files only; it does not call GitHub APIs, create labels, change repository settings, or commit code. Workflow dependencies are pinned to immutable commits and recorded in [`pins.json`](../../pins.json). Read the [assurance case](../../docs/KIT_ASSURANCE.md) before treating the kit as a production control.
+The installer makes local files only; it does not call GitHub APIs, create labels, change repository settings, or commit code. Workflow dependencies are pinned to immutable commits and recorded in [`pins.json`](../../pins.json). Read the exact [PR quality signal contract](../../docs/PROFILE_SIGNALS.md) and the [assurance case](../../docs/KIT_ASSURANCE.md) before treating the kit as a production control.
 
 This is an engineering-tested baseline, not a security certification or a substitute for GitHub's native repository controls.

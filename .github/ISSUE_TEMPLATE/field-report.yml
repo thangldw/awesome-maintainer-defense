@@ -1,0 +1,64 @@
+name: Sanitized field report
+description: Share aggregate evidence from running a Maintainer Defense Kit profile.
+title: "[Field report]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping test the kit's real-world value. Aggregate or redact all data. Repository names, contributor identities, pull-request links, secrets, and confidential details are not required.
+  - type: dropdown
+    id: profile
+    attributes:
+      label: Profile
+      options:
+        - observe
+        - balanced
+        - hardened
+    validations:
+      required: true
+  - type: dropdown
+    id: language
+    attributes:
+      label: Deployment language
+      options:
+        - English (en)
+        - Vietnamese (vi)
+        - Japanese (ja)
+    validations:
+      required: true
+  - type: input
+    id: observation_window
+    attributes:
+      label: Observation window
+      description: Give a duration or date range without identifying the repository.
+      placeholder: 30 days
+    validations:
+      required: true
+  - type: textarea
+    id: outcomes
+    attributes:
+      label: Aggregate outcomes
+      description: Report total PRs, flagged PRs, confirmed low-quality submissions, false positives, successful appeals, and median time to first human review. Use “not measured” where needed.
+      placeholder: |
+        Total PRs: 42
+        Flagged: 5
+        Confirmed low-quality: 3
+        False positives: 2
+        Successful appeals: 1
+        Median first human review: not measured
+    validations:
+      required: true
+  - type: textarea
+    id: operations
+    attributes:
+      label: Operational notes
+      description: What reduced work, created work, failed unexpectedly, or should change?
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy and permission
+      options:
+        - label: I removed secrets, personal data, repository-identifying details, and confidential information, and I have permission to share this aggregate report.
+          required: true

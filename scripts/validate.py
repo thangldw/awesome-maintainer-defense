@@ -275,17 +275,37 @@ def validate_kit_safety() -> None:
     if any(value in balanced for value in forbidden_balanced):
         fail("balanced profile must be a read-only status gate")
     disabled_proxies = (
+        'blocked-source-branches: ""',
         "detect-spam-usernames: false",
         "min-account-age: 0",
         "max-daily-forks: 0",
         "require-public-profile: false",
         "min-profile-completeness: 0",
+        "min-repo-merged-prs: 0",
+        "min-repo-merge-ratio: 0",
         "min-global-merge-ratio: 0",
         "require-commit-author-match: false",
+    )
+    explicit_quality_contract = (
+        "max-failures: 4",
+        "max-changed-files: 50",
+        "max-changed-lines: 10000",
+        "require-maintainer-can-modify: true",
+        "require-description: true",
+        "max-commit-message-length: 500",
+        "require-final-newline: true",
+        "exempt-draft-prs: true",
+        "exempt-author-association: OWNER,MEMBER,COLLABORATOR",
+        'exempt-label: ""',
+        'exempt-pr-label: ""',
+        "exempt-all-milestones: false",
+        "exempt-all-pr-milestones: false",
     )
     for name, workflow in (("observe", observe), ("balanced", balanced)):
         if any(value not in workflow for value in disabled_proxies):
             fail(f"{name} profile re-enabled an identity or history proxy")
+        if any(value not in workflow for value in explicit_quality_contract):
+            fail(f"{name} profile has an incomplete explicit quality-signal contract")
 
 
 def validate_local_markdown_links() -> None:
@@ -307,6 +327,16 @@ def validate_local_markdown_links() -> None:
                 fail(
                     f"broken local Markdown link in {path.relative_to(ROOT)}: {raw_target}"
                 )
+
+
+def validate_issue_forms() -> None:
+    for path in (ROOT / ".github/ISSUE_TEMPLATE").glob("*.yml"):
+        text = path.read_text(encoding="utf-8")
+        if re.search(r"^labels:\s*", text, re.MULTILINE):
+            fail(
+                f"{path.relative_to(ROOT)} depends on repository labels; "
+                "route the issue after creation instead"
+            )
 
 
 def validate_generated_files() -> None:
@@ -332,6 +362,7 @@ def main() -> None:
     validate_readme(catalog)
     validate_workflows(pins)
     validate_kit_safety()
+    validate_issue_forms()
     validate_local_markdown_links()
     validate_generated_files()
     print(
