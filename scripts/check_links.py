@@ -28,10 +28,18 @@ def check(item: dict) -> tuple[str, int | None, str]:
 
 def main() -> None:
     data = json.loads((ROOT / "catalog.json").read_text(encoding="utf-8"))
+    audits = json.loads((ROOT / "audits.json").read_text(encoding="utf-8"))
+    items = list(data["resources"])
+    known_urls = {item["url"] for item in items}
+    for audit in audits["audits"]:
+        for index, url in enumerate(audit["evidence"], start=1):
+            if url not in known_urls:
+                items.append({"id": f"{audit['id']}-evidence-{index}", "url": url})
+                known_urls.add(url)
     failures: list[str] = []
     warnings: list[str] = []
     with ThreadPoolExecutor(max_workers=6) as pool:
-        futures = {pool.submit(check, item): item for item in data["resources"]}
+        futures = {pool.submit(check, item): item for item in items}
         for future in as_completed(futures):
             item = futures[future]
             resource_id, status, reason = future.result()
@@ -51,7 +59,7 @@ def main() -> None:
         for failure in sorted(failures):
             print(f"ERROR: {failure}", file=sys.stderr)
         raise SystemExit(1)
-    print(f"Checked {len(data['resources'])} links; {len(warnings)} transient warning(s)")
+    print(f"Checked {len(items)} unique links; {len(warnings)} transient warning(s)")
 
 
 if __name__ == "__main__":

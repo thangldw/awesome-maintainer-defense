@@ -40,6 +40,13 @@ body:
       description: Note required permissions, external data sharing, destructive actions, and false-positive controls.
     validations:
       required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Official evidence
+      description: Link the upstream documentation for defaults, permissions, data flow, destructive actions, and license.
+    validations:
+      required: true
   - type: dropdown
     id: relationship
     attributes:

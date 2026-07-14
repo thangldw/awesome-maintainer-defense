@@ -18,6 +18,11 @@
       "description": "Reduce review load with structured intake, labels, lifecycle automation, and emergency lockdowns."
     },
     {
+      "id": "governance-access",
+      "name": "Repository Governance & Access",
+      "description": "Keep security policies, branch protections, and repository settings consistent across projects."
+    },
+    {
       "id": "workflow-supply-chain",
       "name": "Workflow & Supply-Chain Defense",
       "description": "Protect CI, dependencies, secrets, and merge paths from hostile or compromised contributions."
@@ -58,9 +63,9 @@
       "category": "abuse-moderation",
       "type": "github-action",
       "license": "MIT",
-      "description": "AI-powered Action from GitHub that detects and labels spam in repository conversations.",
-      "signals": ["issues", "pull requests", "spam"],
-      "featured": true
+      "description": "Model-powered Action that labels spam, link spam, and content it infers to be AI-generated.",
+      "signals": ["issues", "pull requests", "spam", "AI-authorship inference"],
+      "featured": false
     },
     {
       "id": "ai-community-moderator",
@@ -115,7 +120,7 @@
       "license": "MIT",
       "description": "Scores pull-request authors using their contribution history across GitHub.",
       "signals": ["contributor history", "trust score"],
-      "featured": true
+      "featured": false
     },
     {
       "id": "actions-labeler",
@@ -160,6 +165,50 @@
       "description": "Emergency Action that immediately closes and locks new issues or pull requests.",
       "signals": ["lockdown", "incident response"],
       "featured": true
+    },
+    {
+      "id": "issue-metrics",
+      "name": "Issue Metrics",
+      "url": "https://github.com/github-community-projects/issue-metrics",
+      "category": "intake-triage",
+      "type": "github-action",
+      "license": "MIT",
+      "description": "Measures issue, pull-request, and discussion response times and generates a Markdown report.",
+      "signals": ["response time", "queue health", "maintainer load"],
+      "featured": false
+    },
+    {
+      "id": "allstar",
+      "name": "OpenSSF Allstar",
+      "url": "https://github.com/ossf/allstar",
+      "category": "governance-access",
+      "type": "github-app",
+      "license": "Apache-2.0",
+      "description": "Continuously checks and enforces security policies across GitHub organizations.",
+      "signals": ["branch protection", "security policy", "organization governance"],
+      "featured": true
+    },
+    {
+      "id": "safe-settings",
+      "name": "Safe Settings",
+      "url": "https://github.com/github-community-projects/safe-settings",
+      "category": "governance-access",
+      "type": "github-app",
+      "license": "ISC",
+      "description": "Centrally manages repository settings, branch protections, and teams with pull-request dry runs.",
+      "signals": ["repository settings", "branch protection", "configuration drift"],
+      "featured": true
+    },
+    {
+      "id": "repository-settings-app",
+      "name": "Repository Settings App",
+      "url": "https://github.com/repository-settings/app",
+      "category": "governance-access",
+      "type": "github-app",
+      "license": "ISC",
+      "description": "Synchronizes repository settings from a version-controlled `.github/settings.yml` file.",
+      "signals": ["repository settings", "configuration as code"],
+      "featured": false
     },
     {
       "id": "harden-runner",
@@ -232,11 +281,33 @@
       "name": "PRevent",
       "url": "https://github.com/apiiro/PRevent",
       "category": "workflow-supply-chain",
-      "type": "github-action",
+      "type": "github-app",
       "license": "MIT",
       "description": "Detects suspicious pull-request changes that may indicate malicious code.",
       "signals": ["malicious changes", "pull requests"],
       "featured": false
+    },
+    {
+      "id": "osv-scanner",
+      "name": "OSV-Scanner",
+      "url": "https://github.com/google/osv-scanner",
+      "category": "workflow-supply-chain",
+      "type": "tool",
+      "license": "Apache-2.0",
+      "description": "Scans lockfiles, SBOMs, and source artifacts against the OSV vulnerability database.",
+      "signals": ["dependencies", "vulnerabilities", "licenses"],
+      "featured": true
+    },
+    {
+      "id": "gitleaks",
+      "name": "Gitleaks",
+      "url": "https://github.com/gitleaks/gitleaks",
+      "category": "workflow-supply-chain",
+      "type": "tool",
+      "license": "MIT",
+      "description": "Detects secrets in Git history, directories, files, and standard input.",
+      "signals": ["secrets", "credentials", "pre-commit"],
+      "featured": true
     },
     {
       "id": "ai-contribution-policies",
@@ -250,26 +321,15 @@
       "featured": true
     },
     {
-      "id": "agentic-oss-policy",
-      "name": "Agentic OSS Policy",
-      "url": "https://github.com/guenp/agentic-oss-policy",
-      "category": "policies-playbooks",
-      "type": "templates",
-      "license": "Unspecified",
-      "description": "Policy templates for protecting projects from autonomous agent abuse.",
-      "signals": ["policy", "autonomous agents"],
-      "featured": false
-    },
-    {
       "id": "openssf-ai-slop",
-      "name": "OpenSSF AI-Slop Best Practices",
+      "name": "OpenSSF AI-Slop Best-Practices Work Item",
       "url": "https://github.com/ossf/wg-vulnerability-disclosures/issues/178",
       "category": "policies-playbooks",
       "type": "working-group",
       "license": "N/A",
-      "description": "Open working-group effort to develop current practices for low-quality AI security reports and contributions.",
+      "description": "Open work item developing practices for low-quality AI security reports and contributions; not a finalized standard.",
       "signals": ["security reports", "policy", "maintainer burden"],
-      "featured": true
+      "featured": false
     }
   ]
 }

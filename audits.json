@@ -1,0 +1,432 @@
+{
+  "schema_version": 1,
+  "verified_on": "2026-07-14",
+  "methodology": {
+    "automation_impact": {
+      "low": "Read-only analysis or documentation in normal use.",
+      "medium": "Can label, comment, fail checks, publish reports, or modify local files.",
+      "high": "Can close, lock, delete, block, limit interactions, or change repository settings."
+    },
+    "important": "Impact describes documented capability, not product quality or maliciousness. Configuration can reduce or increase actual risk."
+  },
+  "audits": [
+    {
+      "id": "niubi-guard",
+      "repository": "Albert-Weasker/niubi_guard",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-09T11:54:36Z", "license_detected": "NOASSERTION"},
+      "deployment": "Hosted service, CLI, web UI, Docker, or self-hosted source",
+      "default_mode": "Dry-run; strong actions are opt-in",
+      "automation_impact": "high",
+      "maximum_effects": ["delete comments", "close issues", "lock issues", "block users", "set interaction limits"],
+      "data_boundaries": ["GitHub API", "project-configured OpenAI-compatible model", "optional hosted service"],
+      "access": "GitHub token; optional model endpoint and API key",
+      "limitations": "AI classification is probabilistic. Review evidence and planned actions in dry-run before apply mode. GitHub does not detect the license automatically, but the repository LICENSE file contains Apache-2.0 text.",
+      "evidence": [
+        "https://github.com/Albert-Weasker/niubi_guard#what-it-does",
+        "https://github.com/Albert-Weasker/niubi_guard#ai-detection",
+        "https://github.com/Albert-Weasker/niubi_guard/blob/main/LICENSE"
+      ]
+    },
+    {
+      "id": "anti-slop",
+      "repository": "peakoss/anti-slop",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-04-15T16:37:26Z", "license_detected": "AGPL-3.0"},
+      "deployment": "GitHub Action",
+      "default_mode": "Enforcement; the documented quick start closes a PR after the failure threshold",
+      "automation_impact": "high",
+      "maximum_effects": ["label", "comment", "close PR", "lock PR"],
+      "data_boundaries": ["GitHub API"],
+      "access": "Recommended: contents read, issues read, pull requests write",
+      "limitations": "Heuristics include account and contribution-history signals, so legitimate newcomers can be flagged. Set close-pr and lock-pr to false during evaluation.",
+      "evidence": [
+        "https://github.com/peakoss/anti-slop#quick-start",
+        "https://github.com/peakoss/anti-slop#recommended-permissions"
+      ]
+    },
+    {
+      "id": "github-ai-moderator",
+      "repository": "github/ai-moderator",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-06-02T05:54:42Z", "license_detected": "MIT"},
+      "deployment": "GitHub Action",
+      "default_mode": "Applies moderation output unless dry-run is enabled",
+      "automation_impact": "medium",
+      "maximum_effects": ["label", "minimize comment"],
+      "data_boundaries": ["GitHub API", "GitHub Models"],
+      "access": "GitHub token plus models read and write access needed for configured moderation actions",
+      "limitations": "Repository content is sent to a model endpoint and model judgments can be wrong. Its built-in AI-authorship prompt is not proof of authorship; disable it for enforcement. GitHub Models paid usage may apply after free limits.",
+      "evidence": [
+        "https://github.com/github/ai-moderator#usage",
+        "https://github.com/github/ai-moderator#inputs"
+      ]
+    },
+    {
+      "id": "ai-community-moderator",
+      "repository": "benbalter/ai-community-moderator",
+      "repo_snapshot": {"archived": false, "pushed_at": "2025-11-20T02:13:17Z", "license_detected": "MIT"},
+      "deployment": "GitHub Action",
+      "default_mode": "Model-driven moderation using project guidelines",
+      "automation_impact": "high",
+      "maximum_effects": ["comment", "hide content", "lock discussion", "limit interactions"],
+      "data_boundaries": ["GitHub API", "GitHub Models"],
+      "access": "GitHub token, models read, and write permissions for enabled actions",
+      "limitations": "A language model interprets community standards; ambiguous or multilingual content needs human review and an appeal path.",
+      "evidence": [
+        "https://github.com/benbalter/ai-community-moderator#features",
+        "https://github.com/benbalter/ai-community-moderator#permissions"
+      ]
+    },
+    {
+      "id": "ai-assessment-comment-labeler",
+      "repository": "github/ai-assessment-comment-labeler",
+      "repo_snapshot": {"archived": false, "pushed_at": "2025-10-16T13:20:30Z", "license_detected": "MIT"},
+      "deployment": "GitHub Action",
+      "default_mode": "Posts a structured assessment and applies configured labels",
+      "automation_impact": "medium",
+      "maximum_effects": ["comment", "label"],
+      "data_boundaries": ["GitHub API", "GitHub Models or a compatible endpoint"],
+      "access": "GitHub token, models read, issues write, and contents read for prompt files",
+      "limitations": "The assessment is model-generated, not factual proof. Prompt changes and model changes can alter classification behavior.",
+      "evidence": [
+        "https://github.com/github/ai-assessment-comment-labeler#overview",
+        "https://github.com/github/ai-assessment-comment-labeler#required-permissions"
+      ]
+    },
+    {
+      "id": "fossier",
+      "repository": "PThorpe92/fossier",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-06T16:53:54Z", "license_detected": "MIT"},
+      "deployment": "GitHub Action and CLI",
+      "default_mode": "Allows, reviews, or denies based on trust tier and a multi-signal score",
+      "automation_impact": "high",
+      "maximum_effects": ["label", "comment", "close PR"],
+      "data_boundaries": ["GitHub API", "optional Fossier registry"],
+      "access": "GitHub token with pull-request write access; optional registry API key",
+      "limitations": "History-based scoring and optional AI co-author rejection can exclude legitimate contributors. Low-confidence cases are forced to review, but maintainers should still test thresholds.",
+      "evidence": [
+        "https://github.com/PThorpe92/fossier#how-it-works",
+        "https://github.com/PThorpe92/fossier#github-action"
+      ]
+    },
+    {
+      "id": "vouch",
+      "repository": "mitchellh/vouch",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-12T20:29:38Z", "license_detected": "MIT"},
+      "deployment": "GitHub Actions and a repository trust file",
+      "default_mode": "Explicit admission based on project-defined vouches and denouncements",
+      "automation_impact": "high",
+      "maximum_effects": ["fail check", "close issue", "lock issue", "close PR"],
+      "data_boundaries": ["GitHub API", "repository trust file"],
+      "access": "Depends on action; write permission is required for close or lock behavior",
+      "limitations": "Explicit trust can protect attention but can also create a closed or biased contributor network. Define transparent nomination and appeal rules.",
+      "evidence": [
+        "https://github.com/mitchellh/vouch#who-is-vouched",
+        "https://github.com/mitchellh/vouch#github-actions"
+      ]
+    },
+    {
+      "id": "good-egg",
+      "repository": "2ndSetAI/good-egg",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-04-12T17:55:02Z", "license_detected": "MIT"},
+      "deployment": "GitHub Action, CLI, Python package, and MCP server",
+      "default_mode": "Posts a trust-score comment; fail-on-low is false by default",
+      "automation_impact": "medium",
+      "maximum_effects": ["comment", "create check", "fail check"],
+      "data_boundaries": ["GitHub API", "Python package registry during Action installation"],
+      "access": "GitHub token; pull-request write for comments and optional checks write",
+      "limitations": "Past merge history is an imperfect proxy for trust and can disadvantage new or private contributors. The Action installs a version-ranged package from PyPI at runtime.",
+      "evidence": [
+        "https://github.com/2ndSetAI/good-egg#github-action",
+        "https://github.com/2ndSetAI/good-egg#scoring-models"
+      ]
+    },
+    {
+      "id": "actions-labeler",
+      "repository": "actions/labeler",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-12T04:12:15Z", "license_detected": "MIT"},
+      "deployment": "GitHub Action",
+      "default_mode": "Adds or removes labels according to repository configuration",
+      "automation_impact": "medium",
+      "maximum_effects": ["add label", "remove label"],
+      "data_boundaries": ["GitHub API"],
+      "access": "Contents read and pull requests write",
+      "limitations": "Using pull_request_target is dangerous if the same workflow checks out or executes untrusted PR code. Labeling rules can misroute contributions.",
+      "evidence": [
+        "https://github.com/actions/labeler#recommended-permissions",
+        "https://github.com/actions/labeler#notes-regarding-pull_request_target-event"
+      ]
+    },
+    {
+      "id": "actions-stale",
+      "repository": "actions/stale",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-12T04:10:47Z", "license_detected": "MIT"},
+      "deployment": "GitHub Action",
+      "default_mode": "Marks inactivity and closes after the configured grace period",
+      "automation_impact": "high",
+      "maximum_effects": ["label", "comment", "close issue", "close PR", "delete branch"],
+      "data_boundaries": ["GitHub API"],
+      "access": "Issues and pull requests write; contents write only when deleting branches",
+      "limitations": "Inactivity does not mean low value. Exempt security, roadmap, accessibility, and confirmed-bug labels before enabling closure.",
+      "evidence": [
+        "https://github.com/actions/stale#recommended-permissions",
+        "https://github.com/actions/stale#all-options"
+      ]
+    },
+    {
+      "id": "lock-threads",
+      "repository": "dessant/lock-threads",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-06-26T18:23:49Z", "license_detected": "MIT"},
+      "deployment": "GitHub Action",
+      "default_mode": "Locks closed threads after configured inactivity",
+      "automation_impact": "high",
+      "maximum_effects": ["lock issue", "lock PR", "lock discussion"],
+      "data_boundaries": ["GitHub API"],
+      "access": "Write permission for each enabled issue, pull-request, or discussion scope",
+      "limitations": "Locking prevents late corrections and support follow-up. Exclusions and a clear path to open a new issue are important.",
+      "evidence": ["https://github.com/dessant/lock-threads#usage"]
+    },
+    {
+      "id": "repo-lockdown",
+      "repository": "dessant/repo-lockdown",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-06-26T18:23:39Z", "license_detected": "MIT"},
+      "deployment": "GitHub Action",
+      "default_mode": "Immediately closes and locks configured new issues or pull requests",
+      "automation_impact": "high",
+      "maximum_effects": ["label", "comment", "close", "lock"],
+      "data_boundaries": ["GitHub API"],
+      "access": "Issues and/or pull requests write",
+      "limitations": "This is a blunt emergency control intended for repositories that do not accept submissions or for temporary incidents, not routine triage.",
+      "evidence": ["https://github.com/dessant/repo-lockdown#usage"]
+    },
+    {
+      "id": "issue-metrics",
+      "repository": "github-community-projects/issue-metrics",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-09T18:00:50Z", "license_detected": "MIT"},
+      "deployment": "GitHub Action or containerized tool",
+      "default_mode": "Reads repository activity and writes a Markdown report file",
+      "automation_impact": "medium",
+      "maximum_effects": ["write report file in the workflow workspace"],
+      "data_boundaries": ["GitHub API", "workflow workspace"],
+      "access": "Issues, pull requests, or discussions read according to the search query; publishing requires a separate step and permission",
+      "limitations": "Response-time metrics do not measure answer quality or maintainer wellbeing. The official example uses a separate Action to publish the generated file as an issue; this tool does not publish it by itself.",
+      "evidence": [
+        "https://github.com/github-community-projects/issue-metrics#available-metrics",
+        "https://github.com/github-community-projects/issue-metrics#usage"
+      ]
+    },
+    {
+      "id": "allstar",
+      "repository": "ossf/allstar",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-13T13:34:11Z", "license_detected": "Apache-2.0"},
+      "deployment": "OpenSSF-operated or self-hosted GitHub App",
+      "default_mode": "Reports policy violations as issues in the quick start",
+      "automation_impact": "high",
+      "maximum_effects": ["create issue", "create check", "block noncompliant changes"],
+      "data_boundaries": ["GitHub API", "OpenSSF-operated service when using the public app"],
+      "access": "Read access to most repository settings and contents; issues and checks write for reporting and block mode",
+      "limitations": "Organization-wide policy mistakes can affect many repositories. Start with opt-in scope and issue reporting before block enforcement.",
+      "evidence": [
+        "https://github.com/ossf/allstar#using-the-public-allstar-app",
+        "https://github.com/ossf/allstar#configuration-definitions"
+      ]
+    },
+    {
+      "id": "safe-settings",
+      "repository": "github-community-projects/safe-settings",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-10T15:30:03Z", "license_detected": "ISC"},
+      "deployment": "GitHub App",
+      "default_mode": "Applies default-branch settings; pull-request changes are evaluated in dry-run",
+      "automation_impact": "high",
+      "maximum_effects": ["change repository settings", "change branch protection", "change teams", "rename repository"],
+      "data_boundaries": ["GitHub API", "central admin repository"],
+      "access": "Broad organization and repository administration permissions",
+      "limitations": "Configuration errors have organization-wide blast radius. Restrict managed repositories, protect the admin repository, and require review for settings changes.",
+      "evidence": [
+        "https://github.com/github-community-projects/safe-settings#how-it-works",
+        "https://github.com/github-community-projects/safe-settings#restrict-repositories"
+      ]
+    },
+    {
+      "id": "repository-settings-app",
+      "repository": "repository-settings/app",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-14T09:00:37Z", "license_detected": "ISC"},
+      "deployment": "GitHub App",
+      "default_mode": "Synchronizes settings from `.github/settings.yml`",
+      "automation_impact": "high",
+      "maximum_effects": ["change repository settings", "change permissions", "change branch protection"],
+      "data_boundaries": ["GitHub API", "repository configuration file"],
+      "access": "Repository administration permissions",
+      "limitations": "Anyone able to merge settings changes may gain or alter administrative access. Protect the configuration path with CODEOWNERS and required review.",
+      "evidence": [
+        "https://github.com/repository-settings/app#repository-settings-app",
+        "https://github.com/repository-settings/app#security-implications"
+      ]
+    },
+    {
+      "id": "harden-runner",
+      "repository": "step-security/harden-runner",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-07T09:27:49Z", "license_detected": "Apache-2.0"},
+      "deployment": "GitHub Action plus StepSecurity service; self-hosted runner support depends on tier",
+      "default_mode": "Audit network, file, and process activity",
+      "automation_impact": "high",
+      "maximum_effects": ["observe workflow runtime", "block network egress"],
+      "data_boundaries": ["runner telemetry", "StepSecurity service"],
+      "access": "Runs first in a CI job and observes process, file, and network activity",
+      "limitations": "The community and enterprise tiers differ, and monitoring data is presented through an external service. Review data handling and supported runner type before adoption.",
+      "evidence": [
+        "https://github.com/step-security/harden-runner#community-free",
+        "https://github.com/step-security/harden-runner#how-it-works"
+      ]
+    },
+    {
+      "id": "openssf-scorecard",
+      "repository": "ossf/scorecard",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-13T08:23:11Z", "license_detected": "Apache-2.0"},
+      "deployment": "CLI, GitHub Action, REST API, and public dataset",
+      "default_mode": "Read-only heuristic assessment",
+      "automation_impact": "low",
+      "maximum_effects": ["produce score", "produce SARIF when configured"],
+      "data_boundaries": ["GitHub API", "optional Scorecard API and public dataset"],
+      "access": "Repository metadata read; additional permissions when uploading SARIF",
+      "limitations": "Scorecard documents that checks are heuristics with false positives and negatives. Weekly public results omit some checks and can be stale.",
+      "evidence": [
+        "https://github.com/ossf/scorecard#scorecard-checks",
+        "https://github.com/ossf/scorecard#public-data"
+      ]
+    },
+    {
+      "id": "zizmor",
+      "repository": "zizmorcore/zizmor",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-14T08:41:24Z", "license_detected": "MIT"},
+      "deployment": "Local CLI, package, or CI check",
+      "default_mode": "Read-only static analysis",
+      "automation_impact": "low",
+      "maximum_effects": ["report findings", "fail check when configured"],
+      "data_boundaries": ["local files", "optional GitHub API for online audits"],
+      "access": "Read access to workflow files; optional GitHub token",
+      "limitations": "Static analysis cannot prove a workflow is safe and may miss runtime or third-party Action behavior. Review findings in context.",
+      "evidence": ["https://github.com/zizmorcore/zizmor", "https://docs.zizmor.sh/audits/"]
+    },
+    {
+      "id": "pinact",
+      "repository": "suzuki-shunsuke/pinact",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-14T02:46:48Z", "license_detected": "MIT"},
+      "deployment": "Local CLI or CI check",
+      "default_mode": "Modifies files when pinning; supports a non-modifying verification mode",
+      "automation_impact": "medium",
+      "maximum_effects": ["rewrite Action references", "fail verification"],
+      "data_boundaries": ["local files", "GitHub API unless offline mode is used"],
+      "access": "Filesystem write for fixes; optional GitHub token for release and tag lookup",
+      "limitations": "A pinned SHA limits tag movement but does not make third-party code trustworthy. Offline mode only checks SHA syntax.",
+      "evidence": [
+        "https://github.com/suzuki-shunsuke/pinact#offline-check---no-api",
+        "https://github.com/suzuki-shunsuke/pinact#update-actions--update"
+      ]
+    },
+    {
+      "id": "dependency-review-action",
+      "repository": "actions/dependency-review-action",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-09T01:43:34Z", "license_detected": "MIT"},
+      "deployment": "GitHub Action",
+      "default_mode": "Fails when configured vulnerability or license criteria are violated",
+      "automation_impact": "medium",
+      "maximum_effects": ["fail check", "comment summary when configured"],
+      "data_boundaries": ["GitHub Dependency Graph API"],
+      "access": "Contents read and pull requests read; optional pull requests write for comments",
+      "limitations": "Supported for public repositories and private repositories with GitHub Advanced Security. Results depend on dependency graph coverage and advisory data.",
+      "evidence": [
+        "https://github.com/actions/dependency-review-action#dependency-review-action",
+        "https://github.com/actions/dependency-review-action#configuration-options"
+      ]
+    },
+    {
+      "id": "trufflehog",
+      "repository": "trufflesecurity/trufflehog",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-14T12:39:26Z", "license_detected": "AGPL-3.0"},
+      "deployment": "CLI, container, and CI integrations",
+      "default_mode": "Scans and can verify discovered credentials",
+      "automation_impact": "low",
+      "maximum_effects": ["report secret", "make credential-verification requests"],
+      "data_boundaries": ["scanned source", "credential providers during verification"],
+      "access": "Read access to scan targets; network access for verification",
+      "limitations": "Verification can send authentication requests to third-party services. Redact output, scope scans carefully, and treat findings as sensitive incident data.",
+      "evidence": [
+        "https://github.com/trufflesecurity/trufflehog#what-is-secret-verification",
+        "https://github.com/trufflesecurity/trufflehog#usage"
+      ]
+    },
+    {
+      "id": "prevent",
+      "repository": "apiiro/PRevent",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-01-08T08:10:14Z", "license_detected": "MIT"},
+      "deployment": "Self-hosted GitHub App",
+      "default_mode": "Scans configured languages for suspicious patterns and can gate merge",
+      "automation_impact": "high",
+      "maximum_effects": ["report finding", "block merge pending review"],
+      "data_boundaries": ["GitHub API", "self-hosted scanner", "configured secret manager"],
+      "access": "GitHub App private key, webhook secret, repository contents, and checks or status permissions",
+      "limitations": "Rules focus on dynamic execution and obfuscation in supported languages; passing does not prove a contribution is benign. Deployment requires operating a privileged GitHub App.",
+      "evidence": [
+        "https://github.com/apiiro/PRevent#how-it-works",
+        "https://github.com/apiiro/PRevent#supported-languages"
+      ]
+    },
+    {
+      "id": "osv-scanner",
+      "repository": "google/osv-scanner",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-14T04:42:24Z", "license_detected": "Apache-2.0"},
+      "deployment": "CLI, container, and CI integrations",
+      "default_mode": "Read-only vulnerability and license scan",
+      "automation_impact": "medium",
+      "maximum_effects": ["fail check", "modify dependency files in guided remediation"],
+      "data_boundaries": ["OSV API and deps.dev", "offline database option"],
+      "access": "Read access to dependency artifacts; filesystem and package-manager access for fix mode",
+      "limitations": "Coverage varies by ecosystem. Guided remediation can execute package-manager behavior from untrusted projects; do not run fix mode on untrusted code.",
+      "evidence": [
+        "https://github.com/google/osv-scanner#offline-mode",
+        "https://github.com/google/osv-scanner#guided-remediation"
+      ]
+    },
+    {
+      "id": "gitleaks",
+      "repository": "gitleaks/gitleaks",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-08T04:13:10Z", "license_detected": "MIT"},
+      "deployment": "CLI, pre-commit hook, and CI integrations",
+      "default_mode": "Read-only pattern-based secret detection",
+      "automation_impact": "low",
+      "maximum_effects": ["report finding", "fail check"],
+      "data_boundaries": ["local scan target"],
+      "access": "Read access to files or Git history",
+      "limitations": "Pattern detection has false positives and false negatives. Keep output redacted and rotate any real credential rather than merely deleting it from the latest commit.",
+      "evidence": [
+        "https://github.com/gitleaks/gitleaks#readme",
+        "https://github.com/gitleaks/gitleaks#commands"
+      ]
+    },
+    {
+      "id": "ai-contribution-policies",
+      "repository": "melissawm/open-source-ai-contribution-policies",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-09T17:58:53Z", "license_detected": "CC0-1.0"},
+      "deployment": "Reference catalog",
+      "default_mode": "Documentation only",
+      "automation_impact": "low",
+      "maximum_effects": ["none"],
+      "data_boundaries": ["none"],
+      "access": "None",
+      "limitations": "Policies differ by project and can change after collection. Confirm each linked source and seek legal advice for copyright, labor, or privacy questions.",
+      "evidence": ["https://github.com/melissawm/open-source-ai-contribution-policies"]
+    },
+    {
+      "id": "openssf-ai-slop",
+      "repository": "ossf/wg-vulnerability-disclosures",
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-02-04T16:32:52Z", "license_detected": "Apache-2.0"},
+      "deployment": "Open working-group issue",
+      "default_mode": "Discussion and planned deliverables only",
+      "automation_impact": "low",
+      "maximum_effects": ["none"],
+      "data_boundaries": ["public GitHub discussion"],
+      "access": "None",
+      "limitations": "This is an open work item, not a finished best-practices document, standard, or OpenSSF certification.",
+      "evidence": ["https://github.com/ossf/wg-vulnerability-disclosures/issues/178"]
+    }
+  ]
+}

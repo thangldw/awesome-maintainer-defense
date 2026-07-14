@@ -8,6 +8,8 @@
 - Required permissions and external services:
 - License:
 - Maintenance activity:
+- Default behavior and maximum effects:
+- Official evidence links:
 
 ## Relationship disclosure
 
@@ -15,7 +17,8 @@
 
 ## Checklist
 
-- [ ] I edited `catalog.json`, not the generated catalog tables in `README.md`.
-- [ ] I ran `python3 scripts/render.py` and `python3 scripts/validate.py`.
+- [ ] I edited `catalog.json`, `audits.json`, and both translation files—not generated tables.
+- [ ] I ran `make render`, `make validate`, and `make links`.
 - [ ] The description is factual and does not contain promotional claims.
 - [ ] I documented destructive actions, data sharing, and false-positive controls where relevant.
+- [ ] Vietnamese and Japanese descriptions preserve the same limitations as English.

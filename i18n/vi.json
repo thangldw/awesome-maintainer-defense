@@ -1,0 +1,71 @@
+{
+  "table": {
+    "resource": "Tài nguyên",
+    "type": "Loại",
+    "license": "Giấy phép",
+    "why": "Giá trị chính"
+  },
+  "types": {
+    "tool": "công cụ",
+    "github-action": "GitHub Action",
+    "github-app": "GitHub App",
+    "awesome-list": "danh sách",
+    "working-group": "nhóm làm việc",
+    "templates": "mẫu"
+  },
+  "categories": {
+    "abuse-moderation": {
+      "name": "Phát hiện lạm dụng & kiểm duyệt",
+      "description": "Phát hiện, gắn nhãn, cách ly hoặc xử lý spam, quấy rối và contribution tự động chất lượng thấp."
+    },
+    "trust-admission": {
+      "name": "Niềm tin contributor & kiểm soát gia nhập",
+      "description": "Dùng vouch công khai hoặc lịch sử contribution để kiểm soát quyền tham gia mà không đóng cửa dự án với tất cả mọi người."
+    },
+    "intake-triage": {
+      "name": "Tiếp nhận & phân loại",
+      "description": "Giảm tải review bằng biểu mẫu có cấu trúc, nhãn, tự động hóa vòng đời và cơ chế lockdown khẩn cấp."
+    },
+    "governance-access": {
+      "name": "Quản trị repository & quyền truy cập",
+      "description": "Giữ chính sách bảo mật, branch protection và thiết lập repository nhất quán giữa nhiều dự án."
+    },
+    "workflow-supply-chain": {
+      "name": "Bảo vệ workflow & chuỗi cung ứng",
+      "description": "Bảo vệ CI, dependency, secret và đường merge khỏi contribution độc hại hoặc bị xâm nhập."
+    },
+    "policies-playbooks": {
+      "name": "Chính sách & playbook",
+      "description": "Đặt kỳ vọng trước khi có sự cố và phản ứng nhất quán khi sự cố xảy ra."
+    }
+  },
+  "resources": {
+    "niubi-guard": "Hệ thống phát hiện và xử lý lạm dụng repository, bao gồm spam, quấy rối và tấn công phối hợp.",
+    "anti-slop": "GitHub Action có thể cấu hình để phát hiện và đóng pull request chất lượng thấp hoặc AI-slop.",
+    "github-ai-moderator": "Action dùng model để gắn nhãn spam, link spam và nội dung mà model suy đoán do AI tạo.",
+    "ai-community-moderator": "Kiểm duyệt tương tác cộng đồng dựa trên hướng dẫn contribution và code of conduct của dự án.",
+    "ai-assessment-comment-labeler": "Action tiếp nhận issue, lấy đánh giá từ AI và áp dụng các nhãn có thể cấu hình.",
+    "fossier": "Workflow và CLI tương thích với Vouch để giảm spam pull request không được yêu cầu.",
+    "vouch": "Quản lý niềm tin cộng đồng bằng vouch công khai trước khi một người được phép tham gia.",
+    "good-egg": "Chấm điểm tác giả pull request dựa trên lịch sử contribution của họ trên GitHub.",
+    "actions-labeler": "Action chính thức để gắn nhãn pull request theo file thay đổi và mẫu tên branch.",
+    "actions-stale": "Action chính thức để đánh dấu và tùy chọn đóng issue hoặc pull request không còn hoạt động.",
+    "lock-threads": "Khóa issue, pull request và discussion đã đóng sau một khoảng thời gian có thể cấu hình.",
+    "repo-lockdown": "Action khẩn cấp đóng và khóa ngay issue hoặc pull request mới.",
+    "issue-metrics": "Đo thời gian phản hồi của issue, pull request và discussion rồi tạo báo cáo Markdown.",
+    "allstar": "Liên tục kiểm tra và thực thi chính sách bảo mật trên các GitHub organization.",
+    "safe-settings": "Quản lý tập trung thiết lập repository, branch protection và team, có dry-run cho pull request.",
+    "repository-settings-app": "Đồng bộ thiết lập repository từ file `.github/settings.yml` được quản lý bằng version control.",
+    "harden-runner": "Theo dõi network egress, tính toàn vẹn file và tiến trình trên GitHub-hosted runner.",
+    "openssf-scorecard": "Kiểm tra tự động tình trạng bảo mật của dự án mã nguồn mở và dependency.",
+    "zizmor": "Phân tích tĩnh các vấn đề bảo mật và tính đúng đắn trong GitHub Actions workflow.",
+    "pinact": "Ghim GitHub Action và reusable workflow vào commit hash bất biến.",
+    "dependency-review-action": "Chặn pull request đưa vào dependency có lỗ hổng hoặc giấy phép không được phép.",
+    "trufflehog": "Tìm và xác minh credential bị lộ trước khi trở thành sự cố cho maintainer.",
+    "prevent": "Phát hiện thay đổi pull request đáng ngờ có thể cho thấy mã độc.",
+    "osv-scanner": "Quét lockfile, SBOM và source artifact bằng cơ sở dữ liệu lỗ hổng OSV.",
+    "gitleaks": "Phát hiện secret trong lịch sử Git, thư mục, file và standard input.",
+    "ai-contribution-policies": "Catalog so sánh cách các dự án mã nguồn mở quản lý contribution do AI tạo.",
+    "openssf-ai-slop": "Work item đang mở để xây dựng thực hành cho báo cáo bảo mật và contribution AI chất lượng thấp; chưa phải tiêu chuẩn hoàn chỉnh."
+  }
+}
