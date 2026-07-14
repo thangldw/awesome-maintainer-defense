@@ -1,0 +1,51 @@
+name: Bug report
+description: Report a reproducible defect.
+title: "[Bug]: "
+labels: [bug, needs-triage]
+body:
+  - type: markdown
+    attributes:
+      value: Please search existing reports and remove secrets or personal data before submitting.
+  - type: input
+    id: version
+    attributes:
+      label: Affected version or commit
+      placeholder: v1.2.3 or commit SHA
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, runtime, package manager, architecture, and relevant dependency versions.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Provide the smallest ordered steps, repository, or code sample that reproduces the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include complete errors or logs after removing secrets.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation
+      options:
+        - label: I reproduced this on a supported version.
+          required: true
+        - label: I have not included credentials, tokens, or personal data.
+          required: true

@@ -1,0 +1,63 @@
+name: Add a resource
+description: Propose a maintainer-defense resource for the catalog.
+title: "Add: "
+labels: [resource-candidate]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping maintainers. Disclose any relationship you have with the project.
+  - type: input
+    id: url
+    attributes:
+      label: Canonical URL
+      placeholder: https://github.com/owner/project
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - Abuse Detection & Moderation
+        - Contributor Trust & Admission
+        - Intake & Triage
+        - Workflow & Supply-Chain Defense
+        - Policies & Playbooks
+    validations:
+      required: true
+  - type: textarea
+    id: maintainer_problem
+    attributes:
+      label: Maintainer problem solved
+      description: Describe the concrete workload, abuse, or risk this reduces.
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Permissions, data, and failure modes
+      description: Note required permissions, external data sharing, destructive actions, and false-positive controls.
+    validations:
+      required: true
+  - type: dropdown
+    id: relationship
+    attributes:
+      label: Your relationship
+      options:
+        - No affiliation
+        - Contributor
+        - Maintainer or employee
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Submission checks
+      options:
+        - label: I searched the catalog for duplicates.
+          required: true
+        - label: The resource has public documentation and a clear maintainer use case.
+          required: true
+        - label: I am not requesting stars, backlinks, or payment in exchange for inclusion.
+          required: true

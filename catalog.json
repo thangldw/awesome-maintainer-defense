@@ -1,0 +1,275 @@
+{
+  "schema_version": 1,
+  "last_verified": "2026-07-14",
+  "categories": [
+    {
+      "id": "abuse-moderation",
+      "name": "Abuse Detection & Moderation",
+      "description": "Detect, label, quarantine, or respond to spam, harassment, and low-quality automated contributions."
+    },
+    {
+      "id": "trust-admission",
+      "name": "Contributor Trust & Admission",
+      "description": "Use explicit vouches or contribution history to control access without closing a project to everyone."
+    },
+    {
+      "id": "intake-triage",
+      "name": "Intake & Triage",
+      "description": "Reduce review load with structured intake, labels, lifecycle automation, and emergency lockdowns."
+    },
+    {
+      "id": "workflow-supply-chain",
+      "name": "Workflow & Supply-Chain Defense",
+      "description": "Protect CI, dependencies, secrets, and merge paths from hostile or compromised contributions."
+    },
+    {
+      "id": "policies-playbooks",
+      "name": "Policies & Playbooks",
+      "description": "Set expectations before problems arrive and respond consistently when they do."
+    }
+  ],
+  "resources": [
+    {
+      "id": "niubi-guard",
+      "name": "Niubi Guard",
+      "url": "https://github.com/Albert-Weasker/niubi_guard",
+      "category": "abuse-moderation",
+      "type": "tool",
+      "license": "Apache-2.0",
+      "description": "Repository abuse detection and response system for spam, harassment, and coordinated attacks.",
+      "signals": ["issues", "harassment", "ai-assisted detection"],
+      "featured": true
+    },
+    {
+      "id": "anti-slop",
+      "name": "Anti Slop",
+      "url": "https://github.com/peakoss/anti-slop",
+      "category": "abuse-moderation",
+      "type": "github-action",
+      "license": "AGPL-3.0",
+      "description": "Configurable GitHub Action that detects and can close low-quality or AI-slop pull requests.",
+      "signals": ["pull requests", "metadata", "contributor history"],
+      "featured": true
+    },
+    {
+      "id": "github-ai-moderator",
+      "name": "GitHub AI Moderator",
+      "url": "https://github.com/github/ai-moderator",
+      "category": "abuse-moderation",
+      "type": "github-action",
+      "license": "MIT",
+      "description": "AI-powered Action from GitHub that detects and labels spam in repository conversations.",
+      "signals": ["issues", "pull requests", "spam"],
+      "featured": true
+    },
+    {
+      "id": "ai-community-moderator",
+      "name": "AI Community Moderator",
+      "url": "https://github.com/benbalter/ai-community-moderator",
+      "category": "abuse-moderation",
+      "type": "github-action",
+      "license": "MIT",
+      "description": "Moderates community interactions against a project's contributing guide and code of conduct.",
+      "signals": ["community guidelines", "code of conduct"],
+      "featured": false
+    },
+    {
+      "id": "ai-assessment-comment-labeler",
+      "name": "AI Assessment Comment Labeler",
+      "url": "https://github.com/github/ai-assessment-comment-labeler",
+      "category": "abuse-moderation",
+      "type": "github-action",
+      "license": "MIT",
+      "description": "Issue-intake Action that retrieves an AI assessment and applies configurable labels.",
+      "signals": ["issue intake", "classification"],
+      "featured": false
+    },
+    {
+      "id": "fossier",
+      "name": "Fossier",
+      "url": "https://github.com/PThorpe92/fossier",
+      "category": "trust-admission",
+      "type": "tool",
+      "license": "MIT",
+      "description": "Vouch-compatible workflow and CLI for reducing unsolicited pull-request spam.",
+      "signals": ["vouch", "pull requests"],
+      "featured": false
+    },
+    {
+      "id": "vouch",
+      "name": "Vouch",
+      "url": "https://github.com/mitchellh/vouch",
+      "category": "trust-admission",
+      "type": "tool",
+      "license": "MIT",
+      "description": "Community trust management based on explicit vouches before a participant can contribute.",
+      "signals": ["explicit trust", "admission control"],
+      "featured": true
+    },
+    {
+      "id": "good-egg",
+      "name": "Good Egg",
+      "url": "https://github.com/2ndSetAI/good-egg",
+      "category": "trust-admission",
+      "type": "github-action",
+      "license": "MIT",
+      "description": "Scores pull-request authors using their contribution history across GitHub.",
+      "signals": ["contributor history", "trust score"],
+      "featured": true
+    },
+    {
+      "id": "actions-labeler",
+      "name": "Labeler",
+      "url": "https://github.com/actions/labeler",
+      "category": "intake-triage",
+      "type": "github-action",
+      "license": "MIT",
+      "description": "Official Action for labeling pull requests from changed files and branch patterns.",
+      "signals": ["pull requests", "routing"],
+      "featured": false
+    },
+    {
+      "id": "actions-stale",
+      "name": "Stale",
+      "url": "https://github.com/actions/stale",
+      "category": "intake-triage",
+      "type": "github-action",
+      "license": "MIT",
+      "description": "Official Action for marking and optionally closing inactive issues and pull requests.",
+      "signals": ["lifecycle", "inactivity"],
+      "featured": false
+    },
+    {
+      "id": "lock-threads",
+      "name": "Lock Threads",
+      "url": "https://github.com/dessant/lock-threads",
+      "category": "intake-triage",
+      "type": "github-action",
+      "license": "MIT",
+      "description": "Locks closed issues, pull requests, and discussions after a configurable period.",
+      "signals": ["thread locking", "necromancy"],
+      "featured": false
+    },
+    {
+      "id": "repo-lockdown",
+      "name": "Repo Lockdown",
+      "url": "https://github.com/dessant/repo-lockdown",
+      "category": "intake-triage",
+      "type": "github-action",
+      "license": "MIT",
+      "description": "Emergency Action that immediately closes and locks new issues or pull requests.",
+      "signals": ["lockdown", "incident response"],
+      "featured": true
+    },
+    {
+      "id": "harden-runner",
+      "name": "Harden-Runner",
+      "url": "https://github.com/step-security/harden-runner",
+      "category": "workflow-supply-chain",
+      "type": "github-action",
+      "license": "Apache-2.0",
+      "description": "Monitors network egress, file integrity, and processes on GitHub-hosted runners.",
+      "signals": ["ci", "egress", "runtime"],
+      "featured": true
+    },
+    {
+      "id": "openssf-scorecard",
+      "name": "OpenSSF Scorecard",
+      "url": "https://github.com/ossf/scorecard",
+      "category": "workflow-supply-chain",
+      "type": "tool",
+      "license": "Apache-2.0",
+      "description": "Automated security-health checks for open-source projects and their dependencies.",
+      "signals": ["security posture", "dependencies"],
+      "featured": true
+    },
+    {
+      "id": "zizmor",
+      "name": "zizmor",
+      "url": "https://github.com/zizmorcore/zizmor",
+      "category": "workflow-supply-chain",
+      "type": "tool",
+      "license": "MIT",
+      "description": "Static analysis for security and correctness problems in GitHub Actions workflows.",
+      "signals": ["workflow security", "static analysis"],
+      "featured": true
+    },
+    {
+      "id": "pinact",
+      "name": "pinact",
+      "url": "https://github.com/suzuki-shunsuke/pinact",
+      "category": "workflow-supply-chain",
+      "type": "tool",
+      "license": "MIT",
+      "description": "Pins GitHub Actions and reusable workflows to immutable commit hashes.",
+      "signals": ["action pinning", "workflow integrity"],
+      "featured": false
+    },
+    {
+      "id": "dependency-review-action",
+      "name": "Dependency Review Action",
+      "url": "https://github.com/actions/dependency-review-action",
+      "category": "workflow-supply-chain",
+      "type": "github-action",
+      "license": "MIT",
+      "description": "Blocks pull requests that introduce vulnerable dependencies or disallowed licenses.",
+      "signals": ["dependencies", "licenses", "pull requests"],
+      "featured": true
+    },
+    {
+      "id": "trufflehog",
+      "name": "TruffleHog",
+      "url": "https://github.com/trufflesecurity/trufflehog",
+      "category": "workflow-supply-chain",
+      "type": "tool",
+      "license": "AGPL-3.0",
+      "description": "Finds and verifies leaked credentials before they become a maintainer incident.",
+      "signals": ["secrets", "credentials"],
+      "featured": false
+    },
+    {
+      "id": "prevent",
+      "name": "PRevent",
+      "url": "https://github.com/apiiro/PRevent",
+      "category": "workflow-supply-chain",
+      "type": "github-action",
+      "license": "MIT",
+      "description": "Detects suspicious pull-request changes that may indicate malicious code.",
+      "signals": ["malicious changes", "pull requests"],
+      "featured": false
+    },
+    {
+      "id": "ai-contribution-policies",
+      "name": "Open Source AI Contribution Policies",
+      "url": "https://github.com/melissawm/open-source-ai-contribution-policies",
+      "category": "policies-playbooks",
+      "type": "awesome-list",
+      "license": "CC0-1.0",
+      "description": "Comparative catalog of how open-source projects govern AI-generated contributions.",
+      "signals": ["policy", "disclosure", "governance"],
+      "featured": true
+    },
+    {
+      "id": "agentic-oss-policy",
+      "name": "Agentic OSS Policy",
+      "url": "https://github.com/guenp/agentic-oss-policy",
+      "category": "policies-playbooks",
+      "type": "templates",
+      "license": "Unspecified",
+      "description": "Policy templates for protecting projects from autonomous agent abuse.",
+      "signals": ["policy", "autonomous agents"],
+      "featured": false
+    },
+    {
+      "id": "openssf-ai-slop",
+      "name": "OpenSSF AI-Slop Best Practices",
+      "url": "https://github.com/ossf/wg-vulnerability-disclosures/issues/178",
+      "category": "policies-playbooks",
+      "type": "working-group",
+      "license": "N/A",
+      "description": "Open working-group effort to develop current practices for low-quality AI security reports and contributions.",
+      "signals": ["security reports", "policy", "maintainer burden"],
+      "featured": true
+    }
+  ]
+}
