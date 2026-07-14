@@ -2,12 +2,24 @@
 
 All notable changes are documented here. Dates use ISO 8601.
 
+## [1.0.1] - 2026-07-14
+
+### Profile contract and support boundary
+
+- Made all six active PR-quality checks and the four-failure threshold explicit in the shipped workflows, rather than inheriting behavior from upstream defaults.
+- Disabled source-branch-name and label-bypass heuristics, plus repository-history proxies, so the baseline stays focused on submission properties.
+- Added a reviewable signal contract covering checks, thresholds, profile effects, disabled inputs, exemptions, tuning, and limitations.
+- Declared Python 3.10+ support and added CI coverage for Linux on Python 3.10, 3.12, and 3.14 and macOS on Python 3.12.
+- Added a privacy-sanitized field-report path for collecting the evidence needed to evaluate false positives and maintainer workload.
+- Removed the final undeclared issue-form label dependency and added validation to prevent silent label failures from returning.
+- Clarified that English, Vietnamese, and Japanese assets are structurally complete while independent native security/legal review of Vietnamese and Japanese wording remains pending.
+
 ## [1.0.0] - 2026-07-14
 
 ### Maintainer defense kit
 
 - Added install, dry-run, manifest verification, conflict-safe writes, and guarded uninstall across `observe`, `balanced`, and `hardened` profiles.
-- Shipped complete deployment assets in English, Vietnamese, and Japanese.
+- Shipped structurally complete deployment assets in English, Vietnamese, and Japanese.
 - Added a dependency-free standalone release CLI with 25 gzip-compressed embedded assets and a published SHA-256 checksum.
 - Added an honest 35.5-second demo generated from the real standalone CLI: dry-run → install `observe` → verify → uninstall.
 
@@ -24,3 +36,4 @@ All notable changes are documented here. Dates use ISO 8601.
 The engineering guarantees above are covered by static validation and end-to-end tests. Moderation effectiveness, false-positive rates, and maintainer time saved still require field evidence; v1.0.0 does not present them as proven outcomes. See [`docs/KIT_ASSURANCE.md`](docs/KIT_ASSURANCE.md) and [`docs/AUDIT_LOG.md`](docs/AUDIT_LOG.md).
 
 [1.0.0]: https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.0.0
+[1.0.1]: https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.0.1

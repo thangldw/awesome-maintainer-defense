@@ -10,6 +10,13 @@
       "commit_verified": true
     },
     {
+      "repository": "actions/setup-python",
+      "tag": "v6.3.0",
+      "sha": "ece7cb06caefa5fff74198d8649806c4678c61a1",
+      "metadata_path": "action.yml",
+      "commit_verified": true
+    },
+    {
       "repository": "peakoss/anti-slop",
       "tag": "v0",
       "sha": "57858eead489d08b255fab2af45a506c2ca6eab2",

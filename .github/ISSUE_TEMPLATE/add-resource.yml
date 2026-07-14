@@ -1,7 +1,6 @@
 name: Add a resource
 description: Propose a maintainer-defense resource for the catalog.
 title: "Add: "
-labels: [resource-candidate]
 body:
   - type: markdown
     attributes:

@@ -12,7 +12,7 @@ AI作成の判定を主張せず、メンテナーのレビュー負荷を減ら
 | `balanced` | 読み取り専用 | 名前付きquality status checkを失敗させる。コメント、ラベル、close、lockなし |
 | `hardened` | 読み取り専用 | `balanced`に依存関係レビューとワークフロー静的解析を追加 |
 
-すべてのプロファイルは、`en`、`vi`、`ja`のIssueフォーム、PRテンプレート、ポリシー、プレイブック、ラベル仕様、導入記録をインストールします。
+すべてのプロファイルは、`en`、`vi`、`ja`の構造的に完全なIssueフォーム、PRテンプレート、ポリシー、プレイブック、ラベル仕様、導入記録をインストールします。ベトナム語・日本語表現の母語セキュリティ・法務専門家による独立レビューは未完了です。
 
 ## プロファイルの選択
 
@@ -33,7 +33,7 @@ flowchart TD
 
 ## 安全な導入
 
-このリポジトリから実行します。最初のコマンドはプレビューのみです。
+Python 3.10以降が必要です。CIはLinux（3.10、3.12、3.14）とmacOS（3.12）で検証します。このリポジトリから実行し、最初のコマンドはプレビューのみです。
 
 ```bash
 python3 scripts/install_kit.py --target /path/to/project --profile observe --language ja --repo OWNER/REPOSITORY
@@ -51,4 +51,4 @@ python3 scripts/install_kit.py --target /path/to/project --uninstall
 
 アンインストールはインストーラーが作成したファイルだけを削除し、変更済みなら停止します。インストーラーはGitHub APIの呼び出し、ラベル作成、設定変更、コミットを行いません。Actionはcommit SHAで固定され、[`pins.json`](../../pins.json)で追跡されます。
 
-これは技術的にテストされたベースラインであり、セキュリティ認証ではありません。[保証ケース](../../docs/ja/KIT_ASSURANCE.md)に保証済みの範囲と実地証拠がない範囲を記載しています。
+これは技術的にテストされたベースラインであり、セキュリティ認証ではありません。[PR品質シグナル契約](../../docs/PROFILE_SIGNALS.md)と[保証ケース](../../docs/ja/KIT_ASSURANCE.md)に、保証済みの範囲と実地証拠がない範囲を記載しています。

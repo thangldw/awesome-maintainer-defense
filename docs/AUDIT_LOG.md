@@ -12,7 +12,7 @@ This log records material corrections to the catalog. Routine wording and link m
 - Added an installer with dry-run default, conflict refusal, ownership and SHA-256 manifest, verification, modified-file-safe uninstall, repository-bound paths, symlink rejection, and atomic manifest creation.
 - Tested all nine profile/language combinations plus conflicts, modified files, pre-existing files, malicious manifest paths, and symlink traversal.
 - Resolved four upstream Action tags to their recorded immutable SHAs, confirmed GitHub reports all four commits as verified, and added scheduled drift verification.
-- Added an explicit assurance case, production acceptance gate, native-control precedence, and complete deployable English, Vietnamese, and Japanese kit assets.
+- Added an explicit assurance case, production acceptance gate, native-control precedence, and structurally complete deployable English, Vietnamese, and Japanese kit assets; independent native review remains an explicit limitation.
 
 ## 2026-07-14 — Full evidence audit
 

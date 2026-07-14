@@ -32,3 +32,5 @@
 ネイティブ制御の確認、owner・レビューSLA・異議申立て経路・緊急停止責任者の指定、baseline記録、status gateの失敗・回復テスト、人による誤検知レビュー、verification/CI通過が完了するまで`observe`から移行しないでください。
 
 正確な結論は、**導入、権限、ロールバック、pinning、localizationはテスト済みですが、実環境でのモデレーション効果は未保証**です。
+
+インストーラーはPython 3.10以降をサポートし、CIはLinux上のPython 3.10、3.12、3.14とmacOS上のPython 3.12を検証します。シグナル、閾値、無効化したproxyは[`PROFILE_SIGNALS.md`](../PROFILE_SIGNALS.md)に公開しています。機密情報を除いた集計結果は[field-report issue form](https://github.com/thangldw/awesome-maintainer-defense/issues/new?template=field-report.yml)から共有できます。リポジトリ名、コントリビューターの識別情報、生のPRデータは不要です。
