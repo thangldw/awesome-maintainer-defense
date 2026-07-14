@@ -2,6 +2,17 @@
 
 This log records material corrections to the catalog. Routine wording and link maintenance may remain in Git history.
 
+## 2026-07-14 — Maintainer Defense Kit assurance audit
+
+- Found that the earlier triage workflow could create repeated failure comments on `edited` and `synchronize` events; removed public comments and limited the write-enabled workflow to `opened` and `reopened`.
+- Confirmed from upstream source that a missing configured label only produces a warning. Made label provisioning an explicit acceptance gate and made the default `observe` profile fully read-only.
+- Disabled upstream username, account-age, fork-rate, public-profile, profile-completeness, global-history, emoji, and commit-author proxy heuristics so the baseline follows the project's quality-not-authorship principle.
+- Removed undeclared default labels from the issue form because GitHub does not apply labels that do not already exist.
+- Added an installer with dry-run default, conflict refusal, ownership and SHA-256 manifest, verification, modified-file-safe uninstall, repository-bound paths, symlink rejection, and atomic manifest creation.
+- Tested all nine profile/language combinations plus conflicts, modified files, pre-existing files, malicious manifest paths, and symlink traversal.
+- Resolved four upstream Action tags to their recorded immutable SHAs, confirmed GitHub reports all four commits as verified, and added scheduled drift verification.
+- Added an explicit assurance case, production acceptance gate, native-control precedence, and complete deployable English, Vietnamese, and Japanese kit assets.
+
 ## 2026-07-14 — Full evidence audit
 
 - Audited every entry against its official repository, README, action documentation, and detected license.

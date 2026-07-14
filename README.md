@@ -12,19 +12,31 @@ Open source should stay open without requiring maintainers to absorb unlimited s
 
 This project is **anti-abuse, not anti-AI**. It favors transparent signals, reversible actions, least privilege, and a documented appeal path over unreliable claims that a tool can perfectly identify AI-generated content.
 
+## Install the Maintainer Defense Kit
+
+Preview a read-only English installation; nothing is written without `--apply`:
+
+```bash
+python3 scripts/install_kit.py --target /path/to/project --profile observe --language en --repo OWNER/REPOSITORY
+python3 scripts/install_kit.py --target /path/to/project --profile observe --language en --repo OWNER/REPOSITORY --apply
+python3 scripts/install_kit.py --target /path/to/project --verify
+```
+
+The [installable kit](kits/maintainer-defense-kit) includes `observe`, `balanced`, and `hardened` profiles, safe uninstall, and complete `en`, `vi`, and `ja` deployment assets. Its [assurance case](docs/KIT_ASSURANCE.md) distinguishes tested engineering guarantees from moderation effectiveness that has not yet been field-proven.
+
 ## Start here
 
 | Situation | First move | Then consider |
 | --- | --- | --- |
-| Normal project, limited time | Copy the [balanced starter kit](kits/balanced) | Add structured issue forms and lifecycle automation |
+| Normal project, limited time | Install the read-only `observe` profile | Measure false positives before considering `balanced` |
 | Sudden PR or issue flood | Disable automatic merges and enable interaction limits | Review [Repo Lockdown](https://github.com/dessant/repo-lockdown) before activating it |
 | Repeated low-quality PRs | Label for human review before auto-closing | Add Anti Slop in report-only mode and publish a contribution policy |
 | Harassment or coordinated abuse | Preserve evidence and limit interactions | Use Niubi Guard in dry-run mode before applying actions |
 | Suspicious workflow change | Do not run untrusted code with write tokens | Run zizmor, pin Actions, and restrict `GITHUB_TOKEN` permissions |
 
-The [balanced starter kit](kits/balanced) is deliberately review-first: it labels suspicious submissions but does not automatically close them.
+The `balanced` profile is deliberately review-first: it labels submissions for human review but does not comment, close, or lock them. The default `observe` profile does not change contributor-visible state.
 
-Before adopting a tool, read the evidence-backed [resource audit](docs/RESOURCE_AUDIT.md), the [evaluation method](docs/EVALUATION.md), and the [threat model](docs/THREAT_MODEL.md).
+Before adopting a tool, review [native GitHub controls](docs/NATIVE_CONTROLS.md), then read the evidence-backed [resource audit](docs/RESOURCE_AUDIT.md), [evaluation method](docs/EVALUATION.md), and [threat model](docs/THREAT_MODEL.md).
 
 ## Principles
 
@@ -114,6 +126,7 @@ Set expectations before problems arrive and respond consistently when they do.
 
 ## Ready-to-use defenses
 
+- [Installable Maintainer Defense Kit](kits/maintainer-defense-kit) — tested profiles, manifest verification, safe rollback, and three complete deployment languages.
 - [Balanced starter kit](kits/balanced) — PR template, issue form, and review-first PR quality workflow.
 - [Workflow-hardening starter kit](kits/workflow-hardening) — pinned dependency review and GitHub Actions static analysis.
 - [AI contribution policy](policies/AI_CONTRIBUTIONS.md) — allows responsible assistance while keeping humans accountable.
@@ -129,6 +142,8 @@ Operational depth:
 - [Defense playbook](docs/PLAYBOOK.md) — baseline, observe, review-first, incident, and recovery procedures.
 - [Maturity model](docs/MATURITY_MODEL.md) — a five-level path from reactive moderation to resilient operations.
 - [Audit log](docs/AUDIT_LOG.md) — material corrections and scope changes, including removed entries.
+- [Kit assurance case](docs/KIT_ASSURANCE.md) — tested claims, corrected flaws, limits, and the production acceptance gate.
+- [Native-control baseline](docs/NATIVE_CONTROLS.md) — repository settings to prefer before third-party automation.
 
 These templates are starting points, not legal advice. Test workflows in a non-critical repository and pin third-party Actions to full commit SHAs before production use.
 
