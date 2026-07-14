@@ -1,6 +1,6 @@
 # Awesome Maintainer Defense
 
-> A curated defense stack, policies, and ready-to-use workflows for open-source maintainers.
+> Read-only, reversible defenses for OSS maintainers—audited tools, workflows, and a 60-second standalone CLI.
 
 [English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
 
@@ -14,11 +14,15 @@ This project is **anti-abuse, not anti-AI**. It favors transparent signals, reve
 
 ## Try in 60 seconds
 
-No clone and no package-manager trust required. Download the standalone v1.0.0 CLI from GitHub Releases, verify it, preview the read-only `observe` profile, then apply only if the diff is right:
+No signup, clone, or package-manager trust required. Download the standalone v1.0.0 CLI directly from GitHub Releases, verify it, preview the read-only `observe` profile, then apply only if the diff is right. The download is never piped into a shell:
 
 ```bash
-gh release download v1.0.0 -R thangldw/awesome-maintainer-defense -p 'maintainer-defense-kit.py*'
-shasum -a 256 -c maintainer-defense-kit.py.sha256
+curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0.0/maintainer-defense-kit.py
+curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0.0/maintainer-defense-kit.py.sha256
+
+sha256sum -c maintainer-defense-kit.py.sha256
+# macOS: shasum -a 256 -c maintainer-defense-kit.py.sha256
+
 python3 maintainer-defense-kit.py --target . --profile observe --language en --repo OWNER/REPOSITORY
 python3 maintainer-defense-kit.py --target . --profile observe --language en --repo OWNER/REPOSITORY --apply
 ```

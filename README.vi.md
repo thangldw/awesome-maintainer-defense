@@ -1,6 +1,6 @@
 # Awesome Maintainer Defense
 
-> Bộ công cụ phòng thủ, chính sách và workflow dùng ngay dành cho maintainer mã nguồn mở.
+> Biện pháp chỉ đọc, có thể đảo ngược cho maintainer OSS—công cụ đã audit, workflow và CLI độc lập dùng thử trong 60 giây.
 
 [English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
 
@@ -14,11 +14,15 @@ Dự án này **chống lạm dụng, không chống AI**. Chúng tôi ưu tiên
 
 ## Thử trong 60 giây
 
-Không cần clone repo hay tin một package manager. Tải CLI v1.0.0 độc lập từ GitHub Releases, kiểm tra checksum, xem trước profile `observe` chỉ đọc rồi chỉ cài khi diff phù hợp:
+Không cần signup, clone repo hay tin một package manager. Tải trực tiếp CLI v1.0.0 độc lập từ GitHub Releases, kiểm tra checksum, xem trước profile `observe` chỉ đọc rồi chỉ cài khi diff phù hợp. Lệnh tải không bao giờ được pipe vào shell:
 
 ```bash
-gh release download v1.0.0 -R thangldw/awesome-maintainer-defense -p 'maintainer-defense-kit.py*'
-shasum -a 256 -c maintainer-defense-kit.py.sha256
+curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0.0/maintainer-defense-kit.py
+curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0.0/maintainer-defense-kit.py.sha256
+
+sha256sum -c maintainer-defense-kit.py.sha256
+# macOS: shasum -a 256 -c maintainer-defense-kit.py.sha256
+
 python3 maintainer-defense-kit.py --target . --profile observe --language vi --repo OWNER/REPOSITORY
 python3 maintainer-defense-kit.py --target . --profile observe --language vi --repo OWNER/REPOSITORY --apply
 ```
