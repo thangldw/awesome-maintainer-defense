@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 import subprocess
 import sys
@@ -13,6 +14,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 INSTALLER = ROOT / "scripts/install_kit.py"
+BUILDER = ROOT / "scripts/build_standalone.py"
 
 
 class InstallerTests(unittest.TestCase):
@@ -134,6 +136,33 @@ class InstallerTests(unittest.TestCase):
             )
             result = self.run_kit(target, "--uninstall", ok=False)
             self.assertIn("unsafe manifest path", result.stderr)
+
+    def test_standalone_release_cli_works_outside_repository(self) -> None:
+        subprocess.run([sys.executable, str(BUILDER)], check=True, capture_output=True)
+        built = ROOT / "dist/maintainer-defense-kit.py"
+        checksum = built.with_suffix(".py.sha256")
+        self.assertTrue(checksum.is_file())
+        expected = checksum.read_text(encoding="ascii").split()[0]
+        self.assertEqual(hashlib.sha256(built.read_bytes()).hexdigest(), expected)
+        with tempfile.TemporaryDirectory() as outside_tmp, tempfile.TemporaryDirectory() as target_tmp:
+            outside = Path(outside_tmp) / built.name
+            outside.write_bytes(built.read_bytes())
+            target = Path(target_tmp)
+            common = [
+                sys.executable,
+                str(outside),
+                "--target",
+                str(target),
+            ]
+            for args in (
+                ["--profile", "observe", "--language", "ja", "--repo", "example/project"],
+                ["--profile", "observe", "--language", "ja", "--repo", "example/project", "--apply"],
+                ["--verify"],
+                ["--uninstall"],
+            ):
+                result = subprocess.run(common + args, text=True, capture_output=True, check=False)
+                self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertFalse(any(target.rglob("*")))
 
 
 if __name__ == "__main__":

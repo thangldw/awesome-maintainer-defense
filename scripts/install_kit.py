@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+import base64
+import gzip
 import hashlib
 import json
 import os
@@ -18,6 +20,7 @@ KIT_VERSION = "1.0.0"
 MANIFEST = ".maintainer-defense-kit.json"
 PROFILES = ("observe", "balanced", "hardened")
 LANGUAGES = ("en", "vi", "ja")
+EMBEDDED_FILES: dict[str, str] = {}
 
 
 class KitError(Exception):
@@ -29,6 +32,11 @@ def digest(content: bytes) -> str:
 
 
 def read(path: str) -> bytes:
+    if EMBEDDED_FILES:
+        try:
+            return gzip.decompress(base64.b64decode(EMBEDDED_FILES[path]))
+        except KeyError as exc:
+            raise KitError(f"standalone installer is missing embedded asset: {path}") from exc
     return (ROOT / path).read_bytes()
 
 

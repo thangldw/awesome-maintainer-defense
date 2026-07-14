@@ -12,17 +12,22 @@
 
 本プロジェクトは**不正利用への対策であり、反AIではありません**。AI生成を完全に判定できるという主張よりも、透明なシグナル、取り消し可能な操作、最小権限、明確な異議申立て経路を優先します。
 
-## Maintainer Defense Kitの導入
+## 60秒で試す
 
-読み取り専用の日本語版をプレビューします。`--apply`を付けるまでファイルは書き込まれません。
+リポジトリのcloneもpackage managerへの信頼も不要です。GitHub Releasesから単体のv1.0.0 CLIを取得してchecksumを検証し、読み取り専用の`observe` profileをpreviewしてから適用します。
 
 ```bash
-python3 scripts/install_kit.py --target /path/to/project --profile observe --language ja --repo OWNER/REPOSITORY
-python3 scripts/install_kit.py --target /path/to/project --profile observe --language ja --repo OWNER/REPOSITORY --apply
-python3 scripts/install_kit.py --target /path/to/project --verify
+gh release download v1.0.0 -R thangldw/awesome-maintainer-defense -p 'maintainer-defense-kit.py*'
+shasum -a 256 -c maintainer-defense-kit.py.sha256
+python3 maintainer-defense-kit.py --target . --profile observe --language ja --repo OWNER/REPOSITORY
+python3 maintainer-defense-kit.py --target . --profile observe --language ja --repo OWNER/REPOSITORY --apply
 ```
 
-[導入可能なKit](kits/maintainer-defense-kit/README.ja.md)には`observe`、`balanced`、`hardened`、安全なアンインストール、英語・ベトナム語・日本語の完全なテンプレート、ポリシー、プレイブックが含まれます。[保証ケース](docs/ja/KIT_ASSURANCE.md)は、テスト済みの技術的保証と、実地データがまだない有効性を区別します。
+CLIは25個のversion固定assetを内包する依存なしのPython単一fileで、networkやGitHub APIを呼びません。導入後は`python3 maintainer-defense-kit.py --target . --verify`、保護されたrollbackには`--uninstall`を使います。
+
+![35秒のterminal demo：dry-run、observe導入、verify、uninstall](assets/demo.gif)
+
+[導入可能なKit](kits/maintainer-defense-kit/README.ja.md)には`observe`、`balanced`、`hardened`、安全なアンインストール、英語・ベトナム語・日本語の完全なテンプレート、ポリシー、プレイブックが含まれます。[保証ケース](docs/ja/KIT_ASSURANCE.md)は、テスト済みの技術的保証と、実地データがまだない有効性を区別します。安全なdefaultに至った監査経緯は[v1.0.0 changelog](CHANGELOG.md)を参照してください。
 
 ## クイックスタート
 
