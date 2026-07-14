@@ -1,0 +1,71 @@
+{
+  "table": {
+    "resource": "リソース",
+    "type": "種別",
+    "license": "ライセンス",
+    "why": "主な価値"
+  },
+  "types": {
+    "tool": "ツール",
+    "github-action": "GitHub Action",
+    "github-app": "GitHub App",
+    "awesome-list": "リスト",
+    "working-group": "ワーキンググループ",
+    "templates": "テンプレート"
+  },
+  "categories": {
+    "abuse-moderation": {
+      "name": "不正利用の検知・モデレーション",
+      "description": "スパム、嫌がらせ、低品質な自動コントリビューションを検知し、ラベル付け、隔離、対応します。"
+    },
+    "trust-admission": {
+      "name": "コントリビューターの信頼・参加制御",
+      "description": "明示的な推薦や貢献履歴を利用し、プロジェクトを全面的に閉じることなく参加を制御します。"
+    },
+    "intake-triage": {
+      "name": "受付・トリアージ",
+      "description": "構造化された受付、ラベル、ライフサイクル自動化、緊急ロックダウンによってレビュー負荷を減らします。"
+    },
+    "governance-access": {
+      "name": "リポジトリ統制・アクセス管理",
+      "description": "複数プロジェクトのセキュリティポリシー、ブランチ保護、リポジトリ設定を一貫させます。"
+    },
+    "workflow-supply-chain": {
+      "name": "ワークフロー・サプライチェーン防御",
+      "description": "CI、依存関係、シークレット、マージ経路を悪意ある、または侵害されたコントリビューションから守ります。"
+    },
+    "policies-playbooks": {
+      "name": "ポリシー・プレイブック",
+      "description": "問題が起きる前に期待事項を定め、発生時に一貫して対応します。"
+    }
+  },
+  "resources": {
+    "niubi-guard": "スパム、嫌がらせ、協調攻撃に対応するリポジトリ不正利用の検知・対処システム。",
+    "anti-slop": "低品質またはAI-slopのプルリクエストを検知し、必要に応じて閉じる設定可能なGitHub Action。",
+    "github-ai-moderator": "モデルを使い、スパム、リンクスパム、AI生成と推定した内容にラベルを付けるAction。",
+    "ai-community-moderator": "プロジェクトのコントリビューションガイドと行動規範に基づいてコミュニティ交流をモデレート。",
+    "ai-assessment-comment-labeler": "Issue受付時にAI評価を取得し、設定されたラベルを適用するAction。",
+    "fossier": "未依頼のプルリクエストスパムを減らすVouch互換のワークフローとCLI。",
+    "vouch": "明示的な推薦を受けた人だけが参加できるコミュニティ信頼管理。",
+    "good-egg": "GitHub全体の貢献履歴を用いてプルリクエスト作成者をスコアリング。",
+    "actions-labeler": "変更ファイルやブランチパターンに基づきプルリクエストへラベルを付ける公式Action。",
+    "actions-stale": "長期間動きのないIssueやプルリクエストをマークし、任意で閉じる公式Action。",
+    "lock-threads": "設定期間後に、閉じたIssue、プルリクエスト、Discussionをロック。",
+    "repo-lockdown": "新しいIssueやプルリクエストを即時に閉じてロックする緊急用Action。",
+    "issue-metrics": "Issue、プルリクエスト、Discussionの応答時間を計測してMarkdownレポートを生成。",
+    "allstar": "GitHub Organization全体のセキュリティポリシーを継続的に検査・適用。",
+    "safe-settings": "リポジトリ設定、ブランチ保護、チームを一元管理し、プルリクエストではdry-runを実施。",
+    "repository-settings-app": "バージョン管理された`.github/settings.yml`からリポジトリ設定を同期。",
+    "harden-runner": "GitHub-hosted runner上のネットワーク送信、ファイル整合性、プロセス活動を監視。",
+    "openssf-scorecard": "オープンソースプロジェクトと依存関係のセキュリティ状態を自動評価。",
+    "zizmor": "GitHub Actionsワークフローのセキュリティと正当性の問題を静的解析。",
+    "pinact": "GitHub Actionと再利用可能ワークフローを不変のコミットハッシュに固定。",
+    "dependency-review-action": "脆弱な依存関係や許可されていないライセンスを追加するプルリクエストをブロック。",
+    "trufflehog": "漏えいした認証情報を発見・検証し、インシデント化する前に対処を支援。",
+    "prevent": "悪意あるコードを示す可能性のある不審なプルリクエスト変更を検知。",
+    "osv-scanner": "ロックファイル、SBOM、ソース成果物をOSV脆弱性データベースでスキャン。",
+    "gitleaks": "Git履歴、ディレクトリ、ファイル、標準入力からシークレットを検知。",
+    "ai-contribution-policies": "各オープンソースプロジェクトのAI生成コントリビューション方針を比較するカタログ。",
+    "openssf-ai-slop": "低品質なAIセキュリティ報告とコントリビューションの実務指針を検討中の作業項目。完成した標準ではありません。"
+  }
+}
