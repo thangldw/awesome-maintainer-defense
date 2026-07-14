@@ -175,7 +175,40 @@ def validate_readme(data: dict) -> None:
                 )
 
 
-def validate_workflows() -> None:
+def validate_pins() -> set[tuple[str, str]]:
+    path = ROOT / "pins.json"
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        fail(f"invalid pins.json: {exc}")
+    if data.get("schema_version") != 1 or not isinstance(data.get("pins"), list):
+        fail("pins.json has an unsupported or incomplete schema")
+    try:
+        verified = date.fromisoformat(data["verified_on"])
+    except (KeyError, ValueError) as exc:
+        fail(f"invalid pin verification date: {exc}")
+    age = (date.today() - verified).days
+    if age < 0 or age > 180:
+        fail("Action pin verification date must be between today and 180 days old")
+
+    required = {"repository", "tag", "sha", "metadata_path", "commit_verified"}
+    pins: set[tuple[str, str]] = set()
+    for pin in data["pins"]:
+        missing = required - pin.keys()
+        if missing:
+            fail(f"Action pin is missing {sorted(missing)}")
+        key = (pin["repository"], pin["sha"])
+        if key in pins:
+            fail(f"duplicate Action pin: {key[0]}@{key[1]}")
+        if not re.fullmatch(r"[0-9a-f]{40}", pin["sha"]):
+            fail(f"invalid Action pin SHA: {pin['repository']}@{pin['sha']}")
+        if pin["commit_verified"] is not True:
+            fail(f"Action pin lacks verified upstream commit: {pin['repository']}")
+        pins.add(key)
+    return pins
+
+
+def validate_workflows(pins: set[tuple[str, str]]) -> None:
     workflow_files = list(ROOT.glob("**/.github/workflows/*.yml"))
     if not workflow_files:
         fail("no workflow files found")
@@ -185,12 +218,64 @@ def validate_workflows() -> None:
             fail(f"{path.relative_to(ROOT)} grants write-all")
         if "pull_request_target:" in text and "actions/checkout" in text:
             fail(f"{path.relative_to(ROOT)} combines pull_request_target with checkout")
-        for action_ref in re.findall(r"^\s*-?\s*uses:\s*[^@\s]+@([^\s#]+)", text, re.MULTILINE):
+        for action, action_ref in re.findall(
+            r"^\s*-?\s*uses:\s*([^@\s]+)@([^\s#]+)", text, re.MULTILINE
+        ):
             if not re.fullmatch(r"[0-9a-f]{40}", action_ref):
                 fail(
                     f"{path.relative_to(ROOT)} must pin every Action to a full commit SHA; "
                     f"found @{action_ref}"
                 )
+            repository = "/".join(action.split("/")[:2])
+            if (repository, action_ref) not in pins:
+                fail(
+                    f"{path.relative_to(ROOT)} uses {repository}@{action_ref} "
+                    "without matching provenance in pins.json"
+                )
+
+
+def validate_kit_safety() -> None:
+    observe = (
+        ROOT
+        / "kits/maintainer-defense-kit/profiles/observe/.github/workflows/pr-quality.yml"
+    ).read_text(encoding="utf-8")
+    balanced = (
+        ROOT / "kits/balanced/.github/workflows/pr-quality.yml"
+    ).read_text(encoding="utf-8")
+    if "pull_request_target:" in observe or "pull-requests: read" not in observe:
+        fail("observe profile must use a read-only pull_request trust boundary")
+    forbidden_observe = (
+        "failure-add-pr-labels",
+        "failure-pr-message",
+        "success-add-pr-labels",
+        "actions/checkout",
+    )
+    if any(value in observe for value in forbidden_observe):
+        fail("observe profile contains a contributor-visible mutation or checkout")
+    required_balanced = (
+        "pull_request_target:",
+        "types: [opened, reopened]",
+        "pull-requests: write",
+        "failure-add-pr-labels: needs-human-review",
+        "close-pr: false",
+        "lock-pr: false",
+    )
+    if any(value not in balanced for value in required_balanced):
+        fail("balanced profile is missing a review-first safety invariant")
+    if "failure-pr-message" in balanced or "actions/checkout" in balanced:
+        fail("balanced profile must not comment or execute pull-request code")
+    disabled_proxies = (
+        "detect-spam-usernames: false",
+        "min-account-age: 0",
+        "max-daily-forks: 0",
+        "require-public-profile: false",
+        "min-profile-completeness: 0",
+        "min-global-merge-ratio: 0",
+        "require-commit-author-match: false",
+    )
+    for name, workflow in (("observe", observe), ("balanced", balanced)):
+        if any(value not in workflow for value in disabled_proxies):
+            fail(f"{name} profile re-enabled an identity or history proxy")
 
 
 def validate_local_markdown_links() -> None:
@@ -233,8 +318,10 @@ def validate_generated_files() -> None:
 def main() -> None:
     catalog = validate_catalog()
     audits = validate_audits(catalog)
+    pins = validate_pins()
     validate_readme(catalog)
-    validate_workflows()
+    validate_workflows(pins)
+    validate_kit_safety()
     validate_local_markdown_links()
     validate_generated_files()
     print(

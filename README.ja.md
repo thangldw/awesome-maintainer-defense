@@ -12,17 +12,29 @@
 
 本プロジェクトは**不正利用への対策であり、反AIではありません**。AI生成を完全に判定できるという主張よりも、透明なシグナル、取り消し可能な操作、最小権限、明確な異議申立て経路を優先します。
 
+## Maintainer Defense Kitの導入
+
+読み取り専用の日本語版をプレビューします。`--apply`を付けるまでファイルは書き込まれません。
+
+```bash
+python3 scripts/install_kit.py --target /path/to/project --profile observe --language ja --repo OWNER/REPOSITORY
+python3 scripts/install_kit.py --target /path/to/project --profile observe --language ja --repo OWNER/REPOSITORY --apply
+python3 scripts/install_kit.py --target /path/to/project --verify
+```
+
+[導入可能なKit](kits/maintainer-defense-kit/README.ja.md)には`observe`、`balanced`、`hardened`、安全なアンインストール、英語・ベトナム語・日本語の完全なテンプレート、ポリシー、プレイブックが含まれます。[保証ケース](docs/ja/KIT_ASSURANCE.md)は、テスト済みの技術的保証と、実地データがまだない有効性を区別します。
+
 ## クイックスタート
 
 | 状況 | 最初の対応 | 次に検討すること |
 | --- | --- | --- |
-| 通常運用で時間が限られる | [balanced starter kit](kits/balanced)を導入 | 構造化Issueフォームとライフサイクル自動化 |
+| 通常運用で時間が限られる | 読み取り専用の`observe`を導入 | `balanced`の前に誤検知を測定 |
 | Issue/PRが急増 | 自動マージを止め、一時的なinteraction limitを設定 | 所有者と期限を決めたうえでlockdownを検討 |
 | 低品質PRが繰り返される | 自動クローズ前に人間レビュー用ラベルを付与 | dry-runで評価し、ポリシーを公開 |
 | 嫌がらせ・協調攻撃 | 証拠を保存し、交流を制限 | 不正利用を報告し、内容を拡散しない |
 | 不審なワークフロー変更 | 書き込みトークン付きで未信頼コードを実行しない | zizmor、ActionのSHA固定、権限縮小 |
 
-導入前に[リソース監査](docs/RESOURCE_AUDIT.md)、[評価方法](docs/EVALUATION.md)、[脅威モデル](docs/THREAT_MODEL.md)、[日本語プレイブック](docs/ja/PLAYBOOK.md)を確認してください。
+導入前に[優先すべきGitHubネイティブ制御](docs/NATIVE_CONTROLS.md)を確認し、その後[リソース監査](docs/RESOURCE_AUDIT.md)、[評価方法](docs/EVALUATION.md)、[脅威モデル](docs/THREAT_MODEL.md)、[日本語プレイブック](docs/ja/PLAYBOOK.md)を確認してください。
 
 ## 原則
 
@@ -112,12 +124,14 @@ CI、依存関係、シークレット、マージ経路を悪意ある、また
 
 ## すぐに使える資料
 
+- [導入可能なMaintainer Defense Kit](kits/maintainer-defense-kit/README.ja.md) — テスト済みプロファイル、manifest検証、安全なロールバック、3言語の完全な導入資産。
 - [Balanced starter kit](kits/balanced) — PRテンプレート、Issueフォーム、review-firstトリアージ。
 - [Workflow-hardening starter kit](kits/workflow-hardening) — コミットSHA固定済みの依存関係レビューとGitHub Actions解析。
 - [AI支援コントリビューションポリシー](policies/AI_CONTRIBUTIONS.ja.md)。
 - [未依頼プルリクエストポリシー](policies/UNSOLICITED_PULL_REQUESTS.ja.md)。
 - [日本語運用プレイブック](docs/ja/PLAYBOOK.md)。
 - [成熟度モデル](docs/MATURITY_MODEL.md)と[評価方法](docs/EVALUATION.md)。
+- [Kit保証ケース](docs/ja/KIT_ASSURANCE.md)と[ネイティブ制御ベースライン](docs/NATIVE_CONTROLS.md)。
 - [監査ログ](docs/AUDIT_LOG.md) — 重要な修正と削除したエントリ。
 
 テンプレートは出発点であり、法的助言ではありません。執行モードを有効にする前に、非重要リポジトリでテストし、権限とデータフローを確認してください。

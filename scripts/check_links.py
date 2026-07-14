@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Check catalog links without adding a third-party CI dependency."""
+"""Check catalog, audit-evidence, and documentation links without CI dependencies."""
 
 from __future__ import annotations
 
 import json
+import re
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
@@ -35,6 +36,17 @@ def main() -> None:
         for index, url in enumerate(audit["evidence"], start=1):
             if url not in known_urls:
                 items.append({"id": f"{audit['id']}-evidence-{index}", "url": url})
+                known_urls.add(url)
+    for path in ROOT.rglob("*.md"):
+        if ".git" in path.parts:
+            continue
+        for index, url in enumerate(
+            re.findall(r"\]\((https://[^)\s]+)", path.read_text(encoding="utf-8")),
+            start=1,
+        ):
+            if url not in known_urls:
+                label = str(path.relative_to(ROOT)).replace("/", "-")
+                items.append({"id": f"docs-{label}-{index}", "url": url})
                 known_urls.add(url)
     failures: list[str] = []
     warnings: list[str] = []
