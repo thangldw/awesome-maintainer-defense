@@ -1,6 +1,6 @@
 # Awesome Maintainer Defense
 
-> オープンソースメンテナー向けの防御スタック、ポリシー、すぐに使えるワークフロー集。
+> OSSメンテナー向けの読み取り専用・取り消し可能な防御策—監査済みツール、workflow、60秒で試せる単体CLI。
 
 [English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
 
@@ -14,11 +14,15 @@
 
 ## 60秒で試す
 
-リポジトリのcloneもpackage managerへの信頼も不要です。GitHub Releasesから単体のv1.0.0 CLIを取得してchecksumを検証し、読み取り専用の`observe` profileをpreviewしてから適用します。
+signup、リポジトリのclone、package managerへの信頼は不要です。GitHub Releasesから単体のv1.0.0 CLIを直接取得してchecksumを検証し、読み取り専用の`observe` profileをpreviewしてから適用します。downloadをshellへpipeすることはありません。
 
 ```bash
-gh release download v1.0.0 -R thangldw/awesome-maintainer-defense -p 'maintainer-defense-kit.py*'
-shasum -a 256 -c maintainer-defense-kit.py.sha256
+curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0.0/maintainer-defense-kit.py
+curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0.0/maintainer-defense-kit.py.sha256
+
+sha256sum -c maintainer-defense-kit.py.sha256
+# macOS: shasum -a 256 -c maintainer-defense-kit.py.sha256
+
 python3 maintainer-defense-kit.py --target . --profile observe --language ja --repo OWNER/REPOSITORY
 python3 maintainer-defense-kit.py --target . --profile observe --language ja --repo OWNER/REPOSITORY --apply
 ```
