@@ -53,7 +53,11 @@ Use the maximum documented capability, even when the default configuration is sa
 
 ## Changes to the starter kit
 
-Starter-kit changes receive a higher safety review. Workflows must use least-privilege permissions, pin every Action to a full commit SHA, and avoid checking out untrusted code under `pull_request_target`. Automatic closing, locking, or blocking must remain opt-in. Run `actionlint` when available.
+Starter-kit changes receive a higher safety review. Workflows must use least-privilege permissions, pin every Action to a full commit SHA, and avoid privileged fork-triggered events such as `pull_request_target` and `workflow_run`. Automatic closing, locking, or blocking must remain opt-in. Run the installer matrix, `actionlint`, and zizmor before merging.
+
+## Diagrams
+
+Follow [`docs/VISUAL_STYLE.md`](docs/VISUAL_STYLE.md): give each diagram one clear purpose, use standard notation and consistent visual grammar, and provide language parity when the diagram affects adoption decisions.
 
 ## No pay-to-play
 

@@ -144,6 +144,7 @@ Operational depth:
 - [Audit log](docs/AUDIT_LOG.md) — material corrections and scope changes, including removed entries.
 - [Kit assurance case](docs/KIT_ASSURANCE.md) — tested claims, corrected flaws, limits, and the production acceptance gate.
 - [Native-control baseline](docs/NATIVE_CONTROLS.md) — repository settings to prefer before third-party automation.
+- [Visual diagram guidelines](docs/VISUAL_STYLE.md) — Miro-inspired rules for purposeful, consistent, multilingual diagrams.
 
 These templates are starting points, not legal advice. Test workflows in a non-critical repository and pin third-party Actions to full commit SHAs before production use.
 

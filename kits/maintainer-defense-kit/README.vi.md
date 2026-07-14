@@ -14,6 +14,23 @@ Baseline có thể cài và rollback để giảm tải review nhưng không tuy
 
 Mọi profile đều cài issue form, PR template, policy, playbook, đặc tả nhãn và hồ sơ triển khai bằng `en`, `vi` hoặc `ja`.
 
+## Chọn profile
+
+```mermaid
+flowchart TD
+    A{Native control đã sẵn sàng?}
+    A -- Chưa --> B[Rà soát native control]
+    B --> C[Cài observe]
+    A -- Rồi --> C
+    C --> D{Dữ liệu đã đủ?}
+    D -- Chưa --> C
+    D -- Rồi --> E{Cần quality check bắt buộc?}
+    E -- Không --> F[Tiếp tục observe]
+    E -- Có --> G{Cần kiểm tra supply chain?}
+    G -- Không --> H[Dùng balanced]
+    G -- Có --> I[Dùng hardened]
+```
+
 ## Cài đặt an toàn
 
 Chạy từ repository này. Lệnh đầu chỉ xem trước:
