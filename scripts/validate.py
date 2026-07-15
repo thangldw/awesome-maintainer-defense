@@ -345,14 +345,44 @@ def validate_generated_files() -> None:
         ROOT / "README.vi.md",
         ROOT / "README.ja.md",
         ROOT / "docs/RESOURCE_AUDIT.md",
+        ROOT / "docs/AUDITOR_EVALUATION.md",
     ]
     before = {path: path.read_text(encoding="utf-8") for path in paths}
     subprocess.run([sys.executable, str(ROOT / "scripts/render.py")], check=True)
     subprocess.run([sys.executable, str(ROOT / "scripts/render_audit.py")], check=True)
+    subprocess.run([sys.executable, str(ROOT / "scripts/evaluate_auditor.py")], check=True)
     after = {path: path.read_text(encoding="utf-8") for path in paths}
     changed = [str(path.relative_to(ROOT)) for path in paths if before[path] != after[path]]
     if changed:
         fail(f"generated files are stale: {changed}; run make render")
+
+
+def validate_auditor_assets() -> None:
+    for relative in ("auditor.schema.json", "tests/fixtures/auditor/corpus.json"):
+        path = ROOT / relative
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            fail(f"invalid {relative}: {exc}")
+        if data.get("schema_version") not in {None, 1}:
+            fail(f"{relative} has an unsupported schema version")
+    corpus = json.loads(
+        (ROOT / "tests/fixtures/auditor/corpus.json").read_text(encoding="utf-8")
+    )
+    cases = corpus.get("cases", [])
+    case_ids = [case.get("id") for case in cases]
+    if len(cases) < 50 or len(case_ids) != len(set(case_ids)):
+        fail("auditor corpus must contain at least 50 uniquely named cases")
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "scripts/install_kit.py"), "audit", str(ROOT), "--format", "json"],
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    report = json.loads(result.stdout)
+    required = {"schema_version", "tool", "target", "summary", "findings"}
+    if set(report) != required or report["schema_version"] != 1:
+        fail("auditor JSON output does not match the v1 top-level contract")
 
 
 def main() -> None:
@@ -363,6 +393,7 @@ def main() -> None:
     validate_workflows(pins)
     validate_kit_safety()
     validate_issue_forms()
+    validate_auditor_assets()
     validate_local_markdown_links()
     validate_generated_files()
     print(

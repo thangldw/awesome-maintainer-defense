@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/thangldw/awesome-maintainer-defense/auditor.schema.json",
+  "title": "Maintainer Defense audit report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "tool", "target", "summary", "findings"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": {"const": "maintainer-defense"},
+        "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"}
+      }
+    },
+    "target": {"type": "string", "minLength": 1},
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total", "by_severity"],
+      "properties": {
+        "total": {"type": "integer", "minimum": 0},
+        "by_severity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["critical", "high", "medium", "low", "note"],
+          "properties": {
+            "critical": {"type": "integer", "minimum": 0},
+            "high": {"type": "integer", "minimum": 0},
+            "medium": {"type": "integer", "minimum": 0},
+            "low": {"type": "integer", "minimum": 0},
+            "note": {"type": "integer", "minimum": 0}
+          }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/finding"}
+    }
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule_id", "severity", "confidence", "location", "message", "threat_scenario", "recommendation", "fingerprint", "fix"],
+      "properties": {
+        "rule_id": {"type": "string", "pattern": "^MD-(GOV|WF|MOD)-[0-9]{3}$"},
+        "severity": {"enum": ["critical", "high", "medium", "low", "note"]},
+        "confidence": {"enum": ["high", "medium", "low"]},
+        "location": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "line", "column"],
+          "properties": {
+            "path": {"type": "string", "minLength": 1},
+            "line": {"type": "integer", "minimum": 1},
+            "column": {"type": "integer", "minimum": 1}
+          }
+        },
+        "message": {"type": "string", "minLength": 1},
+        "threat_scenario": {"type": "string", "minLength": 1},
+        "recommendation": {"type": "string", "minLength": 1},
+        "fingerprint": {"type": "string", "pattern": "^[0-9a-f]{24}$"},
+        "fix": {
+          "type": "object",
+          "required": ["available"],
+          "properties": {
+            "available": {"type": "boolean"},
+            "safety": {"enum": ["safe", "review-required"]},
+            "patch": {"type": "string"}
+          }
+        }
+      }
+    }
+  }
+}

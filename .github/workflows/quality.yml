@@ -37,6 +37,10 @@ jobs:
         run: python scripts/validate.py
       - name: Test all kit profiles and languages
         run: python scripts/test_install_kit.py
+      - name: Test repository auditor corpus, contracts, patches, and mutations
+        run: python scripts/test_auditor.py
+      - name: Audit this repository
+        run: python scripts/install_kit.py audit . --fail-on medium
       - name: Build standalone release CLI
         run: python scripts/build_standalone.py
       - name: Verify committed release visuals

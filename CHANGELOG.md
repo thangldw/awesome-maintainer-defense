@@ -2,6 +2,16 @@
 
 All notable changes are documented here. Dates use ISO 8601.
 
+## [1.1.0-rc.1] - 2026-07-15
+
+### Repository auditor
+
+- Added dependency-free `audit` and patch-only `fix` commands while preserving the v1 installer interface.
+- Added human, stable JSON v1, and SARIF 2.1.0 output with source locations, severity, confidence, threat scenarios, recommendations, fingerprints, and patch metadata.
+- Added governance, workflow trust-boundary, and moderation-safety rule families.
+- Added a labeled 50-case corpus plus permission, Action-pin, and persisted-token mutation tests.
+- Added CODEOWNERS coverage and monthly Dependabot updates for GitHub Actions.
+
 ## [1.0.1] - 2026-07-14
 
 ### Profile contract and support boundary
@@ -37,3 +47,4 @@ The engineering guarantees above are covered by static validation and end-to-end
 
 [1.0.0]: https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.0.0
 [1.0.1]: https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.0.1
+[1.1.0-rc.1]: https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.1.0-rc.1

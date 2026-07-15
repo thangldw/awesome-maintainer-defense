@@ -140,10 +140,17 @@ class InstallerTests(unittest.TestCase):
     def test_standalone_release_cli_works_outside_repository(self) -> None:
         subprocess.run([sys.executable, str(BUILDER)], check=True, capture_output=True)
         built = ROOT / "dist/maintainer-defense-kit.py"
+        auditor = ROOT / "dist/maintainer-defense.py"
         checksum = built.with_suffix(".py.sha256")
         self.assertTrue(checksum.is_file())
         expected = checksum.read_text(encoding="ascii").split()[0]
         self.assertEqual(hashlib.sha256(built.read_bytes()).hexdigest(), expected)
+        self.assertTrue(auditor.is_file())
+        audit = subprocess.run(
+            [sys.executable, str(auditor), "audit", str(ROOT), "--format", "json"],
+            text=True, capture_output=True, check=True,
+        )
+        self.assertEqual(json.loads(audit.stdout)["schema_version"], 1)
         with tempfile.TemporaryDirectory() as outside_tmp, tempfile.TemporaryDirectory() as target_tmp:
             outside = Path(outside_tmp) / built.name
             outside.write_bytes(built.read_bytes())
