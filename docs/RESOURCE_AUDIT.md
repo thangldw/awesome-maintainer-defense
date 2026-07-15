@@ -4,7 +4,7 @@
 
 ## Snapshot
 
-Verified against official project sources on **2026-07-16**.
+Verified against official project sources on **2026-07-15**.
 Repository activity is a point-in-time snapshot, not an endorsement or a guarantee of future maintenance.
 
 ## Impact vocabulary
