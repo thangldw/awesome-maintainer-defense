@@ -26,17 +26,19 @@ python3 maintainer-defense-kit.py audit . --format sarif > maintainer-defense.sa
 python3 maintainer-defense-kit.py fix . --output recommended.patch
 ```
 
-`fix`はunified diffだけを出力し、file、GitHub設定、commit、pushを変更しません。
+`fix`はunified diffだけを出力し、file、GitHub設定、commit、pushを変更しません。[auditor reference](docs/AUDITOR.md)、[synthetic evaluation](docs/AUDITOR_EVALUATION.md)、[公開repository pilot](docs/AUDITOR_PILOT.md)を参照してください。
 
 ## 防御profileを導入する
 
-既定はpreviewです。すべての出力先を確認してから`--apply`を追加します。
+既定はpreviewです。予定されたすべての`CREATE`/`KEEP`出力先と対応するkit assetの内容を確認してから`--apply`を追加します。
 
 ```bash
 python3 maintainer-defense-kit.py --target . --profile observe --language ja --repo OWNER/REPOSITORY
 python3 maintainer-defense-kit.py --target . --profile observe --language ja --repo OWNER/REPOSITORY --apply
 python3 maintainer-defense-kit.py --target . --verify
 ```
+
+Installerは競合fileを拒否し、ownershipとhashをmanifestへ記録します。Installer所有fileが変更済みの場合はuninstallしません。
 
 ![35秒のterminal demo：dry-run、observe導入、verify、uninstall](assets/demo.gif)
 
@@ -134,6 +136,7 @@ CI、依存関係、シークレット、マージ経路を悪意ある、また
 - 作成者を推測せず、品質とrepository riskを評価します。
 - 未信頼codeをsecretやwrite token付きで実行しません。
 - 観察から始め、根拠がある場合だけ執行します。
+- 自動closeやlockより先にqueueとstatus checkを使います。
 - rule、owner、review date、rollback、異議申立て経路を公開します。
 - scanner resultやcatalog listingをsecurity certificationとして扱いません。
 
