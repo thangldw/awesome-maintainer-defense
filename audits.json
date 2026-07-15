@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "verified_on": "2026-07-14",
+  "verified_on": "2026-07-15",
   "methodology": {
     "automation_impact": {
       "low": "Read-only analysis or documentation in normal use.",
@@ -216,7 +216,7 @@
     {
       "id": "allstar",
       "repository": "ossf/allstar",
-      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-13T13:34:11Z", "license_detected": "Apache-2.0"},
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-15T05:57:50Z", "license_detected": "Apache-2.0"},
       "deployment": "OpenSSF-operated or self-hosted GitHub App",
       "default_mode": "Reports policy violations as issues in the quick start",
       "automation_impact": "high",
@@ -280,7 +280,7 @@
     {
       "id": "openssf-scorecard",
       "repository": "ossf/scorecard",
-      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-13T08:23:11Z", "license_detected": "Apache-2.0"},
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-15T06:27:21Z", "license_detected": "Apache-2.0"},
       "deployment": "CLI, GitHub Action, REST API, and public dataset",
       "default_mode": "Read-only heuristic assessment",
       "automation_impact": "low",
@@ -296,7 +296,7 @@
     {
       "id": "zizmor",
       "repository": "zizmorcore/zizmor",
-      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-14T08:41:24Z", "license_detected": "MIT"},
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-15T12:45:20Z", "license_detected": "MIT"},
       "deployment": "Local CLI, package, or CI check",
       "default_mode": "Read-only static analysis",
       "automation_impact": "low",
@@ -309,7 +309,7 @@
     {
       "id": "pinact",
       "repository": "suzuki-shunsuke/pinact",
-      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-14T02:46:48Z", "license_detected": "MIT"},
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-15T05:50:46Z", "license_detected": "MIT"},
       "deployment": "Local CLI or CI check",
       "default_mode": "Modifies files when pinning; supports a non-modifying verification mode",
       "automation_impact": "medium",
@@ -341,7 +341,7 @@
     {
       "id": "trufflehog",
       "repository": "trufflesecurity/trufflehog",
-      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-14T12:39:26Z", "license_detected": "AGPL-3.0"},
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-15T06:18:39Z", "license_detected": "AGPL-3.0"},
       "deployment": "CLI, container, and CI integrations",
       "default_mode": "Scans and can verify discovered credentials",
       "automation_impact": "low",
@@ -373,7 +373,7 @@
     {
       "id": "osv-scanner",
       "repository": "google/osv-scanner",
-      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-14T04:42:24Z", "license_detected": "Apache-2.0"},
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-14T21:18:31Z", "license_detected": "Apache-2.0"},
       "deployment": "CLI, container, and CI integrations",
       "default_mode": "Read-only vulnerability and license scan",
       "automation_impact": "medium",
@@ -389,7 +389,7 @@
     {
       "id": "gitleaks",
       "repository": "gitleaks/gitleaks",
-      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-08T04:13:10Z", "license_detected": "MIT"},
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-15T04:12:57Z", "license_detected": "MIT"},
       "deployment": "CLI, pre-commit hook, and CI integrations",
       "default_mode": "Read-only pattern-based secret detection",
       "automation_impact": "low",
