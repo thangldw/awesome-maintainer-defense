@@ -1,5 +1,7 @@
 # Repository auditor
 
+> Product reference for commands, rule families, output contracts, fixes, and offline limits. Return to the [documentation hub](README.md).
+
 The dependency-free repository auditor checks local GitHub governance, workflow trust boundaries, and moderation automation. It is designed to complement—not replace—specialized GitHub Actions analyzers such as zizmor.
 
 ## Commands

@@ -1,9 +1,13 @@
 # Resource audit
 
+> Generated evidence record for catalog access, effects, boundaries, and limitations. Start from the [documentation hub](README.md).
+
+## Snapshot
+
 Verified against official project sources on **2026-07-14**.
 Repository activity is a point-in-time snapshot, not an endorsement or a guarantee of future maintenance.
 
-## How to read this audit
+## Impact vocabulary
 
 - **Low impact:** read-only analysis or documentation in normal use.
 - **Medium impact:** can label, comment, fail checks, publish reports, or modify local files.

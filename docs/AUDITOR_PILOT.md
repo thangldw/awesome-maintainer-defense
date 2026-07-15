@@ -1,5 +1,7 @@
 # Public-repository auditor pilot
 
+> Evidence record from public-repository smoke testing. It documents corrections and applicability—not population accuracy. Return to the [documentation hub](README.md).
+
 **Run date:** 2026-07-15.
 
 **Scope:** ten public repositories, shallow-cloned at the exact commits below.

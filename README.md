@@ -1,6 +1,6 @@
 # Awesome Maintainer Defense
 
-> Read-only, reversible defenses for OSS maintainers—audited tools, workflows, and a 60-second standalone CLI.
+> Audit the repository. Install only what you understand. Keep every enforcement decision reversible.
 
 [English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
 
@@ -8,13 +8,18 @@
 [![Quality](https://github.com/thangldw/awesome-maintainer-defense/actions/workflows/quality.yml/badge.svg)](https://github.com/thangldw/awesome-maintainer-defense/actions/workflows/quality.yml)
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Open source should stay open without requiring maintainers to absorb unlimited spam, harassment, unsafe workflows, low-effort automated contributions, or security-report noise. This list collects practical defenses while preserving human review and legitimate first-time contributions.
+This project gives open-source maintainers one coherent defense system:
 
-This project is **anti-abuse, not anti-AI**. It favors transparent signals, reversible actions, least privilege, and a documented appeal path over unreliable claims that a tool can perfectly identify AI-generated content.
+- an offline repository auditor for governance, GitHub Actions, and moderation risk;
+- a reversible kit with `observe`, `balanced`, and `hardened` profiles;
+- an evidence-reviewed catalog of native controls and third-party tools;
+- deployable policies, issue forms, response templates, and operating playbooks.
 
-## Try in 60 seconds
+It is **anti-abuse, not anti-AI**. Findings are review inputs, never proof of authorship or intent.
 
-No signup, clone, or package-manager trust required. Download the standalone v1.0 CLI directly from GitHub Releases, verify it, preview the read-only `observe` profile, then apply only if the diff is right. Python 3.10+ is required. The download is never piped into a shell:
+## Audit first
+
+Download the dependency-free v1.0 CLI and verify its checksum. Python 3.10+ is required; no network access or GitHub token is used during an audit.
 
 ```bash
 curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0/maintainer-defense-kit.py
@@ -23,52 +28,42 @@ curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/downlo
 sha256sum -c maintainer-defense-kit.py.sha256
 # macOS: shasum -a 256 -c maintainer-defense-kit.py.sha256
 
-python3 maintainer-defense-kit.py --target . --profile observe --language en --repo OWNER/REPOSITORY
-python3 maintainer-defense-kit.py --target . --profile observe --language en --repo OWNER/REPOSITORY --apply
+python3 maintainer-defense-kit.py audit .
+python3 maintainer-defense-kit.py audit . --format sarif > maintainer-defense.sarif
+python3 maintainer-defense-kit.py fix . --output recommended.patch
 ```
 
-The CLI is one dependency-free Python file with 25 embedded, versioned assets. It makes no network or GitHub API calls. Run `python3 maintainer-defense-kit.py --target . --verify` after installation and `--uninstall` for a guarded rollback.
+`fix` emits a unified diff. It never edits files, changes GitHub settings, commits, or pushes. See the [auditor reference](docs/AUDITOR.md), [synthetic evaluation](docs/AUDITOR_EVALUATION.md), and [public-repository pilot](docs/AUDITOR_PILOT.md).
 
-The v1.0 release also includes a local repository auditor. It reports GitHub governance gaps, unsafe workflow trust boundaries, and risky moderation automation with source locations, threat scenarios, human/JSON/SARIF output, and reviewable patches. From a source checkout, run:
+## Install a defense profile
+
+Preview is the default. Add `--apply` only after reviewing every destination and diff.
 
 ```bash
-python3 scripts/install_kit.py audit .
-python3 scripts/install_kit.py audit . --format sarif > maintainer-defense.sarif
-python3 scripts/install_kit.py fix . --output recommended.patch
+python3 maintainer-defense-kit.py --target . --profile observe --language en --repo OWNER/REPOSITORY
+python3 maintainer-defense-kit.py --target . --profile observe --language en --repo OWNER/REPOSITORY --apply
+python3 maintainer-defense-kit.py --target . --verify
 ```
 
-`fix` only emits a unified diff; it never edits the repository, changes GitHub settings, commits, or pushes. See the [auditor contract, rules, offline boundary, and corpus](docs/AUDITOR.md).
+The installer refuses conflicting files, records ownership and hashes in a manifest, and will not uninstall modified installer-owned files.
 
 ![35-second terminal demo: dry-run, install observe, verify, then uninstall](assets/demo.gif)
 
-The [installable kit](kits/maintainer-defense-kit) includes `observe`, `balanced`, and `hardened` profiles, safe uninstall, and structurally complete `en`, `vi`, and `ja` deployment assets; independent native security/legal review of Vietnamese and Japanese wording is still pending. Its [signal contract](docs/PROFILE_SIGNALS.md) exposes every active threshold and disabled proxy. The [assurance case](docs/KIT_ASSURANCE.md) distinguishes tested engineering guarantees from moderation effectiveness that has not yet been field-proven. See the [v1.0 changelog](CHANGELOG.md) for the latest audit corrections.
+## Choose the next move
 
-## Start here
+| Repository state | Recommended move |
+| --- | --- |
+| No baseline yet | Review [native controls](docs/NATIVE_CONTROLS.md), then run the auditor |
+| Normal contribution load | Install `observe`; collect data without contributor-visible action |
+| Measured review overload | Consider `balanced`; keep human review and an appeal path |
+| Supply-chain exposure | Add `hardened`; review pins, token permissions, and dependency policy |
+| Active abuse incident | Use the [incident playbook](docs/PLAYBOOK.md); time-bound every restriction |
 
-| Situation | First move | Then consider |
-| --- | --- | --- |
-| Normal project, limited time | Install the read-only `observe` profile | Measure false positives before considering `balanced` |
-| Sudden PR or issue flood | Disable automatic merges and enable interaction limits | Review [Repo Lockdown](https://github.com/dessant/repo-lockdown) before activating it |
-| Repeated low-quality PRs | Label for human review before auto-closing | Add Anti Slop in report-only mode and publish a contribution policy |
-| Harassment or coordinated abuse | Preserve evidence and limit interactions | Use Niubi Guard in dry-run mode before applying actions |
-| Suspicious workflow change | Do not run untrusted code with write tokens | Run zizmor, pin Actions, and restrict `GITHUB_TOKEN` permissions |
-
-The `balanced` profile is deliberately review-first: it exposes a read-only quality status gate but does not comment, label, close, or lock submissions. The default `observe` profile only records results in the job summary.
-
-Before adopting a tool, review [native GitHub controls](docs/NATIVE_CONTROLS.md), then read the evidence-backed [resource audit](docs/RESOURCE_AUDIT.md), [evaluation method](docs/EVALUATION.md), and [threat model](docs/THREAT_MODEL.md).
-
-## Principles
-
-1. **Quality, not authorship.** Evaluate reproducibility, scope, tests, and contributor responsiveness—not writing style.
-2. **Review before enforcement.** Start in report-only or dry-run mode and measure false positives.
-3. **Least privilege.** Give workflows the smallest token permissions and never expose secrets to untrusted pull-request code.
-4. **Reversible by default.** Prefer labels and queues before closing, locking, or blocking.
-5. **Publish the rules.** Contributors should know the policy, evidence standard, and appeal path.
-6. **Protect maintainer attention.** A project may reject unsolicited work that creates more review cost than value.
+The [documentation hub](docs/README.md) maps product reference, operations, evidence, and deployable assets.
 
 ## Resources
 
-⭐ marks a strong starting point, not a paid placement. The catalog is generated from [`catalog.json`](catalog.json).
+The catalog is generated from [`catalog.json`](catalog.json). ⭐ marks a practical starting point, not a ranking, endorsement, or paid placement.
 
 <!-- catalog:start -->
 
@@ -143,42 +138,19 @@ Set expectations before problems arrive and respond consistently when they do.
 
 <!-- catalog:end -->
 
-## Ready-to-use defenses
+## Safety contract
 
-- [Installable Maintainer Defense Kit](kits/maintainer-defense-kit) — tested profiles, manifest verification, safe rollback, and structurally complete assets in three deployment languages.
-- [Balanced starter kit](kits/balanced) — PR template, issue form, and review-first PR quality workflow.
-- [Workflow-hardening starter kit](kits/workflow-hardening) — pinned dependency review and GitHub Actions static analysis.
-- [AI contribution policy](policies/AI_CONTRIBUTIONS.md) — allows responsible assistance while keeping humans accountable.
-- [Unsolicited pull-request policy](policies/UNSOLICITED_PULL_REQUESTS.md) — asks contributors to align before large changes.
-- [Low-quality PR response](responses/low-quality-pr.md) — concise closure text without debating whether AI was used.
-- [Reproduction-needed response](responses/reproduction-needed.md) — requests the minimum evidence needed to investigate.
+- Evaluate submission quality and repository risk, not presumed authorship.
+- Run untrusted code only with read-only authority and no secrets.
+- Start with observation; require evidence before enforcement.
+- Prefer queues and status checks over automatic closing or locking.
+- Publish the rule, owner, review date, rollback, and appeal path.
+- Treat every scanner result and catalog listing as evidence to review—not certification.
 
-Operational depth:
+The kit's installation, pinning, permissions, and rollback behavior are tested. Moderation effectiveness is not yet field-proven. Read the [assurance case](docs/KIT_ASSURANCE.md) before production use.
 
-- [Evaluation method](docs/EVALUATION.md) — inclusion gates, evidence hierarchy, audit expiry, and removal criteria.
-- [Resource audit](docs/RESOURCE_AUDIT.md) — permissions, data boundaries, maximum effects, limitations, and official evidence for every entry.
-- [Threat model](docs/THREAT_MODEL.md) — assets, actors, trust boundaries, abuse paths, and safety invariants.
-- [Defense playbook](docs/PLAYBOOK.md) — baseline, observe, review-first, incident, and recovery procedures.
-- [Maturity model](docs/MATURITY_MODEL.md) — a five-level path from reactive moderation to resilient operations.
-- [Audit log](docs/AUDIT_LOG.md) — material corrections and scope changes, including removed entries.
-- [Kit assurance case](docs/KIT_ASSURANCE.md) — tested claims, corrected flaws, limits, and the production acceptance gate.
-- [PR quality signal contract](docs/PROFILE_SIGNALS.md) — exact checks, thresholds, disabled proxies, exemptions, and profile effects.
-- [Repository auditor](docs/AUDITOR.md) — offline governance, workflow, and moderation checks with JSON/SARIF contracts and patch-only remediation.
-- [Native-control baseline](docs/NATIVE_CONTROLS.md) — repository settings to prefer before third-party automation.
-- [Visual diagram guidelines](docs/VISUAL_STYLE.md) — Miro-inspired rules for purposeful, consistent, multilingual diagrams.
+## Contribute
 
-These templates are starting points, not legal advice. Test workflows in a non-critical repository and pin third-party Actions to full commit SHAs before production use.
+Use [CONTRIBUTING.md](CONTRIBUTING.md) for catalog evidence requirements and safety review. Listings cannot be purchased, and inclusion is not a security endorsement.
 
-## What belongs here
-
-A resource should materially reduce maintainer exposure to abuse, review overload, unsafe contribution paths, or supply-chain risk. It must have public documentation, a clear maintainer use case, and no deceptive claims. Open-source resources are preferred; a proprietary service must offer a meaningfully useful free tier and disclose data handling.
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) to propose a resource. Entries are reviewed for relevance and safety, not accepted in exchange for stars, backlinks, or payment.
-
-## Project status
-
-This catalog is young and intentionally conservative. A listing is not a security endorsement. Verify licenses, permissions, data flows, maintenance status, and false-positive behavior for your own threat model.
-
-## License
-
-This project is available under the [MIT License](LICENSE).
+MIT licensed. Templates are starting points, not legal advice.

@@ -1,5 +1,7 @@
 # Code of conduct
 
+> Community behavior and enforcement contract. Technical contribution requirements live in [CONTRIBUTING.md](CONTRIBUTING.md); private vulnerability reports belong in [SECURITY.md](SECURITY.md).
+
 This project exists to protect maintainer attention without dehumanizing contributors.
 
 Participants must be respectful, disclose relevant affiliations, accept evidence-based corrections, and avoid harassment, threats, impersonation, spam, or coordinated pressure. Critique tools, policies, permissions, and outcomes—not a person's identity, writing style, presumed use of AI, or experience level.

@@ -1,5 +1,7 @@
 # Balanced maintainer-defense starter kit
 
+> Deployable asset. Start from the [documentation hub](../../docs/README.md).
+
 This is the read-only status-gate component used by the balanced Maintainer Defense Kit profile. Prefer the [installer](../maintainer-defense-kit) so conflicts, provenance, verification, and rollback are recorded.
 
 ## Behavior

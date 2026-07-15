@@ -1,5 +1,7 @@
 # PR quality profile contract
 
+> Product contract for every enabled signal, disabled proxy, threshold, exemption, and profile effect. Return to the [documentation hub](README.md).
+
 This document is the reviewable contract for the PR-quality workflows shipped in the Maintainer Defense Kit. The workflow files configure every active check explicitly so an upstream default cannot silently change the baseline.
 
 ## Active checks

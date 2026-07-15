@@ -1,5 +1,7 @@
 # Maintainer Defense Kit
 
+> 導入可能なkitです。[documentation hub](../../docs/README.md)から開始してください。
+
 [English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
 
 AI作成の判定を主張せず、メンテナーのレビュー負荷を減らす、導入・ロールバック可能なベースラインです。インストーラーは既定でdry-runとなり、内容が異なる既存ファイルを上書きせず、各ファイルのハッシュを記録して検証と安全な削除を行えます。

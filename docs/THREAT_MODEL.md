@@ -1,5 +1,7 @@
 # Maintainer-defense threat model
 
+> Risk model for assets, actors, trust boundaries, abuse paths, safety invariants, and explicit non-goals. Return to the [documentation hub](README.md).
+
 ## Scope
 
 The defended system is an open-source repository that accepts public issues, pull requests, discussions, or vulnerability reports. The goal is to preserve maintainer attention, contributor safety, code integrity, and recoverability without excluding legitimate newcomers by default.

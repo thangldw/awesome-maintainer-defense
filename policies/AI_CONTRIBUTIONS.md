@@ -1,5 +1,7 @@
 # AI-assisted contribution policy
 
+> Deployable policy or response. Review the [documentation hub](../docs/README.md) before adoption.
+
 AI tools may assist a contribution, but a human contributor must own the result.
 
 ## Requirements

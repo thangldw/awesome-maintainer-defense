@@ -54,6 +54,10 @@ def main() -> None:
     lines = [
         "# Auditor corpus evaluation",
         "",
+        "> Evidence record for deterministic rule behavior. Start from the [documentation hub](README.md).",
+        "",
+        "## Result",
+        "",
         f"**Corpus:** {len(corpus['cases'])} labeled synthetic repository fixtures.",
         "",
         f"**Exact-case agreement:** {exact}/{len(corpus['cases'])}.",

@@ -1,5 +1,7 @@
 # Evaluation method
 
+> Evidence method for catalog inclusion, verification, expiry, and removal. Return to the [documentation hub](README.md).
+
 This project evaluates usefulness and operational risk; it does not certify that a resource is secure, unbiased, or suitable for every repository.
 
 ## Inclusion gates

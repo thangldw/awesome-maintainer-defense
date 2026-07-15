@@ -1,5 +1,7 @@
 # Unsolicited pull-request policy
 
+> Deployable policy or response. Review the [documentation hub](../docs/README.md) before adoption.
+
 We welcome focused fixes and thoughtful improvements, but reviewing a pull request is real project work. Before starting a large change, open or join an issue and wait for maintainer agreement on the problem and approach.
 
 ## Usually welcome without prior approval

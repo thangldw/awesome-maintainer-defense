@@ -1,5 +1,7 @@
 # Audit log
 
+> Evidence ledger for material corrections, removals, and claim changes. Return to the [documentation hub](README.md).
+
 This log records material corrections to the catalog. Routine wording and link maintenance may remain in Git history.
 
 ## 2026-07-14 — Maintainer Defense Kit assurance audit

@@ -1,5 +1,7 @@
 # Chính sách pull request không được yêu cầu
 
+> Policy triển khai được. Review [documentation hub](../docs/README.md) và điều chỉnh theo dự án trước khi áp dụng.
+
 Chúng tôi chào đón bug fix tập trung và cải tiến có suy nghĩ, nhưng review pull request là công việc thực sự của dự án. Trước một thay đổi lớn, hãy mở hoặc tham gia issue và chờ maintainer đồng ý về vấn đề và hướng tiếp cận.
 
 ## Thường có thể gửi mà không cần duyệt trước

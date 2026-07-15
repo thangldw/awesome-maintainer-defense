@@ -1,5 +1,7 @@
 # Maintainer-defense playbook
 
+> Operating guide for baseline, observation, review-first enforcement, incidents, and recovery. Return to the [documentation hub](README.md).
+
 ## Level 0 — Baseline
 
 Use this before there is an incident.
