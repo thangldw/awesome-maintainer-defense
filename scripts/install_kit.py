@@ -17,8 +17,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-KIT_VERSION = "1.1.0-rc.1"
-AUDITOR_VERSION = "0.1.0"
+KIT_VERSION = "1.1.0-rc.2"
+AUDITOR_VERSION = "0.1.1"
 MANIFEST = ".maintainer-defense-kit.json"
 PROFILES = ("observe", "balanced", "hardened")
 LANGUAGES = ("en", "vi", "ja")
@@ -474,6 +474,44 @@ def governance_findings(target: Path) -> list[dict]:
     return findings
 
 
+def yaml_block(lines: list[str], index: int, indentation: int) -> str:
+    """Return the surrounding indentation-delimited YAML block."""
+    start = index
+    while start > 0:
+        candidate = lines[start]
+        stripped = candidate.lstrip()
+        current = len(candidate) - len(stripped)
+        if current == indentation and stripped and not stripped.startswith("#"):
+            break
+        start -= 1
+    end = index + 1
+    while end < len(lines):
+        candidate = lines[end]
+        stripped = candidate.lstrip()
+        current = len(candidate) - len(stripped)
+        if stripped and not stripped.startswith("#") and current <= indentation:
+            break
+        end += 1
+    return "\n".join(lines[start:end])
+
+
+def permission_scope_writes(lines: list[str], checkout_index: int) -> bool:
+    text = "\n".join(lines)
+    top_write = bool(re.search(r"(?m)^permissions\s*:\s*write-all\b", text))
+    top_match = re.search(r"(?m)^permissions\s*:\s*$", text)
+    if top_match:
+        tail = text[top_match.end():]
+        boundary = re.search(r"(?m)^\S", tail)
+        top_block = tail[:boundary.start()] if boundary else tail
+        top_write = top_write or bool(re.search(r"(?m)^\s{2}\S[^:]*:\s*write\b", top_block))
+    job_block = yaml_block(lines, checkout_index, 2)
+    job_write = bool(
+        re.search(r"permissions\s*:\s*write-all\b", job_block)
+        or re.search(r"(?m)^\s+(?:contents|issues|pull-requests|actions|packages|id-token)\s*:\s*write\b", job_block)
+    )
+    return top_write or job_write
+
+
 def workflow_findings(target: Path, path: Path) -> list[dict]:
     findings: list[dict] = []
     rel = relative_path(target, path)
@@ -510,7 +548,7 @@ def workflow_findings(target: Path, path: Path) -> list[dict]:
                 )
             )
 
-        uses = re.search(r"\buses:\s*([^@\s]+)@([^\s#]+)", line)
+        uses = re.search(r"\buses:\s*[\"']?([^@\"'\s]+)@([^\"'\s#]+)[\"']?", line)
         if uses and not re.fullmatch(r"[0-9a-fA-F]{40}", uses.group(2)):
             findings.append(
                 make_finding(
@@ -522,18 +560,22 @@ def workflow_findings(target: Path, path: Path) -> list[dict]:
             )
 
     privileged = [event for event in PRIVILEGED_EVENTS if re.search(rf"(?m)^\s{{0,2}}{event}\s*:", text)]
-    checkout = bool(re.search(r"uses:\s*actions/checkout@", text))
+    checkout_indexes = [
+        index for index, line in enumerate(lines)
+        if re.search(r"uses:\s*[\"']?actions/checkout@", line)
+    ]
+    checkout = bool(checkout_indexes)
     untrusted_ref = bool(re.search(r"github\.(?:event\.pull_request\.(?:head\.(?:sha|ref)|head)|head_ref)|refs/pull/", text))
     secrets = bool(re.search(r"\$\{\{\s*secrets\.|secrets:\s*inherit", text))
     writes = bool(re.search(r"permissions\s*:\s*write-all|\b(?:contents|issues|pull-requests|actions|packages|id-token)\s*:\s*write", text))
-    if privileged and checkout:
+    if privileged and checkout and untrusted_ref:
         needle = privileged[0]
         line, column = line_column(text, needle)
         findings.append(
             make_finding(
-                "MD-WF-004", "high" if untrusted_ref else "medium", "high" if untrusted_ref else "medium", rel, line, column,
-                f"Privileged event {needle} is combined with repository checkout.",
-                "A fork or attacker-controlled event may influence the checked-out revision inside a context that can receive base-repository authority.",
+                "MD-WF-004", "high", "high", rel, line, column,
+                f"Privileged event {needle} checks out an attacker-influenced revision.",
+                "A fork or attacker-controlled event influences the checked-out revision inside a context that can receive base-repository authority.",
                 "Split metadata handling from untrusted-code execution; use pull_request with read-only permissions for code execution and never check out a fork head in the privileged job.",
             )
         )
@@ -548,16 +590,20 @@ def workflow_findings(target: Path, path: Path) -> list[dict]:
                 "Remove the untrusted checkout/execution path from the privileged event and move it to an isolated pull_request workflow with no secrets and read-only permissions.",
             )
         )
-    if checkout and writes and "persist-credentials: false" not in text:
-        line, column = line_column(text, "actions/checkout@")
-        findings.append(
-            make_finding(
-                "MD-WF-006", "medium", "medium", rel, line, column,
-                "Checkout may persist a write-capable token in the workspace.",
-                "A later command or compromised build step can recover the credential from Git configuration and use its repository authority.",
-                "Set persist-credentials: false unless a reviewed step explicitly needs authenticated Git operations.",
+    for checkout_index in checkout_indexes:
+        checkout_line = lines[checkout_index]
+        indentation = len(checkout_line) - len(checkout_line.lstrip())
+        step_block = yaml_block(lines, checkout_index, max(0, indentation - 2))
+        if permission_scope_writes(lines, checkout_index) and "persist-credentials: false" not in step_block:
+            column = checkout_line.find("actions/checkout@") + 1
+            findings.append(
+                make_finding(
+                    "MD-WF-006", "medium", "medium", rel, checkout_index + 1, column,
+                    "Checkout may persist a write-capable token in the workspace.",
+                    "A later command or compromised build step can recover the credential from Git configuration and use its repository authority.",
+                    "Set persist-credentials: false unless a reviewed step explicitly needs authenticated Git operations.",
+                )
             )
-        )
 
     destructive_lines: list[int] = []
     for index, line in enumerate(lines):
