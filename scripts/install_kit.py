@@ -17,8 +17,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-KIT_VERSION = "1.1.0-rc.2"
-AUDITOR_VERSION = "0.1.1"
+KIT_VERSION = "1.0"
+AUDITOR_VERSION = "1.0"
 MANIFEST = ".maintainer-defense-kit.json"
 PROFILES = ("observe", "balanced", "hardened")
 LANGUAGES = ("en", "vi", "ja")
