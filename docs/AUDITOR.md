@@ -45,3 +45,5 @@ The labeled corpus in [`tests/fixtures/auditor/corpus.json`](../tests/fixtures/a
 Corpus accuracy is a regression measurement over the published cases, not a claim about all GitHub repositories. New rules should add positive, negative, and non-applicable examples before their behavior is advertised.
 
 Published per-rule precision, recall, exact-case agreement, mutation score, and their interpretation boundary are in [`AUDITOR_EVALUATION.md`](AUDITOR_EVALUATION.md).
+
+The first public-repository smoke test, pinned source revisions, corrections it produced, and why it does not claim real-world precision are documented in [`AUDITOR_PILOT.md`](AUDITOR_PILOT.md).

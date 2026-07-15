@@ -2,6 +2,16 @@
 
 All notable changes are documented here. Dates use ISO 8601.
 
+## [1.1.0-rc.2] - 2026-07-15
+
+### Real-repository pilot corrections
+
+- Audited ten public repositories at pinned commits and published the applicability boundary instead of inferring real-world precision from synthetic fixtures.
+- Correctly parse quoted `uses:` values so full-SHA pins are not reported as mutable references.
+- Report privileged-event checkout only when the checked-out revision is attacker-influenced; a reviewed base-branch checkout is not treated as a pwn-request path.
+- Scope persisted-checkout-credential checks to the checkout job and step rather than permissions or options elsewhere in a multi-job workflow.
+- Added regression fixtures derived from all three pilot corrections, bringing the labeled synthetic corpus to 52 cases.
+
 ## [1.1.0-rc.1] - 2026-07-15
 
 ### Repository auditor
@@ -48,3 +58,4 @@ The engineering guarantees above are covered by static validation and end-to-end
 [1.0.0]: https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.0.0
 [1.0.1]: https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.0.1
 [1.1.0-rc.1]: https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.1.0-rc.1
+[1.1.0-rc.2]: https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.1.0-rc.2
