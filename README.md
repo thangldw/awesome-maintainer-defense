@@ -14,11 +14,11 @@ This project is **anti-abuse, not anti-AI**. It favors transparent signals, reve
 
 ## Try in 60 seconds
 
-No signup, clone, or package-manager trust required. Download the standalone v1.0.1 CLI directly from GitHub Releases, verify it, preview the read-only `observe` profile, then apply only if the diff is right. Python 3.10+ is required. The download is never piped into a shell:
+No signup, clone, or package-manager trust required. Download the standalone v1.0 CLI directly from GitHub Releases, verify it, preview the read-only `observe` profile, then apply only if the diff is right. Python 3.10+ is required. The download is never piped into a shell:
 
 ```bash
-curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0.1/maintainer-defense-kit.py
-curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0.1/maintainer-defense-kit.py.sha256
+curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0/maintainer-defense-kit.py
+curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0/maintainer-defense-kit.py.sha256
 
 sha256sum -c maintainer-defense-kit.py.sha256
 # macOS: shasum -a 256 -c maintainer-defense-kit.py.sha256
@@ -29,7 +29,7 @@ python3 maintainer-defense-kit.py --target . --profile observe --language en --r
 
 The CLI is one dependency-free Python file with 25 embedded, versioned assets. It makes no network or GitHub API calls. Run `python3 maintainer-defense-kit.py --target . --verify` after installation and `--uninstall` for a guarded rollback.
 
-The `v1.1.0-rc.2` pre-release also includes a local repository auditor. It reports GitHub governance gaps, unsafe workflow trust boundaries, and risky moderation automation with source locations, threat scenarios, human/JSON/SARIF output, and reviewable patches. From a source checkout, run:
+The v1.0 release also includes a local repository auditor. It reports GitHub governance gaps, unsafe workflow trust boundaries, and risky moderation automation with source locations, threat scenarios, human/JSON/SARIF output, and reviewable patches. From a source checkout, run:
 
 ```bash
 python3 scripts/install_kit.py audit .
@@ -41,7 +41,7 @@ python3 scripts/install_kit.py fix . --output recommended.patch
 
 ![35-second terminal demo: dry-run, install observe, verify, then uninstall](assets/demo.gif)
 
-The [installable kit](kits/maintainer-defense-kit) includes `observe`, `balanced`, and `hardened` profiles, safe uninstall, and structurally complete `en`, `vi`, and `ja` deployment assets; independent native security/legal review of Vietnamese and Japanese wording is still pending. Its [signal contract](docs/PROFILE_SIGNALS.md) exposes every active threshold and disabled proxy. The [assurance case](docs/KIT_ASSURANCE.md) distinguishes tested engineering guarantees from moderation effectiveness that has not yet been field-proven. See the [v1.0.1 changelog](CHANGELOG.md) for the latest audit corrections.
+The [installable kit](kits/maintainer-defense-kit) includes `observe`, `balanced`, and `hardened` profiles, safe uninstall, and structurally complete `en`, `vi`, and `ja` deployment assets; independent native security/legal review of Vietnamese and Japanese wording is still pending. Its [signal contract](docs/PROFILE_SIGNALS.md) exposes every active threshold and disabled proxy. The [assurance case](docs/KIT_ASSURANCE.md) distinguishes tested engineering guarantees from moderation effectiveness that has not yet been field-proven. See the [v1.0 changelog](CHANGELOG.md) for the latest audit corrections.
 
 ## Start here
 

@@ -13,7 +13,7 @@
       "required": ["name", "version"],
       "properties": {
         "name": {"const": "maintainer-defense"},
-        "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"}
+        "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+(?:\\.[0-9]+)?$"}
       }
     },
     "target": {"type": "string", "minLength": 1},

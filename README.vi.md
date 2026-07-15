@@ -14,11 +14,11 @@ Dự án này **chống lạm dụng, không chống AI**. Chúng tôi ưu tiên
 
 ## Thử trong 60 giây
 
-Không cần signup, clone repo hay tin một package manager. Tải trực tiếp CLI v1.0.1 độc lập từ GitHub Releases, kiểm tra checksum, xem trước profile `observe` chỉ đọc rồi chỉ cài khi diff phù hợp. Yêu cầu Python 3.10+. Lệnh tải không bao giờ được pipe vào shell:
+Không cần signup, clone repo hay tin một package manager. Tải trực tiếp CLI v1.0 độc lập từ GitHub Releases, kiểm tra checksum, xem trước profile `observe` chỉ đọc rồi chỉ cài khi diff phù hợp. Yêu cầu Python 3.10+. Lệnh tải không bao giờ được pipe vào shell:
 
 ```bash
-curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0.1/maintainer-defense-kit.py
-curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0.1/maintainer-defense-kit.py.sha256
+curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0/maintainer-defense-kit.py
+curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0/maintainer-defense-kit.py.sha256
 
 sha256sum -c maintainer-defense-kit.py.sha256
 # macOS: shasum -a 256 -c maintainer-defense-kit.py.sha256
@@ -31,7 +31,7 @@ CLI là một file Python không có dependency, chứa 25 asset đã khóa theo
 
 ![Demo terminal 35 giây: dry-run, cài observe, verify rồi uninstall](assets/demo.gif)
 
-[Kit có thể cài đặt](kits/maintainer-defense-kit/README.vi.md) gồm ba profile `observe`, `balanced`, `hardened`, uninstall an toàn và asset triển khai đầy đủ về cấu trúc bằng tiếng Anh, Việt, Nhật; nội dung Việt/Nhật chưa được chuyên gia bảo mật/pháp lý bản ngữ review độc lập. [Hợp đồng signal](docs/PROFILE_SIGNALS.md) công bố toàn bộ threshold và proxy bị tắt. [Hồ sơ đảm bảo](docs/vi/KIT_ASSURANCE.md) nói rõ phần nào đã được test kỹ thuật và phần hiệu quả thực tế nào chưa có dữ liệu hiện trường. Xem [changelog v1.0.1](CHANGELOG.md) để theo dõi sửa đổi audit mới nhất.
+[Kit có thể cài đặt](kits/maintainer-defense-kit/README.vi.md) gồm ba profile `observe`, `balanced`, `hardened`, uninstall an toàn và asset triển khai đầy đủ về cấu trúc bằng tiếng Anh, Việt, Nhật; nội dung Việt/Nhật chưa được chuyên gia bảo mật/pháp lý bản ngữ review độc lập. [Hợp đồng signal](docs/PROFILE_SIGNALS.md) công bố toàn bộ threshold và proxy bị tắt. [Hồ sơ đảm bảo](docs/vi/KIT_ASSURANCE.md) nói rõ phần nào đã được test kỹ thuật và phần hiệu quả thực tế nào chưa có dữ liệu hiện trường. Xem [changelog v1.0](CHANGELOG.md) để theo dõi sửa đổi audit mới nhất.
 
 ## Bắt đầu nhanh
 

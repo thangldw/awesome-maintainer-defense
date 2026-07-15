@@ -2,7 +2,7 @@
 
 All notable changes are documented here. Dates use ISO 8601.
 
-## [1.1.0-rc.2] - 2026-07-15
+## [1.0] - 2026-07-15
 
 ### Real-repository pilot corrections
 
@@ -12,8 +12,6 @@ All notable changes are documented here. Dates use ISO 8601.
 - Scope persisted-checkout-credential checks to the checkout job and step rather than permissions or options elsewhere in a multi-job workflow.
 - Added regression fixtures derived from all three pilot corrections, bringing the labeled synthetic corpus to 52 cases.
 
-## [1.1.0-rc.1] - 2026-07-15
-
 ### Repository auditor
 
 - Added dependency-free `audit` and patch-only `fix` commands while preserving the v1 installer interface.
@@ -21,8 +19,6 @@ All notable changes are documented here. Dates use ISO 8601.
 - Added governance, workflow trust-boundary, and moderation-safety rule families.
 - Added a labeled 50-case corpus plus permission, Action-pin, and persisted-token mutation tests.
 - Added CODEOWNERS coverage and monthly Dependabot updates for GitHub Actions.
-
-## [1.0.1] - 2026-07-14
 
 ### Profile contract and support boundary
 
@@ -33,8 +29,6 @@ All notable changes are documented here. Dates use ISO 8601.
 - Added a privacy-sanitized field-report path for collecting the evidence needed to evaluate false positives and maintainer workload.
 - Removed the final undeclared issue-form label dependency and added validation to prevent silent label failures from returning.
 - Clarified that English, Vietnamese, and Japanese assets are structurally complete while independent native security/legal review of Vietnamese and Japanese wording remains pending.
-
-## [1.0.0] - 2026-07-14
 
 ### Maintainer defense kit
 
@@ -53,9 +47,6 @@ All notable changes are documented here. Dates use ISO 8601.
 
 ### Assurance boundary
 
-The engineering guarantees above are covered by static validation and end-to-end tests. Moderation effectiveness, false-positive rates, and maintainer time saved still require field evidence; v1.0.0 does not present them as proven outcomes. See [`docs/KIT_ASSURANCE.md`](docs/KIT_ASSURANCE.md) and [`docs/AUDIT_LOG.md`](docs/AUDIT_LOG.md).
+The engineering guarantees above are covered by static validation and end-to-end tests. Moderation effectiveness, false-positive rates, and maintainer time saved still require field evidence; v1.0 does not present them as proven outcomes. See [`docs/KIT_ASSURANCE.md`](docs/KIT_ASSURANCE.md) and [`docs/AUDIT_LOG.md`](docs/AUDIT_LOG.md).
 
-[1.0.0]: https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.0.0
-[1.0.1]: https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.0.1
-[1.1.0-rc.1]: https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.1.0-rc.1
-[1.1.0-rc.2]: https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.1.0-rc.2
+[1.0]: https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.0
