@@ -4,7 +4,7 @@
 
 ## Snapshot
 
-Verified against official project sources on **2026-07-14**.
+Verified against official project sources on **2026-07-16**.
 Repository activity is a point-in-time snapshot, not an endorsement or a guarantee of future maintenance.
 
 ## Impact vocabulary
@@ -174,7 +174,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** GitHub API, OpenSSF-operated service when using the public app
 - **Access:** Read access to most repository settings and contents; issues and checks write for reporting and block mode
 - **Important limitation:** Organization-wide policy mistakes can affect many repositories. Start with opt-in scope and issue reporting before block enforcement.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-13T13:34:11Z`, GitHub license detection=`Apache-2.0`
+- **Repository snapshot:** archived=`false`, last source push=`2026-07-15T05:57:50Z`, GitHub license detection=`Apache-2.0`
 - **Evidence:** [source 1](https://github.com/ossf/allstar#using-the-public-allstar-app) · [source 2](https://github.com/ossf/allstar#configuration-definitions)
 
 ### [Safe Settings](https://github.com/github-community-projects/safe-settings)
@@ -220,7 +220,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** GitHub API, optional Scorecard API and public dataset
 - **Access:** Repository metadata read; additional permissions when uploading SARIF
 - **Important limitation:** Scorecard documents that checks are heuristics with false positives and negatives. Weekly public results omit some checks and can be stale.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-13T08:23:11Z`, GitHub license detection=`Apache-2.0`
+- **Repository snapshot:** archived=`false`, last source push=`2026-07-15T06:27:21Z`, GitHub license detection=`Apache-2.0`
 - **Evidence:** [source 1](https://github.com/ossf/scorecard#scorecard-checks) · [source 2](https://github.com/ossf/scorecard#public-data)
 
 ### [zizmor](https://github.com/zizmorcore/zizmor)
@@ -231,7 +231,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** local files, optional GitHub API for online audits
 - **Access:** Read access to workflow files; optional GitHub token
 - **Important limitation:** Static analysis cannot prove a workflow is safe and may miss runtime or third-party Action behavior. Review findings in context.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-14T08:41:24Z`, GitHub license detection=`MIT`
+- **Repository snapshot:** archived=`false`, last source push=`2026-07-15T12:45:20Z`, GitHub license detection=`MIT`
 - **Evidence:** [source 1](https://github.com/zizmorcore/zizmor) · [source 2](https://docs.zizmor.sh/audits/)
 
 ### [pinact](https://github.com/suzuki-shunsuke/pinact)
@@ -242,7 +242,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** local files, GitHub API unless offline mode is used
 - **Access:** Filesystem write for fixes; optional GitHub token for release and tag lookup
 - **Important limitation:** A pinned SHA limits tag movement but does not make third-party code trustworthy. Offline mode only checks SHA syntax.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-14T02:46:48Z`, GitHub license detection=`MIT`
+- **Repository snapshot:** archived=`false`, last source push=`2026-07-15T05:50:46Z`, GitHub license detection=`MIT`
 - **Evidence:** [source 1](https://github.com/suzuki-shunsuke/pinact#offline-check---no-api) · [source 2](https://github.com/suzuki-shunsuke/pinact#update-actions--update)
 
 ### [Dependency Review Action](https://github.com/actions/dependency-review-action)
@@ -264,7 +264,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** scanned source, credential providers during verification
 - **Access:** Read access to scan targets; network access for verification
 - **Important limitation:** Verification can send authentication requests to third-party services. Redact output, scope scans carefully, and treat findings as sensitive incident data.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-14T12:39:26Z`, GitHub license detection=`AGPL-3.0`
+- **Repository snapshot:** archived=`false`, last source push=`2026-07-15T06:18:39Z`, GitHub license detection=`AGPL-3.0`
 - **Evidence:** [source 1](https://github.com/trufflesecurity/trufflehog#what-is-secret-verification) · [source 2](https://github.com/trufflesecurity/trufflehog#usage)
 
 ### [PRevent](https://github.com/apiiro/PRevent)
@@ -286,7 +286,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** OSV API and deps.dev, offline database option
 - **Access:** Read access to dependency artifacts; filesystem and package-manager access for fix mode
 - **Important limitation:** Coverage varies by ecosystem. Guided remediation can execute package-manager behavior from untrusted projects; do not run fix mode on untrusted code.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-14T04:42:24Z`, GitHub license detection=`Apache-2.0`
+- **Repository snapshot:** archived=`false`, last source push=`2026-07-14T21:18:31Z`, GitHub license detection=`Apache-2.0`
 - **Evidence:** [source 1](https://github.com/google/osv-scanner#offline-mode) · [source 2](https://github.com/google/osv-scanner#guided-remediation)
 
 ### [Gitleaks](https://github.com/gitleaks/gitleaks)
@@ -297,7 +297,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** local scan target
 - **Access:** Read access to files or Git history
 - **Important limitation:** Pattern detection has false positives and false negatives. Keep output redacted and rotate any real credential rather than merely deleting it from the latest commit.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-08T04:13:10Z`, GitHub license detection=`MIT`
+- **Repository snapshot:** archived=`false`, last source push=`2026-07-15T04:12:57Z`, GitHub license detection=`MIT`
 - **Evidence:** [source 1](https://github.com/gitleaks/gitleaks#readme) · [source 2](https://github.com/gitleaks/gitleaks#commands)
 
 ## Policies & Playbooks
