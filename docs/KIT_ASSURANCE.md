@@ -16,7 +16,7 @@ This document defines exactly what the kit currently guarantees, how those claim
 | Limited contributor-visible effect | `balanced` and `hardened` can fail only a named status check; they do not comment, label, close, lock, merge, or execute PR code | Static workflow inspection and profile tests |
 | Reduced proxy bias | Baseline explicitly disables username, account-age, fork-rate, public-profile, profile-completeness, global-merge-history, emoji, code-reference, and commit-author identity heuristics | Static workflow inspection |
 | Immutable dependencies | Every Action reference is a full commit SHA with a matching `pins.json` record | Repository validator |
-| Upstream provenance is monitored | Each documented tag resolved to the recorded SHA and each commit was reported verified by GitHub on 2026-07-14 | `scripts/verify_pins.py`, run on the weekly evidence workflow |
+| Upstream provenance is monitored | Each documented tag resolved to the recorded SHA and each commit was reported verified by GitHub on 2026-07-15 | `scripts/verify_pins.py`, run on the weekly evidence workflow |
 | Deployable translations | Every profile installs structurally complete English, Vietnamese, or Japanese intake templates, policies, playbook, and adoption record; independent native review of Vietnamese and Japanese wording remains pending | 3 profiles × 3 languages end-to-end matrix |
 | Workflow regression detection | Workflow safety invariants, zizmor, and install tests run in CI | Quality and Workflow security workflows |
 | Runtime support | The installer supports Python 3.10+ and is tested on Linux with Python 3.10, 3.12, and 3.14 and on macOS with Python 3.12 | Quality workflow matrix |
