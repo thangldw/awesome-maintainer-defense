@@ -19,7 +19,7 @@ All notable changes are documented here. Dates use ISO 8601.
 - Added dependency-free `audit` and patch-only `fix` commands while preserving the v1 installer interface.
 - Added human, stable JSON v1, and SARIF 2.1.0 output with source locations, severity, confidence, threat scenarios, recommendations, fingerprints, and patch metadata.
 - Added governance, workflow trust-boundary, and moderation-safety rule families.
-- Added a labeled 50-case corpus plus permission, Action-pin, and persisted-token mutation tests.
+- Added a labeled 52-case corpus plus permission, Action-pin, and persisted-token mutation tests.
 - Added CODEOWNERS coverage and monthly Dependabot updates for GitHub Actions.
 
 ### Profile contract and support boundary
