@@ -1,5 +1,7 @@
 # Playbook bảo vệ maintainer
 
+> Hướng dẫn vận hành cho baseline, quan sát, thực thi review-first, incident và recovery. Quay lại [documentation hub](../README.md).
+
 ## Cấp 0 — Nền tảng
 
 - Công bố policy contribution, AI hỗ trợ, unsolicited PR, code of conduct và báo cáo bảo mật.

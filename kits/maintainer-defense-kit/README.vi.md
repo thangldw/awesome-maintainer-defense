@@ -1,5 +1,7 @@
 # Maintainer Defense Kit
 
+> Kit triển khai được. Bắt đầu từ [documentation hub](../../docs/README.md).
+
 [English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
 
 Baseline có thể cài và rollback để giảm tải review nhưng không tuyên bố phát hiện nội dung do AI tạo. Installer mặc định dry-run, không ghi đè file khác nội dung, ghi hash của từng file và có thể xác minh hoặc gỡ chính xác phần do nó tạo.

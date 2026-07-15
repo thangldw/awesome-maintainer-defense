@@ -1,6 +1,6 @@
 # Awesome Maintainer Defense
 
-> Biện pháp chỉ đọc, có thể đảo ngược cho maintainer OSS—công cụ đã audit, workflow và CLI độc lập dùng thử trong 60 giây.
+> Audit repository trước. Chỉ cài điều bạn hiểu. Mọi biện pháp thực thi phải đảo ngược được.
 
 [English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
 
@@ -8,13 +8,11 @@
 [![Quality](https://github.com/thangldw/awesome-maintainer-defense/actions/workflows/quality.yml/badge.svg)](https://github.com/thangldw/awesome-maintainer-defense/actions/workflows/quality.yml)
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Mã nguồn mở nên tiếp tục cởi mở nhưng maintainer không phải hấp thụ vô hạn spam, quấy rối, workflow không an toàn, contribution tự động chất lượng thấp hay báo cáo bảo mật nhiễu. Repo này tuyển chọn các biện pháp thực tế, đồng thời giữ human review và cơ hội cho contributor mới.
+Dự án cung cấp một hệ thống phòng vệ thống nhất: auditor offline, kit có thể rollback, catalog có bằng chứng và policy/template triển khai được. Dự án **chống lạm dụng, không chống AI**; finding là đầu vào để review, không phải bằng chứng về tác giả hay ý định.
 
-Dự án này **chống lạm dụng, không chống AI**. Chúng tôi ưu tiên tín hiệu minh bạch, hành động có thể đảo ngược, quyền tối thiểu và cơ chế khiếu nại rõ ràng; không xem công cụ nào là bằng chứng tuyệt đối về việc nội dung do AI tạo.
+## Audit trước
 
-## Thử trong 60 giây
-
-Không cần signup, clone repo hay tin một package manager. Tải trực tiếp CLI v1.0 độc lập từ GitHub Releases, kiểm tra checksum, xem trước profile `observe` chỉ đọc rồi chỉ cài khi diff phù hợp. Yêu cầu Python 3.10+. Lệnh tải không bao giờ được pipe vào shell:
+Tải CLI v1.0 không có dependency và kiểm tra checksum. Audit không dùng mạng hay GitHub token.
 
 ```bash
 curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0/maintainer-defense-kit.py
@@ -23,40 +21,40 @@ curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/downlo
 sha256sum -c maintainer-defense-kit.py.sha256
 # macOS: shasum -a 256 -c maintainer-defense-kit.py.sha256
 
-python3 maintainer-defense-kit.py --target . --profile observe --language vi --repo OWNER/REPOSITORY
-python3 maintainer-defense-kit.py --target . --profile observe --language vi --repo OWNER/REPOSITORY --apply
+python3 maintainer-defense-kit.py audit .
+python3 maintainer-defense-kit.py audit . --format sarif > maintainer-defense.sarif
+python3 maintainer-defense-kit.py fix . --output recommended.patch
 ```
 
-CLI là một file Python không có dependency, chứa 25 asset đã khóa theo phiên bản; nó không gọi mạng hay GitHub API. Sau khi cài, chạy `python3 maintainer-defense-kit.py --target . --verify`; dùng `--uninstall` để rollback có kiểm soát.
+`fix` chỉ sinh unified diff; không sửa file, GitHub setting, commit hay push. Xem [auditor reference](docs/AUDITOR.md) và [pilot trên repository công khai](docs/AUDITOR_PILOT.md).
+
+## Cài profile phòng vệ
+
+Preview là mặc định. Chỉ thêm `--apply` sau khi review toàn bộ file đích.
+
+```bash
+python3 maintainer-defense-kit.py --target . --profile observe --language vi --repo OWNER/REPOSITORY
+python3 maintainer-defense-kit.py --target . --profile observe --language vi --repo OWNER/REPOSITORY --apply
+python3 maintainer-defense-kit.py --target . --verify
+```
 
 ![Demo terminal 35 giây: dry-run, cài observe, verify rồi uninstall](assets/demo.gif)
 
-[Kit có thể cài đặt](kits/maintainer-defense-kit/README.vi.md) gồm ba profile `observe`, `balanced`, `hardened`, uninstall an toàn và asset triển khai đầy đủ về cấu trúc bằng tiếng Anh, Việt, Nhật; nội dung Việt/Nhật chưa được chuyên gia bảo mật/pháp lý bản ngữ review độc lập. [Hợp đồng signal](docs/PROFILE_SIGNALS.md) công bố toàn bộ threshold và proxy bị tắt. [Hồ sơ đảm bảo](docs/vi/KIT_ASSURANCE.md) nói rõ phần nào đã được test kỹ thuật và phần hiệu quả thực tế nào chưa có dữ liệu hiện trường. Xem [changelog v1.0](CHANGELOG.md) để theo dõi sửa đổi audit mới nhất.
+## Chọn bước tiếp theo
 
-## Bắt đầu nhanh
+| Trạng thái | Hành động |
+| --- | --- |
+| Chưa có baseline | Review [native controls](docs/NATIVE_CONTROLS.md), rồi chạy audit |
+| Tải contribution bình thường | Cài `observe`; chưa tạo tác động nhìn thấy với contributor |
+| Review overload đã đo được | Cân nhắc `balanced`; giữ human review và đường khiếu nại |
+| Có rủi ro supply chain | Dùng `hardened`; review pin, token và dependency policy |
+| Đang có incident | Theo [playbook tiếng Việt](docs/vi/PLAYBOOK.md); mọi giới hạn phải có thời hạn |
 
-| Tình huống | Bước đầu tiên | Sau đó cân nhắc |
-| --- | --- | --- |
-| Dự án bình thường, ít thời gian | Cài profile `observe` chỉ đọc | Đo false positive trước khi cân nhắc `balanced` |
-| Issue hoặc PR tăng đột biến | Tắt auto-merge và bật interaction limit tạm thời | Chỉ dùng lockdown khi có owner và thời hạn |
-| PR chất lượng thấp lặp lại | Gắn nhãn để người thật review trước khi tự động đóng | Chạy công cụ ở dry-run và công bố policy |
-| Quấy rối hoặc tấn công phối hợp | Lưu bằng chứng và giới hạn tương tác | Báo cáo lạm dụng, tránh khuếch đại nội dung |
-| Thay đổi workflow đáng ngờ | Không chạy code không tin cậy với write token | Chạy zizmor, ghim Action và giảm quyền token |
-
-Xem [native control nên ưu tiên](docs/NATIVE_CONTROLS.md), rồi đọc [audit tài nguyên](docs/RESOURCE_AUDIT.md), [phương pháp đánh giá](docs/EVALUATION.md), [threat model](docs/THREAT_MODEL.md) và [playbook tiếng Việt](docs/vi/PLAYBOOK.md) trước khi áp dụng.
-
-## Nguyên tắc
-
-1. **Đánh giá chất lượng, không đoán tác giả.** Xem reproduction, phạm vi, test và khả năng phản hồi.
-2. **Review trước khi thực thi.** Bắt đầu bằng dry-run hoặc report-only và đo false positive.
-3. **Quyền tối thiểu.** Không để workflow đặc quyền chạy code từ pull request không tin cậy.
-4. **Có thể đảo ngược.** Ưu tiên nhãn và queue trước close, lock hoặc block.
-5. **Công bố luật chơi.** Contributor cần biết policy, chuẩn bằng chứng và đường khiếu nại.
-6. **Bảo vệ sự chú ý của maintainer.** Dự án có quyền từ chối công việc tạo chi phí review lớn hơn giá trị.
+Xem [documentation hub](docs/README.md) để đi tới product reference, operations, evidence và deployable assets.
 
 ## Tài nguyên
 
-⭐ là điểm bắt đầu được đề xuất, không phải vị trí trả phí. Bảng được sinh từ [`catalog.json`](catalog.json); dữ liệu dịch nằm trong [`i18n/vi.json`](i18n/vi.json).
+Catalog được sinh từ [`catalog.json`](catalog.json); bản dịch nằm trong [`i18n/vi.json`](i18n/vi.json). ⭐ là điểm bắt đầu thực dụng, không phải xếp hạng hay vị trí trả phí.
 
 <!-- catalog:start -->
 
@@ -131,21 +129,12 @@ Bảo vệ CI, dependency, secret và đường merge khỏi contribution độc
 
 <!-- catalog:end -->
 
-## Tài liệu và cấu hình dùng ngay
+## Hợp đồng an toàn
 
-- [Maintainer Defense Kit có thể cài đặt](kits/maintainer-defense-kit/README.vi.md) — profile đã test, manifest để xác minh, rollback an toàn và asset đầy đủ về cấu trúc bằng ba ngôn ngữ.
-- [Balanced starter kit](kits/balanced) — PR template, issue form và workflow triage theo hướng review-first.
-- [Workflow-hardening starter kit](kits/workflow-hardening) — dependency review và phân tích GitHub Actions đã ghim commit SHA.
-- [Policy contribution có AI hỗ trợ](policies/AI_CONTRIBUTIONS.vi.md).
-- [Policy cho pull request không được yêu cầu](policies/UNSOLICITED_PULL_REQUESTS.vi.md).
-- [Playbook vận hành tiếng Việt](docs/vi/PLAYBOOK.md).
-- [Mô hình trưởng thành](docs/MATURITY_MODEL.md) và [phương pháp đánh giá](docs/EVALUATION.md).
-- [Hồ sơ đảm bảo của kit](docs/vi/KIT_ASSURANCE.md) và [native-control baseline](docs/NATIVE_CONTROLS.md).
-- [Hợp đồng signal PR](docs/PROFILE_SIGNALS.md) — check, threshold, proxy bị tắt, exemption và tác động của từng profile.
-- [Audit log](docs/AUDIT_LOG.md) — các sửa đổi quan trọng và entry đã bị loại.
+- Đánh giá chất lượng và rủi ro repository, không đoán tác giả.
+- Không chạy code không tin cậy với secret hoặc write token.
+- Bắt đầu bằng quan sát; chỉ thực thi khi có bằng chứng.
+- Công bố rule, owner, review date, rollback và đường khiếu nại.
+- Không xem scanner result hay catalog listing là chứng nhận bảo mật.
 
-Các template là điểm khởi đầu, không phải tư vấn pháp lý. Hãy thử trong repository không quan trọng, đọc quyền truy cập và kiểm tra data flow trước khi bật chế độ thực thi.
-
-## Giấy phép
-
-Dự án sử dụng [MIT License](LICENSE).
+Đọc [hồ sơ đảm bảo tiếng Việt](docs/vi/KIT_ASSURANCE.md) trước khi dùng production. Template là điểm khởi đầu, không phải tư vấn pháp lý. Dự án dùng [MIT License](LICENSE).

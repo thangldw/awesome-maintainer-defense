@@ -1,5 +1,7 @@
 # Maintainer Defense Kit assurance case
 
+> Acceptance contract separating tested engineering guarantees from unproven field effectiveness. Return to the [documentation hub](README.md).
+
 **Status:** engineering-verified baseline; not security-certified and not yet field-validated across representative public repositories.
 
 This document defines exactly what the kit currently guarantees, how those claims are tested, and what remains unproven. “Defense” means reducing review cost and unsafe automation paths—not identifying whether a human or AI authored a contribution.

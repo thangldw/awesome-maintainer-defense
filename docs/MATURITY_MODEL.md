@@ -1,5 +1,7 @@
 # Maintainer-defense maturity model
 
+> Decision model for moving from ad hoc response to measured, recoverable operations. Return to the [documentation hub](README.md).
+
 This model describes operational readiness, not project prestige.
 
 | Level | Name | Observable state |

@@ -1,5 +1,9 @@
 # Auditor corpus evaluation
 
+> Evidence record for deterministic rule behavior. Start from the [documentation hub](README.md).
+
+## Result
+
 **Corpus:** 52 labeled synthetic repository fixtures.
 
 **Exact-case agreement:** 52/52.

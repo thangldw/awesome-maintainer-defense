@@ -1,5 +1,7 @@
 ## Vấn đề
 
+<!-- Asset triển khai có phiên bản từ Awesome Maintainer Defense v1.0. -->
+
 <!-- Thay đổi này giải quyết vấn đề nào đã được maintainer đồng ý hoặc ảnh hưởng trực tiếp đến người dùng? Hãy liên kết issue nếu có. -->
 
 ## Cách tiếp cận

@@ -1,5 +1,7 @@
 # Chính sách contribution có AI hỗ trợ
 
+> Policy triển khai được. Review [documentation hub](../docs/README.md) và điều chỉnh theo dự án trước khi áp dụng.
+
 Công cụ AI có thể hỗ trợ contribution, nhưng một contributor là con người phải chịu trách nhiệm cho kết quả.
 
 ## Yêu cầu
