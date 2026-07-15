@@ -29,7 +29,7 @@ python3 maintainer-defense-kit.py --target . --profile observe --language en --r
 
 The CLI is one dependency-free Python file with 25 embedded, versioned assets. It makes no network or GitHub API calls. Run `python3 maintainer-defense-kit.py --target . --verify` after installation and `--uninstall` for a guarded rollback.
 
-The `v1.1.0-rc.1` pre-release also includes a local repository auditor. It reports GitHub governance gaps, unsafe workflow trust boundaries, and risky moderation automation with source locations, threat scenarios, human/JSON/SARIF output, and reviewable patches. From a source checkout, run:
+The `v1.1.0-rc.2` pre-release also includes a local repository auditor. It reports GitHub governance gaps, unsafe workflow trust boundaries, and risky moderation automation with source locations, threat scenarios, human/JSON/SARIF output, and reviewable patches. From a source checkout, run:
 
 ```bash
 python3 scripts/install_kit.py audit .
