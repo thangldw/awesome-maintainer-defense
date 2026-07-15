@@ -29,6 +29,16 @@ python3 maintainer-defense-kit.py --target . --profile observe --language en --r
 
 The CLI is one dependency-free Python file with 25 embedded, versioned assets. It makes no network or GitHub API calls. Run `python3 maintainer-defense-kit.py --target . --verify` after installation and `--uninstall` for a guarded rollback.
 
+The `v1.1.0-rc.1` pre-release also includes a local repository auditor. It reports GitHub governance gaps, unsafe workflow trust boundaries, and risky moderation automation with source locations, threat scenarios, human/JSON/SARIF output, and reviewable patches. From a source checkout, run:
+
+```bash
+python3 scripts/install_kit.py audit .
+python3 scripts/install_kit.py audit . --format sarif > maintainer-defense.sarif
+python3 scripts/install_kit.py fix . --output recommended.patch
+```
+
+`fix` only emits a unified diff; it never edits the repository, changes GitHub settings, commits, or pushes. See the [auditor contract, rules, offline boundary, and corpus](docs/AUDITOR.md).
+
 ![35-second terminal demo: dry-run, install observe, verify, then uninstall](assets/demo.gif)
 
 The [installable kit](kits/maintainer-defense-kit) includes `observe`, `balanced`, and `hardened` profiles, safe uninstall, and structurally complete `en`, `vi`, and `ja` deployment assets; independent native security/legal review of Vietnamese and Japanese wording is still pending. Its [signal contract](docs/PROFILE_SIGNALS.md) exposes every active threshold and disabled proxy. The [assurance case](docs/KIT_ASSURANCE.md) distinguishes tested engineering guarantees from moderation effectiveness that has not yet been field-proven. See the [v1.0.1 changelog](CHANGELOG.md) for the latest audit corrections.
@@ -153,6 +163,7 @@ Operational depth:
 - [Audit log](docs/AUDIT_LOG.md) — material corrections and scope changes, including removed entries.
 - [Kit assurance case](docs/KIT_ASSURANCE.md) — tested claims, corrected flaws, limits, and the production acceptance gate.
 - [PR quality signal contract](docs/PROFILE_SIGNALS.md) — exact checks, thresholds, disabled proxies, exemptions, and profile effects.
+- [Repository auditor](docs/AUDITOR.md) — offline governance, workflow, and moderation checks with JSON/SARIF contracts and patch-only remediation.
 - [Native-control baseline](docs/NATIVE_CONTROLS.md) — repository settings to prefer before third-party automation.
 - [Visual diagram guidelines](docs/VISUAL_STYLE.md) — Miro-inspired rules for purposeful, consistent, multilingual diagrams.
 

@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "scripts/install_kit.py"
 DIST = ROOT / "dist"
 OUTPUT = DIST / "maintainer-defense-kit.py"
+AUDITOR_OUTPUT = DIST / "maintainer-defense.py"
 SENTINEL = "EMBEDDED_FILES: dict[str, str] = {}"
 
 
@@ -65,11 +66,14 @@ def main() -> None:
     DIST.mkdir(exist_ok=True)
     OUTPUT.write_text(standalone, encoding="utf-8")
     OUTPUT.chmod(0o755)
-    checksum = hashlib.sha256(OUTPUT.read_bytes()).hexdigest()
-    checksum_path = OUTPUT.with_suffix(OUTPUT.suffix + ".sha256")
-    checksum_path.write_text(f"{checksum}  {OUTPUT.name}\n", encoding="ascii")
-    print(f"BUILT {OUTPUT.relative_to(ROOT)} ({len(asset_paths())} embedded assets)")
-    print(f"SHA256 {checksum}")
+    AUDITOR_OUTPUT.write_text(standalone, encoding="utf-8")
+    AUDITOR_OUTPUT.chmod(0o755)
+    for output in (OUTPUT, AUDITOR_OUTPUT):
+        checksum = hashlib.sha256(output.read_bytes()).hexdigest()
+        checksum_path = output.with_suffix(output.suffix + ".sha256")
+        checksum_path.write_text(f"{checksum}  {output.name}\n", encoding="ascii")
+        print(f"BUILT {output.relative_to(ROOT)} ({len(asset_paths())} embedded assets)")
+        print(f"SHA256 {checksum}")
 
 
 if __name__ == "__main__":
