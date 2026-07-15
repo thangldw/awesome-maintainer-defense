@@ -1,5 +1,7 @@
 # Maintainer Defense adoption record
 
+> Versioned deployment asset from Awesome Maintainer Defense v1.0.
+
 - Owner:
 - Installed profile:
 - Installed date:

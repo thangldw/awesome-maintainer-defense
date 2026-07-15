@@ -1,5 +1,7 @@
 # Maintainer Defense Kit
 
+> Deployable asset. Start from the [documentation hub](../../docs/README.md).
+
 [English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
 
 An installable, reversible baseline for reducing maintainer review load without claiming to detect AI authorship. The installer defaults to a dry run, never overwrites a conflicting file, records every installed file, and can verify or safely remove its own changes.

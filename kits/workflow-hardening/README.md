@@ -1,5 +1,7 @@
 # Workflow-hardening starter kit
 
+> Deployable asset. Start from the [documentation hub](../../docs/README.md).
+
 This kit adds two independent checks:
 
 - dependency review for newly introduced vulnerabilities and license policy;

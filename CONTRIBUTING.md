@@ -1,8 +1,10 @@
 # Contributing
 
-Contributions are welcome when they make this collection more useful, safer, or easier to verify for maintainers.
+> Contribution contract for catalog evidence, product changes, translations, and release safety.
 
-## Add a resource
+Contributions are welcome when they make maintainer defenses safer, more useful, or easier to verify. Read the [documentation map](docs/README.md) before adding a new concept or duplicating an existing contract.
+
+## Add or update a catalog resource
 
 1. Search `catalog.json` and open pull requests for duplicates.
 2. Confirm the resource has public documentation and a concrete maintainer use case.
@@ -21,7 +23,7 @@ Contributions are welcome when they make this collection more useful, safer, or 
 
 8. Complete the pull-request template and disclose your relationship to the resource.
 
-## Inclusion bar
+## Evidence bar
 
 Resources should materially reduce at least one of these burdens:
 
@@ -35,11 +37,11 @@ Open-source projects are preferred. A proprietary service may be considered only
 
 We generally reject abandoned proofs of concept, undisclosed affiliate links, generic developer tools, paywalled-only products, duplicate wrappers, and tools that present automated authorship guesses as proof of misconduct.
 
-## Descriptions
+## Write factual descriptions
 
 Describe what the resource does—not what its marketing page claims. Avoid words such as “best,” “revolutionary,” “perfect,” and “100% accurate.” Note when a resource can close, lock, delete, block, execute untrusted code, or send repository data to an external service.
 
-## Editing generated content
+## Edit canonical sources
 
 The resource tables in all three README files and `docs/RESOURCE_AUDIT.md` are generated. Edit the catalog, audit, and translation data, then run `make render`. CI fails if generated content is stale, audit coverage differs, a translation is missing, or an audit is more than 180 days old.
 
@@ -51,9 +53,11 @@ The resource tables in all three README files and `docs/RESOURCE_AUDIT.md` are g
 
 Use the maximum documented capability, even when the default configuration is safer. Impact is not a quality score.
 
-## Changes to the starter kit
+## Change the auditor or kit
 
-Starter-kit changes receive a higher safety review. Workflows must use least-privilege permissions, pin every Action to a full commit SHA, and avoid privileged fork-triggered events such as `pull_request_target` and `workflow_run`. Automatic closing, locking, or blocking must remain opt-in. Run the installer matrix, `actionlint`, and zizmor before merging.
+Product changes receive a higher safety review. Add corpus cases for auditor behavior; preserve JSON/SARIF contracts; keep installation conflict-safe; use least-privilege workflow permissions; pin Actions to full SHAs; and avoid privileged execution of untrusted code. Automatic closing, locking, or blocking remains opt-in.
+
+Run `make test`, `make validate`, `make standalone`, and the self-audit before opening a pull request. Workflow changes must also pass zizmor in CI.
 
 ## Diagrams
 

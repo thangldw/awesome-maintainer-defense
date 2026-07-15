@@ -1,6 +1,6 @@
 # Awesome Maintainer Defense
 
-> OSSメンテナー向けの読み取り専用・取り消し可能な防御策—監査済みツール、workflow、60秒で試せる単体CLI。
+> まずリポジトリを監査し、理解したものだけを導入し、すべての執行を取り消し可能にします。
 
 [English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
 
@@ -8,13 +8,11 @@
 [![Quality](https://github.com/thangldw/awesome-maintainer-defense/actions/workflows/quality.yml/badge.svg)](https://github.com/thangldw/awesome-maintainer-defense/actions/workflows/quality.yml)
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-オープンソースは開かれているべきですが、メンテナーがスパム、嫌がらせ、危険なワークフロー、低品質な自動コントリビューション、ノイズの多い脆弱性報告を無制限に引き受ける必要はありません。このリポジトリは、人によるレビューと正当な初参加者の機会を守りながら、実用的な防御策をまとめます。
+本プロジェクトは、offline auditor、rollback可能なkit、根拠付きcatalog、導入可能なpolicy/templateを一つの防御システムとして提供します。**不正利用への対策であり、反AIではありません**。findingはreview入力であり、作成者や意図の証明ではありません。
 
-本プロジェクトは**不正利用への対策であり、反AIではありません**。AI生成を完全に判定できるという主張よりも、透明なシグナル、取り消し可能な操作、最小権限、明確な異議申立て経路を優先します。
+## まず監査する
 
-## 60秒で試す
-
-signup、リポジトリのclone、package managerへの信頼は不要です。GitHub Releasesから単体のv1.0 CLIを直接取得してchecksumを検証し、読み取り専用の`observe` profileをpreviewしてから適用します。Python 3.10以降が必要です。downloadをshellへpipeすることはありません。
+依存なしのv1.0 CLIを取得し、checksumを検証します。監査はnetworkやGitHub tokenを使いません。
 
 ```bash
 curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0/maintainer-defense-kit.py
@@ -23,40 +21,40 @@ curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/downlo
 sha256sum -c maintainer-defense-kit.py.sha256
 # macOS: shasum -a 256 -c maintainer-defense-kit.py.sha256
 
-python3 maintainer-defense-kit.py --target . --profile observe --language ja --repo OWNER/REPOSITORY
-python3 maintainer-defense-kit.py --target . --profile observe --language ja --repo OWNER/REPOSITORY --apply
+python3 maintainer-defense-kit.py audit .
+python3 maintainer-defense-kit.py audit . --format sarif > maintainer-defense.sarif
+python3 maintainer-defense-kit.py fix . --output recommended.patch
 ```
 
-CLIは25個のversion固定assetを内包する依存なしのPython単一fileで、networkやGitHub APIを呼びません。導入後は`python3 maintainer-defense-kit.py --target . --verify`、保護されたrollbackには`--uninstall`を使います。
+`fix`はunified diffだけを出力し、file、GitHub設定、commit、pushを変更しません。
+
+## 防御profileを導入する
+
+既定はpreviewです。すべての出力先を確認してから`--apply`を追加します。
+
+```bash
+python3 maintainer-defense-kit.py --target . --profile observe --language ja --repo OWNER/REPOSITORY
+python3 maintainer-defense-kit.py --target . --profile observe --language ja --repo OWNER/REPOSITORY --apply
+python3 maintainer-defense-kit.py --target . --verify
+```
 
 ![35秒のterminal demo：dry-run、observe導入、verify、uninstall](assets/demo.gif)
 
-[導入可能なKit](kits/maintainer-defense-kit/README.ja.md)には`observe`、`balanced`、`hardened`、安全なアンインストール、英語・ベトナム語・日本語の構造的に完全な導入assetが含まれます。ベトナム語・日本語表現の母語セキュリティ・法務専門家による独立レビューは未完了です。[シグナル契約](docs/PROFILE_SIGNALS.md)は全thresholdと無効化したproxyを公開します。[保証ケース](docs/ja/KIT_ASSURANCE.md)は、テスト済みの技術的保証と、実地データがまだない有効性を区別します。最新の監査修正は[v1.0 changelog](CHANGELOG.md)を参照してください。
+## 次の操作を選ぶ
 
-## クイックスタート
+| 状態 | 推奨操作 |
+| --- | --- |
+| baseline未整備 | [native controls](docs/NATIVE_CONTROLS.md)を確認してaudit |
+| 通常のcontribution量 | `observe`を導入し、利用者に見える操作なしで測定 |
+| 測定済みのreview overload | `balanced`を検討し、人間reviewと異議申立てを維持 |
+| supply-chain risk | `hardened`でpin、token、dependency policyを確認 |
+| 進行中のincident | [日本語playbook](docs/ja/PLAYBOOK.md)に従い、制限に期限を設定 |
 
-| 状況 | 最初の対応 | 次に検討すること |
-| --- | --- | --- |
-| 通常運用で時間が限られる | 読み取り専用の`observe`を導入 | `balanced`の前に誤検知を測定 |
-| Issue/PRが急増 | 自動マージを止め、一時的なinteraction limitを設定 | 所有者と期限を決めたうえでlockdownを検討 |
-| 低品質PRが繰り返される | 自動クローズ前に人間レビュー用ラベルを付与 | dry-runで評価し、ポリシーを公開 |
-| 嫌がらせ・協調攻撃 | 証拠を保存し、交流を制限 | 不正利用を報告し、内容を拡散しない |
-| 不審なワークフロー変更 | 書き込みトークン付きで未信頼コードを実行しない | zizmor、ActionのSHA固定、権限縮小 |
-
-導入前に[優先すべきGitHubネイティブ制御](docs/NATIVE_CONTROLS.md)を確認し、その後[リソース監査](docs/RESOURCE_AUDIT.md)、[評価方法](docs/EVALUATION.md)、[脅威モデル](docs/THREAT_MODEL.md)、[日本語プレイブック](docs/ja/PLAYBOOK.md)を確認してください。
-
-## 原則
-
-1. **作成者ではなく品質を評価する。** 再現性、範囲、テスト、レビューへの応答を確認します。
-2. **執行前にレビューする。** dry-runまたはreport-onlyから始め、誤検知を測定します。
-3. **最小権限。** 特権ワークフローで未信頼のPRコードを実行しません。
-4. **取り消し可能を既定にする。** close、lock、blockより先にラベルとキューを使います。
-5. **ルールを公開する。** 証拠基準、ポリシー、異議申立て経路を明確にします。
-6. **メンテナーの注意力を守る。** レビューコストが価値を上回る未依頼作業は拒否できます。
+[documentation hub](docs/README.md)からproduct reference、operations、evidence、deployable assetsへ移動できます。
 
 ## リソース
 
-⭐は推奨される出発点であり、有料掲載ではありません。表は[`catalog.json`](catalog.json)から生成され、翻訳は[`i18n/ja.json`](i18n/ja.json)で管理されます。
+Catalogは[`catalog.json`](catalog.json)から生成され、翻訳は[`i18n/ja.json`](i18n/ja.json)で管理されます。⭐は実用的な出発点であり、順位や有料掲載ではありません。
 
 <!-- catalog:start -->
 
@@ -131,21 +129,12 @@ CI、依存関係、シークレット、マージ経路を悪意ある、また
 
 <!-- catalog:end -->
 
-## すぐに使える資料
+## 安全契約
 
-- [導入可能なMaintainer Defense Kit](kits/maintainer-defense-kit/README.ja.md) — テスト済みプロファイル、manifest検証、安全なロールバック、3言語の構造的に完全な導入asset。
-- [Balanced starter kit](kits/balanced) — PRテンプレート、Issueフォーム、review-firstトリアージ。
-- [Workflow-hardening starter kit](kits/workflow-hardening) — コミットSHA固定済みの依存関係レビューとGitHub Actions解析。
-- [AI支援コントリビューションポリシー](policies/AI_CONTRIBUTIONS.ja.md)。
-- [未依頼プルリクエストポリシー](policies/UNSOLICITED_PULL_REQUESTS.ja.md)。
-- [日本語運用プレイブック](docs/ja/PLAYBOOK.md)。
-- [成熟度モデル](docs/MATURITY_MODEL.md)と[評価方法](docs/EVALUATION.md)。
-- [Kit保証ケース](docs/ja/KIT_ASSURANCE.md)と[ネイティブ制御ベースライン](docs/NATIVE_CONTROLS.md)。
-- [PR品質シグナル契約](docs/PROFILE_SIGNALS.md) — check、threshold、無効化したproxy、exemption、各profileの効果。
-- [監査ログ](docs/AUDIT_LOG.md) — 重要な修正と削除したエントリ。
+- 作成者を推測せず、品質とrepository riskを評価します。
+- 未信頼codeをsecretやwrite token付きで実行しません。
+- 観察から始め、根拠がある場合だけ執行します。
+- rule、owner、review date、rollback、異議申立て経路を公開します。
+- scanner resultやcatalog listingをsecurity certificationとして扱いません。
 
-テンプレートは出発点であり、法的助言ではありません。執行モードを有効にする前に、非重要リポジトリでテストし、権限とデータフローを確認してください。
-
-## ライセンス
-
-本プロジェクトは[MIT License](LICENSE)で提供されます。
+production利用前に[日本語保証ケース](docs/ja/KIT_ASSURANCE.md)を確認してください。Templateは法的助言ではありません。本プロジェクトは[MIT License](LICENSE)です。

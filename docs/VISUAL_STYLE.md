@@ -1,5 +1,7 @@
 # Visual diagram guidelines
 
+> Production standard for diagrams and release visuals. Return to the [documentation hub](README.md).
+
 Diagrams in this repository should shorten a decision or reveal a relationship that prose does not make obvious. They are not decoration.
 
 ## Rules

@@ -1,5 +1,7 @@
 # Native controls before automation
 
+> Operating baseline for GitHub-native controls that should precede third-party automation. Return to the [documentation hub](README.md).
+
 Use GitHub's own repository and organization controls before adding third-party automation. Native controls reduce code, token, network, and vendor trust boundaries; the kit should fill remaining intake and operating gaps.
 
 ## Baseline order

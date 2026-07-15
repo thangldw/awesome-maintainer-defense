@@ -1,5 +1,7 @@
 # メンテナー防御プレイブック
 
+> baseline、観察、review-first執行、incident、recoveryの運用ガイドです。[documentation hub](../README.md)へ戻ります。
+
 ## レベル0 — ベースライン
 
 - コントリビューション、AI支援、未依頼PR、行動規範、セキュリティ報告のポリシーを公開する。

@@ -1,5 +1,7 @@
 # Maintainer Defense Kit — hồ sơ đảm bảo
 
+> Hợp đồng nghiệm thu, tách bảo đảm kỹ thuật đã test khỏi hiệu quả hiện trường chưa được chứng minh. Quay lại [documentation hub](../README.md).
+
 **Trạng thái:** baseline đã được xác minh kỹ thuật; chưa phải chứng nhận bảo mật và chưa được kiểm chứng trên tập repository công khai đại diện.
 
 “Defense” ở đây là giảm chi phí review và đường tự động hóa không an toàn, không phải xác định contribution do người hay AI tạo.
