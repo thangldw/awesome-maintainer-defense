@@ -37,7 +37,7 @@ python3 maintainer-defense-kit.py fix . --output recommended.patch
 
 ## Install a defense profile
 
-Preview is the default. Add `--apply` only after reviewing every destination and diff.
+Preview is the default. Review every planned `CREATE`/`KEEP` destination and the corresponding kit asset content before adding `--apply`.
 
 ```bash
 python3 maintainer-defense-kit.py --target . --profile observe --language en --repo OWNER/REPOSITORY

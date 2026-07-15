@@ -26,17 +26,19 @@ python3 maintainer-defense-kit.py audit . --format sarif > maintainer-defense.sa
 python3 maintainer-defense-kit.py fix . --output recommended.patch
 ```
 
-`fix` chỉ sinh unified diff; không sửa file, GitHub setting, commit hay push. Xem [auditor reference](docs/AUDITOR.md) và [pilot trên repository công khai](docs/AUDITOR_PILOT.md).
+`fix` chỉ sinh unified diff; không sửa file, GitHub setting, commit hay push. Xem [auditor reference](docs/AUDITOR.md), [đánh giá synthetic](docs/AUDITOR_EVALUATION.md) và [pilot trên repository công khai](docs/AUDITOR_PILOT.md).
 
 ## Cài profile phòng vệ
 
-Preview là mặc định. Chỉ thêm `--apply` sau khi review toàn bộ file đích.
+Preview là mặc định. Review mọi đích `CREATE`/`KEEP` dự kiến và nội dung asset tương ứng trước khi thêm `--apply`.
 
 ```bash
 python3 maintainer-defense-kit.py --target . --profile observe --language vi --repo OWNER/REPOSITORY
 python3 maintainer-defense-kit.py --target . --profile observe --language vi --repo OWNER/REPOSITORY --apply
 python3 maintainer-defense-kit.py --target . --verify
 ```
+
+Installer từ chối file xung đột, ghi ownership và hash vào manifest, đồng thời không uninstall file do installer sở hữu nếu file đó đã bị sửa.
 
 ![Demo terminal 35 giây: dry-run, cài observe, verify rồi uninstall](assets/demo.gif)
 
@@ -134,6 +136,7 @@ Bảo vệ CI, dependency, secret và đường merge khỏi contribution độc
 - Đánh giá chất lượng và rủi ro repository, không đoán tác giả.
 - Không chạy code không tin cậy với secret hoặc write token.
 - Bắt đầu bằng quan sát; chỉ thực thi khi có bằng chứng.
+- Ưu tiên queue và status check trước khi tự động close hoặc lock.
 - Công bố rule, owner, review date, rollback và đường khiếu nại.
 - Không xem scanner result hay catalog listing là chứng nhận bảo mật.
 
