@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect width="1280" height="720" fill="#0B1220"/>
+  <rect x="38" y="34" width="1204" height="652" rx="18" fill="#101D2A" stroke="#31485A" stroke-width="2"/>
+  <circle cx="72" cy="68" r="7" fill="#FF6B6B"/>
+  <circle cx="96" cy="68" r="7" fill="#F8CF5C"/>
+  <circle cx="120" cy="68" r="7" fill="#69D68A"/>
+  <text x="76" y="132" fill="#B8F36B" font-family="ui-sans-serif, system-ui, sans-serif" font-size="20" font-weight="800" letter-spacing="1.5">READ-ONLY AUDIT · REAL CLI OUTPUT</text>
+  <text x="76" y="164" fill="#7F96A7" font-family="ui-sans-serif, system-ui, sans-serif" font-size="15">Published pwn-request corpus case</text>
+  <rect x="62" y="190" width="1156" height="396" rx="12" fill="#09131D" stroke="#243847"/>
+  <text x="82" y="238" fill="#F2F5F7" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18">$ python3 maintainer-defense-kit.py audit ./sample --format summary</text>
+  <text x="82" y="302" fill="#FF8A8A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20" font-weight="700">3 findings · 1 critical · 1 high · 1 medium</text>
+  <text x="82" y="358" fill="#FF8A8A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17">CRITICAL MD-WF-005  Untrusted pull-request input can reach a privileged workflow with secrets or write authority.</text>
+  <text x="82" y="405" fill="#FFD27A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17">HIGH     MD-WF-004  Privileged event pull_request_target checks out an attacker-influenced revision.</text>
+  <text x="82" y="452" fill="#AFC2CF" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17">MEDIUM   MD-WF-006  Checkout may persist a write-capable token in the workspace.</text>
+  <text x="82" y="530" fill="#7F96A7" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="16">No network · no GitHub token · no files changed</text>
+  <text x="76" y="638" fill="#637B8C" font-family="ui-sans-serif, system-ui, sans-serif" font-size="14">The auditor reports evidence for human review; it does not change the repository.</text>
+</svg>
