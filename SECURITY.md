@@ -14,4 +14,4 @@ A catalog entry is not maintained by this project and is not a security endorsem
 
 ## Supported versions
 
-Only `v1.0` and the latest commit on the default branch are maintained. Verify release checksums, pin Actions, review upstream changes, and test defenses in a non-critical repository before deployment.
+Only `v1.1` and the latest commit on the default branch are maintained. Verify release checksums, pin Actions, review upstream changes, and test defenses in a non-critical repository before deployment.

@@ -13,7 +13,7 @@
     {
       "id": "niubi-guard",
       "repository": "Albert-Weasker/niubi_guard",
-      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-09T11:54:36Z", "license_detected": "NOASSERTION"},
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-16T11:54:05Z", "license_detected": "NOASSERTION"},
       "deployment": "Hosted service, CLI, web UI, Docker, or self-hosted source",
       "default_mode": "Dry-run; strong actions are opt-in",
       "automation_impact": "high",
@@ -248,7 +248,7 @@
     {
       "id": "repository-settings-app",
       "repository": "repository-settings/app",
-      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-14T09:00:37Z", "license_detected": "ISC"},
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-16T09:47:42Z", "license_detected": "ISC"},
       "deployment": "GitHub App",
       "default_mode": "Synchronizes settings from `.github/settings.yml`",
       "automation_impact": "high",
@@ -325,7 +325,7 @@
     {
       "id": "dependency-review-action",
       "repository": "actions/dependency-review-action",
-      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-09T01:43:34Z", "license_detected": "MIT"},
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-16T14:52:45Z", "license_detected": "MIT"},
       "deployment": "GitHub Action",
       "default_mode": "Fails when configured vulnerability or license criteria are violated",
       "automation_impact": "medium",
@@ -341,7 +341,7 @@
     {
       "id": "trufflehog",
       "repository": "trufflesecurity/trufflehog",
-      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-15T06:18:39Z", "license_detected": "AGPL-3.0"},
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-16T13:36:49Z", "license_detected": "AGPL-3.0"},
       "deployment": "CLI, container, and CI integrations",
       "default_mode": "Scans and can verify discovered credentials",
       "automation_impact": "low",
@@ -373,7 +373,7 @@
     {
       "id": "osv-scanner",
       "repository": "google/osv-scanner",
-      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-14T21:18:31Z", "license_detected": "Apache-2.0"},
+      "repo_snapshot": {"archived": false, "pushed_at": "2026-07-15T21:18:29Z", "license_detected": "Apache-2.0"},
       "deployment": "CLI, container, and CI integrations",
       "default_mode": "Read-only vulnerability and license scan",
       "automation_impact": "medium",

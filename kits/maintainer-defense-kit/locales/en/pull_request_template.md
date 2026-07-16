@@ -1,6 +1,6 @@
 ## Problem
 
-<!-- Versioned deployment asset from Awesome Maintainer Defense v1.0. -->
+<!-- Versioned deployment asset from Awesome Maintainer Defense v1.1. -->
 
 <!-- What user-visible or maintainer-approved problem does this solve? Link an issue when possible. -->
 

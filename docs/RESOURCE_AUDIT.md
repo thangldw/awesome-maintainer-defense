@@ -25,7 +25,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** GitHub API, project-configured OpenAI-compatible model, optional hosted service
 - **Access:** GitHub token; optional model endpoint and API key
 - **Important limitation:** AI classification is probabilistic. Review evidence and planned actions in dry-run before apply mode. GitHub does not detect the license automatically, but the repository LICENSE file contains Apache-2.0 text.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-09T11:54:36Z`, GitHub license detection=`NOASSERTION`
+- **Repository snapshot:** archived=`false`, last source push=`2026-07-16T11:54:05Z`, GitHub license detection=`NOASSERTION`
 - **Evidence:** [source 1](https://github.com/Albert-Weasker/niubi_guard#what-it-does) · [source 2](https://github.com/Albert-Weasker/niubi_guard#ai-detection) · [source 3](https://github.com/Albert-Weasker/niubi_guard/blob/main/LICENSE)
 
 ### [Anti Slop](https://github.com/peakoss/anti-slop)
@@ -196,7 +196,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** GitHub API, repository configuration file
 - **Access:** Repository administration permissions
 - **Important limitation:** Anyone able to merge settings changes may gain or alter administrative access. Protect the configuration path with CODEOWNERS and required review.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-14T09:00:37Z`, GitHub license detection=`ISC`
+- **Repository snapshot:** archived=`false`, last source push=`2026-07-16T09:47:42Z`, GitHub license detection=`ISC`
 - **Evidence:** [source 1](https://github.com/repository-settings/app#repository-settings-app) · [source 2](https://github.com/repository-settings/app#security-implications)
 
 ## Workflow & Supply-Chain Defense
@@ -253,7 +253,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** GitHub Dependency Graph API
 - **Access:** Contents read and pull requests read; optional pull requests write for comments
 - **Important limitation:** Supported for public repositories and private repositories with GitHub Advanced Security. Results depend on dependency graph coverage and advisory data.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-09T01:43:34Z`, GitHub license detection=`MIT`
+- **Repository snapshot:** archived=`false`, last source push=`2026-07-16T14:52:45Z`, GitHub license detection=`MIT`
 - **Evidence:** [source 1](https://github.com/actions/dependency-review-action#dependency-review-action) · [source 2](https://github.com/actions/dependency-review-action#configuration-options)
 
 ### [TruffleHog](https://github.com/trufflesecurity/trufflehog)
@@ -264,7 +264,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** scanned source, credential providers during verification
 - **Access:** Read access to scan targets; network access for verification
 - **Important limitation:** Verification can send authentication requests to third-party services. Redact output, scope scans carefully, and treat findings as sensitive incident data.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-15T06:18:39Z`, GitHub license detection=`AGPL-3.0`
+- **Repository snapshot:** archived=`false`, last source push=`2026-07-16T13:36:49Z`, GitHub license detection=`AGPL-3.0`
 - **Evidence:** [source 1](https://github.com/trufflesecurity/trufflehog#what-is-secret-verification) · [source 2](https://github.com/trufflesecurity/trufflehog#usage)
 
 ### [PRevent](https://github.com/apiiro/PRevent)
@@ -286,7 +286,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** OSV API and deps.dev, offline database option
 - **Access:** Read access to dependency artifacts; filesystem and package-manager access for fix mode
 - **Important limitation:** Coverage varies by ecosystem. Guided remediation can execute package-manager behavior from untrusted projects; do not run fix mode on untrusted code.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-14T21:18:31Z`, GitHub license detection=`Apache-2.0`
+- **Repository snapshot:** archived=`false`, last source push=`2026-07-15T21:18:29Z`, GitHub license detection=`Apache-2.0`
 - **Evidence:** [source 1](https://github.com/google/osv-scanner#offline-mode) · [source 2](https://github.com/google/osv-scanner#guided-remediation)
 
 ### [Gitleaks](https://github.com/gitleaks/gitleaks)

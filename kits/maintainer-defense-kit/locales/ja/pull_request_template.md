@@ -1,6 +1,6 @@
 ## 解決する問題
 
-<!-- Awesome Maintainer Defense v1.0のversion管理された導入asset。 -->
+<!-- Awesome Maintainer Defense v1.1のversion管理された導入asset。 -->
 
 <!-- ユーザーに影響する、またはメンテナーが承認したどの問題を解決しますか。可能ならIssueをリンクしてください。 -->
 

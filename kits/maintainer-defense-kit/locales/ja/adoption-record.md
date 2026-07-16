@@ -1,6 +1,6 @@
 # Maintainer Defense導入記録
 
-> Awesome Maintainer Defense v1.0のversion管理された導入assetです。
+> Awesome Maintainer Defense v1.1のversion管理された導入assetです。
 
 - 責任者:
 - 導入プロファイル:

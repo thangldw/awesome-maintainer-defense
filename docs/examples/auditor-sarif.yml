@@ -1,0 +1,46 @@
+name: Maintainer Defense audit
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Required only to publish SARIF results; it cannot modify repository contents.
+      security-events: write
+    steps:
+      - name: Check out repository without persisted credentials
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
+
+      - name: Download the reviewed auditor release
+        env:
+          AUDITOR_SHA256: 731670a8926134eda2348b53a81a92b7dfff00771a03100ab322bb9415c950a0
+        run: |
+          curl -fL --proto '=https' --tlsv1.2 \
+            https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1/maintainer-defense-kit.py \
+            -o maintainer-defense-kit.py
+          printf '%s  %s\n' "$AUDITOR_SHA256" maintainer-defense-kit.py | sha256sum -c -
+
+      - name: Audit files without executing repository code
+        run: python3 maintainer-defense-kit.py audit . --format sarif > maintainer-defense.sarif
+
+      - name: Upload results to code scanning
+        uses: github/codeql-action/upload-sarif@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v4
+        with:
+          sarif_file: maintainer-defense.sarif
+          category: maintainer-defense

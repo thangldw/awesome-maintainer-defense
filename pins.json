@@ -36,6 +36,13 @@
       "sha": "192e21d79ab29983730a13d1382995c2307fbcaa",
       "metadata_path": "action.yml",
       "commit_verified": true
+    },
+    {
+      "repository": "github/codeql-action",
+      "tag": "v4",
+      "sha": "99df26d4f13ea111d4ec1a7dddef6063f76b97e9",
+      "metadata_path": "upload-sarif/action.yml",
+      "commit_verified": true
     }
   ]
 }

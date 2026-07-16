@@ -9,6 +9,8 @@ Start with the repository [README](../README.md). Use this page when you need to
 | Need | Canonical document |
 | --- | --- |
 | Run the repository auditor | [Auditor reference](AUDITOR.md) |
+| Understand a finding or rule ID | [Auditor rule reference](AUDITOR_RULES.md) |
+| Upload read-only audit results to GitHub | [SARIF workflow example](examples/auditor-sarif.yml) |
 | Understand every PR-quality signal | [Signal contract](PROFILE_SIGNALS.md) |
 | Install, verify, or remove the kit | [Kit guide](../kits/maintainer-defense-kit/README.md) |
 | Know what the kit actually guarantees | [Kit assurance case](KIT_ASSURANCE.md) |
@@ -33,6 +35,7 @@ Deployment translations:
 | What access, effects, and limitations does each resource have? | [Resource audit](RESOURCE_AUDIT.md) |
 | What did the synthetic corpus measure? | [Auditor evaluation](AUDITOR_EVALUATION.md) |
 | What changed after testing public repositories? | [Auditor pilot](AUDITOR_PILOT.md) |
+| How can an OSS maintainer join an independent pilot? | [Auditor pilot program](AUDITOR_PILOT_PROGRAM.md) |
 | What material corrections have been made? | [Audit log](AUDIT_LOG.md) |
 
 ## Deployable assets

@@ -1,0 +1,168 @@
+{
+  "schema_version": 1,
+  "rules": [
+    {
+      "id": "MD-GOV-001",
+      "title": "Repository security policy is missing",
+      "default_severity": "medium",
+      "description": "Reporters may disclose vulnerabilities publicly or abandon reports when no supported private route is documented.",
+      "safe_remediation": "Add SECURITY.md with supported versions, a private reporting route, response expectations, and a warning not to disclose secrets publicly.",
+      "help_anchor": "md-gov-001",
+      "mappings": [
+        {"framework": "OpenSSF Scorecard", "id": "Security-Policy", "url": "https://github.com/ossf/scorecard/blob/main/docs/checks.md#security-policy"}
+      ]
+    },
+    {
+      "id": "MD-GOV-002",
+      "title": "CODEOWNERS boundary is missing",
+      "default_severity": "medium",
+      "description": "Repository control-plane files can be changed without an explicit ownership boundary.",
+      "safe_remediation": "Add real owners for workflows, issue templates, the security policy, and CODEOWNERS itself, then enforce owner review separately where appropriate.",
+      "help_anchor": "md-gov-002",
+      "mappings": [
+        {"framework": "OpenSSF Scorecard", "id": "Code-Review", "url": "https://github.com/ossf/scorecard/blob/main/docs/checks.md#code-review"},
+        {"framework": "OpenSSF Scorecard", "id": "Branch-Protection", "url": "https://github.com/ossf/scorecard/blob/main/docs/checks.md#branch-protection"}
+      ]
+    },
+    {
+      "id": "MD-GOV-003",
+      "title": "CODEOWNERS does not explicitly cover .github",
+      "default_severity": "medium",
+      "description": "A broad ownership rule can be weakened without an explicit review boundary for workflows and repository automation.",
+      "safe_remediation": "Add a specific /.github/ ownership rule naming an eligible, active owner and verify that repository rules enforce the intended review.",
+      "help_anchor": "md-gov-003",
+      "mappings": [
+        {"framework": "OpenSSF Scorecard", "id": "Code-Review", "url": "https://github.com/ossf/scorecard/blob/main/docs/checks.md#code-review"}
+      ]
+    },
+    {
+      "id": "MD-GOV-004",
+      "title": "Structured issue form is missing",
+      "default_severity": "low",
+      "description": "Unstructured reports can omit reproduction evidence and increase maintainer triage cost.",
+      "safe_remediation": "Add a non-destructive YAML issue form requesting reproduction steps, expected behavior, and relevant versions, and route vulnerabilities privately.",
+      "help_anchor": "md-gov-004",
+      "mappings": []
+    },
+    {
+      "id": "MD-GOV-005",
+      "title": "Machine-readable dependency update policy is missing",
+      "default_severity": "low",
+      "description": "Pinned Actions and packages can remain on vulnerable versions when no update mechanism or review cadence is configured.",
+      "safe_remediation": "Configure Dependabot or Renovate for the repository's real ecosystems and review update pull requests before merging.",
+      "help_anchor": "md-gov-005",
+      "mappings": [
+        {"framework": "OpenSSF Scorecard", "id": "Dependency-Update-Tool", "url": "https://github.com/ossf/scorecard/blob/main/docs/checks.md#dependency-update-tool"}
+      ]
+    },
+    {
+      "id": "MD-GOV-006",
+      "title": "Branch-protection expectations are not documented locally",
+      "default_severity": "note",
+      "description": "Maintainers cannot compare the intended review and merge boundary with the external repository configuration.",
+      "safe_remediation": "Document expected reviews, checks, force-push restrictions, bypass owners, and emergency procedure, then verify actual settings with read-only API access.",
+      "help_anchor": "md-gov-006",
+      "mappings": [
+        {"framework": "OpenSSF Scorecard", "id": "Branch-Protection", "url": "https://github.com/ossf/scorecard/blob/main/docs/checks.md#branch-protection"}
+      ]
+    },
+    {
+      "id": "MD-WF-001",
+      "title": "Workflow has no top-level token boundary",
+      "default_severity": "medium",
+      "description": "A future job can inherit broader repository-default GITHUB_TOKEN permissions than intended.",
+      "safe_remediation": "Add permissions: {} at workflow level and grant only required permissions per job, then test the workflow before merging.",
+      "help_anchor": "md-wf-001",
+      "mappings": [
+        {"framework": "OpenSSF Scorecard", "id": "Token-Permissions", "url": "https://github.com/ossf/scorecard/blob/main/docs/checks.md#token-permissions"},
+        {"framework": "CWE", "id": "CWE-269", "url": "https://cwe.mitre.org/data/definitions/269.html"}
+      ]
+    },
+    {
+      "id": "MD-WF-002",
+      "title": "Workflow grants write-all token permissions",
+      "default_severity": "high",
+      "description": "A compromised Action or command can use unnecessary write authority to modify sensitive repository resources.",
+      "safe_remediation": "Replace write-all with an empty default and enumerate only the exact job-level write permissions required.",
+      "help_anchor": "md-wf-002",
+      "mappings": [
+        {"framework": "OpenSSF Scorecard", "id": "Token-Permissions", "url": "https://github.com/ossf/scorecard/blob/main/docs/checks.md#token-permissions"},
+        {"framework": "CWE", "id": "CWE-269", "url": "https://cwe.mitre.org/data/definitions/269.html"}
+      ]
+    },
+    {
+      "id": "MD-WF-003",
+      "title": "GitHub Action is not pinned to a full commit SHA",
+      "default_severity": "medium",
+      "description": "A mutable tag or branch can move to compromised code without a reviewed workflow change.",
+      "safe_remediation": "Resolve the reviewed release to a full commit SHA, retain the release tag in a comment, verify provenance, and automate reviewed updates.",
+      "help_anchor": "md-wf-003",
+      "mappings": [
+        {"framework": "OpenSSF Scorecard", "id": "Pinned-Dependencies", "url": "https://github.com/ossf/scorecard/blob/main/docs/checks.md#pinned-dependencies"},
+        {"framework": "CWE", "id": "CWE-829", "url": "https://cwe.mitre.org/data/definitions/829.html"}
+      ]
+    },
+    {
+      "id": "MD-WF-004",
+      "title": "Privileged event checks out attacker-influenced code",
+      "default_severity": "high",
+      "description": "A fork or attacker-controlled event can influence code executed in a context with base-repository authority.",
+      "safe_remediation": "Separate metadata handling from code execution and run contributor code only under pull_request with read-only permissions and no secrets.",
+      "help_anchor": "md-wf-004",
+      "mappings": [
+        {"framework": "OpenSSF Scorecard", "id": "Dangerous-Workflow", "url": "https://github.com/ossf/scorecard/blob/main/docs/checks.md#dangerous-workflow"},
+        {"framework": "CWE", "id": "CWE-829", "url": "https://cwe.mitre.org/data/definitions/829.html"}
+      ]
+    },
+    {
+      "id": "MD-WF-005",
+      "title": "Untrusted input can reach secrets or write authority",
+      "default_severity": "critical",
+      "description": "Attacker-controlled pull-request content can plausibly reach credentials or repository-changing authority.",
+      "safe_remediation": "Remove secrets and writes from the untrusted path, isolate contributor-code execution, and pass only validated artifacts or metadata to privileged stages.",
+      "help_anchor": "md-wf-005",
+      "mappings": [
+        {"framework": "OpenSSF Scorecard", "id": "Dangerous-Workflow", "url": "https://github.com/ossf/scorecard/blob/main/docs/checks.md#dangerous-workflow"},
+        {"framework": "CWE", "id": "CWE-829", "url": "https://cwe.mitre.org/data/definitions/829.html"}
+      ]
+    },
+    {
+      "id": "MD-WF-006",
+      "title": "Checkout may persist a write-capable token",
+      "default_severity": "medium",
+      "description": "A later command or compromised build step can recover a persisted credential and use its repository authority.",
+      "safe_remediation": "Set persist-credentials: false unless authenticated Git is required, then isolate that operation in a narrow least-privilege job.",
+      "help_anchor": "md-wf-006",
+      "mappings": [
+        {"framework": "OpenSSF Scorecard", "id": "Token-Permissions", "url": "https://github.com/ossf/scorecard/blob/main/docs/checks.md#token-permissions"}
+      ]
+    },
+    {
+      "id": "MD-MOD-001",
+      "title": "Destructive moderation is enabled",
+      "default_severity": "high",
+      "description": "A false positive or configuration mistake can close, lock, or delete legitimate contributor work without human review.",
+      "safe_remediation": "Switch to report-only mode, require human review, measure false positives, and publish an appeal path before enabling enforcement.",
+      "help_anchor": "md-mod-001",
+      "mappings": []
+    },
+    {
+      "id": "MD-MOD-002",
+      "title": "Identity or history proxy is used for contributor risk",
+      "default_severity": "medium",
+      "description": "A legitimate newcomer can be penalized for identity or history characteristics unrelated to the submitted change.",
+      "safe_remediation": "Disable the proxy and evaluate reproducibility, scope, tests, policy compliance, and contributor responsiveness instead.",
+      "help_anchor": "md-mod-002",
+      "mappings": []
+    },
+    {
+      "id": "MD-MOD-003",
+      "title": "Destructive moderation has no discoverable appeal path",
+      "default_severity": "medium",
+      "description": "A moderation false positive can become permanent when contributors have no documented route to human reconsideration.",
+      "safe_remediation": "Document the appeal channel, human owner, response expectation, reopening process, and emergency disable path.",
+      "help_anchor": "md-mod-003",
+      "mappings": []
+    }
+  ]
+}

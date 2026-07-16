@@ -13,11 +13,12 @@ SOURCE = ROOT / "scripts/install_kit.py"
 DIST = ROOT / "dist"
 OUTPUT = DIST / "maintainer-defense-kit.py"
 AUDITOR_OUTPUT = DIST / "maintainer-defense.py"
+PACKAGE_MODULE = ROOT / "generated/maintainer_defense_kit.py"
 SENTINEL = "EMBEDDED_FILES: dict[str, str] = {}"
 
 
 def asset_paths() -> list[str]:
-    paths: list[str] = []
+    paths: list[str] = ["auditor-rules.json"]
     for language in ("en", "vi", "ja"):
         base = f"kits/maintainer-defense-kit/locales/{language}"
         paths.extend(
@@ -68,12 +69,15 @@ def main() -> None:
     OUTPUT.chmod(0o755)
     AUDITOR_OUTPUT.write_text(standalone, encoding="utf-8")
     AUDITOR_OUTPUT.chmod(0o755)
+    PACKAGE_MODULE.parent.mkdir(exist_ok=True)
+    PACKAGE_MODULE.write_text(standalone, encoding="utf-8")
     for output in (OUTPUT, AUDITOR_OUTPUT):
         checksum = hashlib.sha256(output.read_bytes()).hexdigest()
         checksum_path = output.with_suffix(output.suffix + ".sha256")
         checksum_path.write_text(f"{checksum}  {output.name}\n", encoding="ascii")
         print(f"BUILT {output.relative_to(ROOT)} ({len(asset_paths())} embedded assets)")
         print(f"SHA256 {checksum}")
+    print(f"BUILT {PACKAGE_MODULE.relative_to(ROOT)} (Python package module)")
 
 
 if __name__ == "__main__":

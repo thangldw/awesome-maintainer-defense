@@ -1,0 +1,67 @@
+name: Auditor false positive
+description: Report a rule that fired on a configuration you believe is safe.
+title: "[Auditor false positive]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Provide the smallest configuration needed to reproduce the finding. Remove secrets, tokens, private repository details, contributor identities, and unrelated workflow content.
+  - type: dropdown
+    id: rule_id
+    attributes:
+      label: Rule ID
+      options:
+        - MD-GOV-001
+        - MD-GOV-002
+        - MD-GOV-003
+        - MD-GOV-004
+        - MD-GOV-005
+        - MD-GOV-006
+        - MD-WF-001
+        - MD-WF-002
+        - MD-WF-003
+        - MD-WF-004
+        - MD-WF-005
+        - MD-WF-006
+        - MD-MOD-001
+        - MD-MOD-002
+        - MD-MOD-003
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Auditor version
+      description: Run `maintainer-defense --version`.
+      placeholder: "1.1"
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Minimal evidence
+      description: Include the smallest sanitized file excerpt and the exact finding output.
+      render: yaml
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Why this should not fire
+      description: Explain the trust boundary or configuration detail that makes the documented risk inapplicable.
+    validations:
+      required: true
+  - type: textarea
+    id: remediation_review
+    attributes:
+      label: Remediation review
+      description: Explain why the documented safe remediation is unnecessary, unsafe, or incomplete for this case.
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy and permission
+      options:
+        - label: I removed secrets, personal data, private repository details, and confidential information, and I have permission to share this evidence.
+          required: true

@@ -1,0 +1,48 @@
+name: OSS maintainer auditor pilot
+description: Volunteer a repository for a consent-based, read-only auditor pilot.
+title: "[Auditor pilot]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The pilot runs the offline auditor against a pinned revision, reviews every result with a maintainer, and publishes only agreed, sanitized aggregate outcomes. It does not execute repository code or change repository settings.
+  - type: input
+    id: repository
+    attributes:
+      label: Public repository
+      placeholder: owner/repository
+    validations:
+      required: true
+  - type: input
+    id: revision
+    attributes:
+      label: Revision to audit
+      description: Use a full commit SHA so the pilot can be reproduced.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Maintainer context
+      description: Note inherited organization policy, intentional workflow exceptions, or constraints the offline checkout cannot see.
+    validations:
+      required: true
+  - type: dropdown
+    id: publication
+    attributes:
+      label: Publication preference
+      options:
+        - Repository name and sanitized aggregate results may be published
+        - Publish sanitized aggregate results without repository name
+        - Private dry run only; do not publish results
+    validations:
+      required: true
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Authority and consent
+      options:
+        - label: I am a maintainer of this repository or have explicit maintainer permission to volunteer it.
+          required: true
+        - label: I understand that findings are review inputs, not proof of a vulnerability, authorship, or intent.
+          required: true
