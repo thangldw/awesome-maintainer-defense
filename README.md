@@ -1,6 +1,6 @@
 # Awesome Maintainer Defense
 
-> Audit repository governance and workflow risk without changing anything.
+> Find risky GitHub settings and automated jobs without changing your repository.
 
 [English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
 
@@ -24,6 +24,8 @@ HIGH     MD-WF-004  Privileged event pull_request_target checks out an attacker-
 MEDIUM   MD-WF-006  Checkout may persist a write-capable token in the workspace.
 ```
 <!-- auditor-output:end -->
+
+![Real Maintainer Defense audit result showing three workflow findings](assets/audit-result.png)
 
 Download the dependency-free v1.1 CLI and verify its checksum. Python 3.10+ is required; no network access or GitHub token is used during an audit.
 
@@ -51,6 +53,19 @@ brew install thangldw/maintainer-defense/maintainer-defense-kit
 
 `fix` emits a unified diff. It never edits files, changes GitHub settings, commits, or pushes. See the [rule reference](docs/AUDITOR_RULES.md), [synthetic per-rule evaluation](docs/AUDITOR_EVALUATION.md), [public-repository pilot](docs/AUDITOR_PILOT.md), [independent pilot program](docs/AUDITOR_PILOT_PROGRAM.md), and [read-only SARIF workflow](docs/examples/auditor-sarif.yml).
 
+## Why this instead of X?
+
+Choose this kit for an offline, no-token first pass that checks both repository policy files and risky GitHub Actions patterns, then suggests reviewable patches without applying them. It complements more specialized or continuously managed tools:
+
+| Tool | Prefer it when you need |
+| --- | --- |
+| **Maintainer Defense Kit** | One local, read-only check across governance files and workflow trust boundaries |
+| [zizmor](https://github.com/zizmorcore/zizmor) | Deeper static analysis focused specifically on GitHub Actions |
+| [OpenSSF Scorecard](https://github.com/ossf/scorecard) | A broader security-health assessment using repository and GitHub-hosted signals |
+| [OpenSSF Allstar](https://github.com/ossf/allstar) | Continuous policy checks across repositories through an installed GitHub App |
+
+They can be used together; a passing result from any one tool is not proof that a repository is safe.
+
 ## Install a defense profile
 
 Preview is the default. Review every planned `CREATE`/`KEEP` destination and the corresponding kit asset content before adding `--apply`.
@@ -75,7 +90,7 @@ The installer refuses conflicting files, records ownership and hashes in a manif
 | Supply-chain exposure | Add `hardened`; review pins, token permissions, and dependency policy |
 | Active abuse incident | Use the [incident playbook](docs/PLAYBOOK.md); time-bound every restriction |
 
-The [documentation hub](docs/README.md) maps product reference, operations, evidence, and deployable assets.
+The [documentation hub](docs/README.md) maps product reference, operations, evidence, and deployable assets. The short [outcome roadmap](ROADMAP.md) states what must be proven before the project expands.
 
 ## Resources
 

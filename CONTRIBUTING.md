@@ -4,6 +4,16 @@
 
 Contributions are welcome when they make maintainer defenses safer, more useful, or easier to verify. Read the [documentation map](docs/README.md) before adding a new concept or duplicating an existing contract.
 
+## Start with a bounded issue
+
+These issues are intentionally small and include acceptance criteria:
+
+- [Add a Windows PowerShell checksum quick start](https://github.com/thangldw/awesome-maintainer-defense/issues/11) — documentation only;
+- [Add a documentation-correction issue form](https://github.com/thangldw/awesome-maintainer-defense/issues/10) — GitHub issue-form YAML;
+- [Add an auditor regression test for repository paths with spaces](https://github.com/thangldw/awesome-maintainer-defense/issues/12) — one focused CLI test.
+
+Comment on the issue before starting so work is not duplicated. A maintainer will confirm scope; being listed here does not reserve the issue indefinitely.
+
 ## Add or update a catalog resource
 
 1. Search `catalog.json` and open pull requests for duplicates.

@@ -14,6 +14,7 @@ Start with the repository [README](../README.md). Use this page when you need to
 | Understand every PR-quality signal | [Signal contract](PROFILE_SIGNALS.md) |
 | Install, verify, or remove the kit | [Kit guide](../kits/maintainer-defense-kit/README.md) |
 | Know what the kit actually guarantees | [Kit assurance case](KIT_ASSURANCE.md) |
+| See which outcomes come next | [Outcome roadmap](../ROADMAP.md) |
 
 ## Operate safely
 

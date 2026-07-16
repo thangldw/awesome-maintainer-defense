@@ -1,6 +1,6 @@
 # Awesome Maintainer Defense
 
-> Audit rủi ro governance và workflow của repository mà không thay đổi bất kỳ thứ gì.
+> Tìm thiết lập GitHub và tác vụ tự động có rủi ro mà không thay đổi kho mã nguồn của bạn.
 
 [English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
 
@@ -20,6 +20,8 @@ CRITICAL MD-WF-005  Untrusted pull-request input can reach a privileged workflow
 HIGH     MD-WF-004  Privileged event pull_request_target checks out an attacker-influenced revision.
 MEDIUM   MD-WF-006  Checkout may persist a write-capable token in the workspace.
 ```
+
+![Kết quả audit thật của Maintainer Defense với ba finding trong workflow](assets/audit-result.png)
 
 Tải CLI v1.1 không có dependency và kiểm tra checksum. Audit không dùng mạng hay GitHub token.
 
@@ -47,6 +49,19 @@ brew install thangldw/maintainer-defense/maintainer-defense-kit
 
 `fix` chỉ sinh unified diff; không sửa file, GitHub setting, commit hay push. Xem [rule reference](docs/AUDITOR_RULES.md), [đánh giá synthetic theo rule](docs/AUDITOR_EVALUATION.md), [pilot trên repository công khai](docs/AUDITOR_PILOT.md), [chương trình pilot độc lập](docs/AUDITOR_PILOT_PROGRAM.md) và [workflow SARIF read-only](docs/examples/auditor-sarif.yml).
 
+## Vì sao dùng công cụ này thay vì X?
+
+Chọn kit này khi cần một bước kiểm tra offline, không cần token, bao quát cả file chính sách lẫn mẫu GitHub Actions có rủi ro và chỉ đề xuất patch để review. Các công cụ sau bổ sung cho kit ở những nhu cầu chuyên biệt hơn:
+
+| Công cụ | Phù hợp hơn khi bạn cần |
+| --- | --- |
+| **Maintainer Defense Kit** | Một lần kiểm tra local, read-only cho file quản trị và trust boundary của workflow |
+| [zizmor](https://github.com/zizmorcore/zizmor) | Phân tích tĩnh sâu hơn, tập trung riêng vào GitHub Actions |
+| [OpenSSF Scorecard](https://github.com/ossf/scorecard) | Đánh giá tình trạng bảo mật rộng hơn bằng tín hiệu từ repository và GitHub |
+| [OpenSSF Allstar](https://github.com/ossf/allstar) | Kiểm tra policy liên tục trên nhiều repository bằng GitHub App |
+
+Có thể dùng chúng cùng nhau; kết quả pass từ một công cụ không chứng minh repository an toàn.
+
 ## Cài profile phòng vệ
 
 Preview là mặc định. Review mọi đích `CREATE`/`KEEP` dự kiến và nội dung asset tương ứng trước khi thêm `--apply`.
@@ -71,7 +86,7 @@ Installer từ chối file xung đột, ghi ownership và hash vào manifest, đ
 | Có rủi ro supply chain | Dùng `hardened`; review pin, token và dependency policy |
 | Đang có incident | Theo [playbook tiếng Việt](docs/vi/PLAYBOOK.md); mọi giới hạn phải có thời hạn |
 
-Xem [documentation hub](docs/README.md) để đi tới product reference, operations, evidence và deployable assets.
+Xem [documentation hub](docs/README.md) để đi tới product reference, operations, evidence và deployable assets. [Roadmap theo outcome](ROADMAP.md) nêu rõ bằng chứng cần có trước khi dự án mở rộng.
 
 ## Tài nguyên
 
