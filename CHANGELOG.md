@@ -1,6 +1,6 @@
 # Changelog
 
-> Release history for the single public v1.0 line.
+> Release history for published versions.
 
 All notable changes are documented here. Dates use ISO 8601.
 
@@ -16,6 +16,7 @@ All notable changes are documented here. Dates use ISO 8601.
 - Added a machine-readable rule registry that owns canonical titles, severities, help anchors, and standards mappings, with drift checks across implementation, corpus, and documentation.
 - Added compact `--format summary` output, dedicated auditor false-positive intake, and a consent-based OSS maintainer pilot protocol.
 - Added a tested universal wheel with `pipx` entry points and a checksum-locked Homebrew formula.
+- Added a real CLI-result screenshot, plain-language product description, focused comparison, outcome roadmap, and three bounded newcomer issues.
 
 ## [1.0] - 2026-07-15
 

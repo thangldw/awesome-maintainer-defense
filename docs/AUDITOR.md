@@ -4,7 +4,7 @@
 
 The dependency-free repository auditor checks local GitHub governance, workflow trust boundaries, and moderation automation. It is designed to complement—not replace—specialized GitHub Actions analyzers such as zizmor.
 
-Its contract is: **audit repository governance and workflow risk without changing anything**. The default human output leads with severity counts and then shows the source evidence, risk, safe remediation, and stable rule link for every finding.
+Its contract is: **find risky GitHub settings and automated jobs without changing your repository**. The default human output leads with severity counts and then shows the source evidence, risk, safe remediation, and stable rule link for every finding.
 
 ## Commands
 
