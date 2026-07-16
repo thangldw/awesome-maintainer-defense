@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=77.0.3,<82"]
+build-backend = "build_backend"
+backend-path = ["."]
+
+[project]
+name = "maintainer-defense-kit"
+version = "1.1.0"
+description = "Offline auditor and reversible defense kit for repository governance and GitHub Actions risk"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{name = "Thang Le"}]
+keywords = ["github-actions", "governance", "maintainer", "security", "sarif"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Software Development :: Quality Assurance",
+  "Topic :: Security",
+]
+
+[project.scripts]
+maintainer-defense = "maintainer_defense_kit:main"
+maintainer-defense-kit = "maintainer_defense_kit:main"
+
+[project.urls]
+Homepage = "https://github.com/thangldw/awesome-maintainer-defense"
+Documentation = "https://github.com/thangldw/awesome-maintainer-defense/blob/v1.1/docs/AUDITOR.md"
+Issues = "https://github.com/thangldw/awesome-maintainer-defense/issues"
+Source = "https://github.com/thangldw/awesome-maintainer-defense"
+
+[tool.setuptools]
+py-modules = ["maintainer_defense_kit"]
+package-dir = {"" = "generated"}

@@ -4,6 +4,19 @@
 
 All notable changes are documented here. Dates use ISO 8601.
 
+## [1.1] - 2026-07-17
+
+### Auditor-first product contract
+
+- Repositioned the README around Maintainer Defense Kit as the CLI/auditor/policy product and moved the Awesome badge to the community catalog.
+- Added real default CLI output from the published `pwn-request` corpus case and a regression test that keeps the README block byte-for-byte aligned with the implementation.
+- Made human output lead with severity counts and label evidence, risk, safe remediation, and the stable rule reference.
+- Added a complete rule reference with false-positive review guidance and conservative OpenSSF/CWE mappings.
+- Added SARIF `helpUri` links and a pinned, checksum-verified GitHub code scanning workflow example with an explicit `security-events: write` boundary.
+- Added a machine-readable rule registry that owns canonical titles, severities, help anchors, and standards mappings, with drift checks across implementation, corpus, and documentation.
+- Added compact `--format summary` output, dedicated auditor false-positive intake, and a consent-based OSS maintainer pilot protocol.
+- Added a tested universal wheel with `pipx` entry points and a checksum-locked Homebrew formula.
+
 ## [1.0] - 2026-07-15
 
 ### Real-repository pilot corrections
@@ -52,3 +65,4 @@ All notable changes are documented here. Dates use ISO 8601.
 The engineering guarantees above are covered by static validation and end-to-end tests. Moderation effectiveness, false-positive rates, and maintainer time saved still require field evidence; v1.0 does not present them as proven outcomes. See [`docs/KIT_ASSURANCE.md`](docs/KIT_ASSURANCE.md) and [`docs/AUDIT_LOG.md`](docs/AUDIT_LOG.md).
 
 [1.0]: https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.0
+[1.1]: https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.1

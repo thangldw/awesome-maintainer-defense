@@ -1,32 +1,51 @@
 # Awesome Maintainer Defense
 
-> Audit repository trước. Chỉ cài điều bạn hiểu. Mọi biện pháp thực thi phải đảo ngược được.
+> Audit rủi ro governance và workflow của repository mà không thay đổi bất kỳ thứ gì.
 
 [English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
 
-[![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
 [![Quality](https://github.com/thangldw/awesome-maintainer-defense/actions/workflows/quality.yml/badge.svg)](https://github.com/thangldw/awesome-maintainer-defense/actions/workflows/quality.yml)
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Dự án cung cấp một hệ thống phòng vệ thống nhất: auditor offline, kit có thể rollback, catalog có bằng chứng và policy/template triển khai được. Dự án **chống lạm dụng, không chống AI**; finding là đầu vào để review, không phải bằng chứng về tác giả hay ý định.
+**Maintainer Defense Kit** là sản phẩm: CLI auditor, profile có thể rollback, policy và playbook. **Awesome Maintainer Defense** là catalog cộng đồng đã review bằng chứng trong cùng repository. Hệ thống **chống lạm dụng, không chống AI**; finding là đầu vào để review, không phải bằng chứng về tác giả hay ý định.
 
 ## Audit trước
 
-Tải CLI v1.0 không có dependency và kiểm tra checksum. Audit không dùng mạng hay GitHub token.
+Output `--format summary` thật dưới đây được lấy nguyên văn từ case `pwn-request` trong corpus đã công bố:
+
+```text
+3 findings · 1 critical · 1 high · 1 medium
+
+CRITICAL MD-WF-005  Untrusted pull-request input can reach a privileged workflow with secrets or write authority.
+HIGH     MD-WF-004  Privileged event pull_request_target checks out an attacker-influenced revision.
+MEDIUM   MD-WF-006  Checkout may persist a write-capable token in the workspace.
+```
+
+Tải CLI v1.1 không có dependency và kiểm tra checksum. Audit không dùng mạng hay GitHub token.
 
 ```bash
-curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0/maintainer-defense-kit.py
-curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0/maintainer-defense-kit.py.sha256
+curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1/maintainer-defense-kit.py
+curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1/maintainer-defense-kit.py.sha256
 
 sha256sum -c maintainer-defense-kit.py.sha256
 # macOS: shasum -a 256 -c maintainer-defense-kit.py.sha256
 
 python3 maintainer-defense-kit.py audit .
+python3 maintainer-defense-kit.py audit . --format summary
 python3 maintainer-defense-kit.py audit . --format sarif > maintainer-defense.sarif
 python3 maintainer-defense-kit.py fix . --output recommended.patch
 ```
 
-`fix` chỉ sinh unified diff; không sửa file, GitHub setting, commit hay push. Xem [auditor reference](docs/AUDITOR.md), [đánh giá synthetic](docs/AUDITOR_EVALUATION.md) và [pilot trên repository công khai](docs/AUDITOR_PILOT.md).
+Hoặc cài cùng code v1.1 qua package manager:
+
+```bash
+pipx install https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1/maintainer_defense_kit-1.1.0-py3-none-any.whl
+
+brew tap thangldw/maintainer-defense https://github.com/thangldw/awesome-maintainer-defense
+brew install thangldw/maintainer-defense/maintainer-defense-kit
+```
+
+`fix` chỉ sinh unified diff; không sửa file, GitHub setting, commit hay push. Xem [rule reference](docs/AUDITOR_RULES.md), [đánh giá synthetic theo rule](docs/AUDITOR_EVALUATION.md), [pilot trên repository công khai](docs/AUDITOR_PILOT.md), [chương trình pilot độc lập](docs/AUDITOR_PILOT_PROGRAM.md) và [workflow SARIF read-only](docs/examples/auditor-sarif.yml).
 
 ## Cài profile phòng vệ
 
@@ -55,6 +74,8 @@ Installer từ chối file xung đột, ghi ownership và hash vào manifest, đ
 Xem [documentation hub](docs/README.md) để đi tới product reference, operations, evidence và deployable assets.
 
 ## Tài nguyên
+
+[![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
 
 Catalog được sinh từ [`catalog.json`](catalog.json); bản dịch nằm trong [`i18n/vi.json`](i18n/vi.json). ⭐ là điểm bắt đầu thực dụng, không phải xếp hạng hay vị trí trả phí.
 
