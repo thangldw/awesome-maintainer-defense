@@ -9,6 +9,7 @@ class MaintainerDefenseKit < Formula
 
   def install
     libexec.install "maintainer-defense-kit.py" => "maintainer-defense"
+    chmod 0755, libexec/"maintainer-defense"
     bin.write_exec_script libexec/"maintainer-defense"
   end
 
