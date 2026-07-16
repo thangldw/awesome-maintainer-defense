@@ -358,7 +358,9 @@ def validate_generated_files() -> None:
 
 
 def validate_auditor_assets() -> None:
-    for relative in ("auditor.schema.json", "tests/fixtures/auditor/corpus.json"):
+    for relative in (
+        "auditor.schema.json", "auditor-rules.json", "tests/fixtures/auditor/corpus.json"
+    ):
         path = ROOT / relative
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
@@ -366,6 +368,54 @@ def validate_auditor_assets() -> None:
             fail(f"invalid {relative}: {exc}")
         if data.get("schema_version") not in {None, 1}:
             fail(f"{relative} has an unsupported schema version")
+    registry = json.loads((ROOT / "auditor-rules.json").read_text(encoding="utf-8"))
+    rules = registry.get("rules", [])
+    required_rule_fields = {
+        "id", "title", "default_severity", "description", "safe_remediation",
+        "help_anchor", "mappings",
+    }
+    if not rules or any(set(item) != required_rule_fields for item in rules):
+        fail("auditor rule registry contains an incomplete entry")
+    registry_ids = {item["id"] for item in rules}
+    if len(registry_ids) != len(rules):
+        fail("auditor rule registry IDs must be unique")
+    for item in rules:
+        if item["help_anchor"] != item["id"].lower():
+            fail(f"auditor rule {item['id']} has a non-canonical help anchor")
+        if item["default_severity"] not in {"critical", "high", "medium", "low", "note"}:
+            fail(f"auditor rule {item['id']} has an invalid severity")
+        for mapping in item["mappings"]:
+            if set(mapping) != {"framework", "id", "url"} or not mapping["url"].startswith("https://"):
+                fail(f"auditor rule {item['id']} has an invalid standards mapping")
+    implemented_ids = set(
+        re.findall(
+            r'"(MD-(?:GOV|WF|MOD)-[0-9]{3})"',
+            (ROOT / "scripts/install_kit.py").read_text(encoding="utf-8"),
+        )
+    )
+    documented_ids = set(
+        re.findall(
+            r"^### (MD-(?:GOV|WF|MOD)-[0-9]{3})$",
+            (ROOT / "docs/AUDITOR_RULES.md").read_text(encoding="utf-8"),
+            re.MULTILINE,
+        )
+    )
+    if registry_ids != implemented_ids or registry_ids != documented_ids:
+        fail("auditor registry, implementation, and rule documentation IDs differ")
+    rule_docs = (ROOT / "docs/AUDITOR_RULES.md").read_text(encoding="utf-8")
+    for item in rules:
+        section = rule_docs.split(f"### {item['id']}\n", 1)[1].split("\n### ", 1)[0]
+        if f"· {item['default_severity']}**" not in section:
+            fail(f"auditor rule {item['id']} documentation severity differs from registry")
+        for mapping in item["mappings"]:
+            if mapping["url"] not in section:
+                fail(f"auditor rule {item['id']} documentation omits {mapping['id']}")
+    false_positive_form = (
+        ROOT / ".github/ISSUE_TEMPLATE/auditor-false-positive.yml"
+    ).read_text(encoding="utf-8")
+    form_ids = set(re.findall(r"^        - (MD-(?:GOV|WF|MOD)-[0-9]{3})$", false_positive_form, re.MULTILINE))
+    if form_ids != registry_ids:
+        fail("auditor false-positive form rule IDs differ from registry")
     corpus = json.loads(
         (ROOT / "tests/fixtures/auditor/corpus.json").read_text(encoding="utf-8")
     )

@@ -1,6 +1,6 @@
 # Hồ sơ triển khai Maintainer Defense
 
-> Asset triển khai có phiên bản từ Awesome Maintainer Defense v1.0.
+> Asset triển khai có phiên bản từ Awesome Maintainer Defense v1.1.
 
 - Người chịu trách nhiệm:
 - Profile đã cài:

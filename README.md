@@ -1,39 +1,55 @@
 # Awesome Maintainer Defense
 
-> Audit the repository. Install only what you understand. Keep every enforcement decision reversible.
+> Audit repository governance and workflow risk without changing anything.
 
 [English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
 
-[![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
 [![Quality](https://github.com/thangldw/awesome-maintainer-defense/actions/workflows/quality.yml/badge.svg)](https://github.com/thangldw/awesome-maintainer-defense/actions/workflows/quality.yml)
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-This project gives open-source maintainers one coherent defense system:
+**Maintainer Defense Kit** is the product: a CLI auditor, reversible profiles, policies, and playbooks. **Awesome Maintainer Defense** is the evidence-reviewed community catalog in the same repository.
 
-- an offline repository auditor for governance, GitHub Actions, and moderation risk;
-- a reversible kit with `observe`, `balanced`, and `hardened` profiles;
-- an evidence-reviewed catalog of native controls and third-party tools;
-- deployable policies, issue forms, response templates, and operating playbooks.
-
-It is **anti-abuse, not anti-AI**. Findings are review inputs, never proof of authorship or intent.
+The system is **anti-abuse, not anti-AI**. Findings are review inputs, never proof of authorship or intent.
 
 ## Audit first
 
-Download the dependency-free v1.0 CLI and verify its checksum. Python 3.10+ is required; no network access or GitHub token is used during an audit.
+This is unedited `--format summary` output from the published `pwn-request` corpus case:
+
+<!-- auditor-output:start -->
+```text
+3 findings · 1 critical · 1 high · 1 medium
+
+CRITICAL MD-WF-005  Untrusted pull-request input can reach a privileged workflow with secrets or write authority.
+HIGH     MD-WF-004  Privileged event pull_request_target checks out an attacker-influenced revision.
+MEDIUM   MD-WF-006  Checkout may persist a write-capable token in the workspace.
+```
+<!-- auditor-output:end -->
+
+Download the dependency-free v1.1 CLI and verify its checksum. Python 3.10+ is required; no network access or GitHub token is used during an audit.
 
 ```bash
-curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0/maintainer-defense-kit.py
-curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0/maintainer-defense-kit.py.sha256
+curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1/maintainer-defense-kit.py
+curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1/maintainer-defense-kit.py.sha256
 
 sha256sum -c maintainer-defense-kit.py.sha256
 # macOS: shasum -a 256 -c maintainer-defense-kit.py.sha256
 
 python3 maintainer-defense-kit.py audit .
+python3 maintainer-defense-kit.py audit . --format summary
 python3 maintainer-defense-kit.py audit . --format sarif > maintainer-defense.sarif
 python3 maintainer-defense-kit.py fix . --output recommended.patch
 ```
 
-`fix` emits a unified diff. It never edits files, changes GitHub settings, commits, or pushes. See the [auditor reference](docs/AUDITOR.md), [synthetic evaluation](docs/AUDITOR_EVALUATION.md), and [public-repository pilot](docs/AUDITOR_PILOT.md).
+Or install the same v1.1 code through a package manager:
+
+```bash
+pipx install https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1/maintainer_defense_kit-1.1.0-py3-none-any.whl
+
+brew tap thangldw/maintainer-defense https://github.com/thangldw/awesome-maintainer-defense
+brew install thangldw/maintainer-defense/maintainer-defense-kit
+```
+
+`fix` emits a unified diff. It never edits files, changes GitHub settings, commits, or pushes. See the [rule reference](docs/AUDITOR_RULES.md), [synthetic per-rule evaluation](docs/AUDITOR_EVALUATION.md), [public-repository pilot](docs/AUDITOR_PILOT.md), [independent pilot program](docs/AUDITOR_PILOT_PROGRAM.md), and [read-only SARIF workflow](docs/examples/auditor-sarif.yml).
 
 ## Install a defense profile
 
@@ -62,6 +78,8 @@ The installer refuses conflicting files, records ownership and hashes in a manif
 The [documentation hub](docs/README.md) maps product reference, operations, evidence, and deployable assets.
 
 ## Resources
+
+[![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
 
 The catalog is generated from [`catalog.json`](catalog.json). ⭐ marks a practical starting point, not a ranking, endorsement, or paid placement.
 

@@ -17,12 +17,17 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-KIT_VERSION = "1.0"
-AUDITOR_VERSION = "1.0"
+KIT_VERSION = "1.1"
+AUDITOR_VERSION = "1.1"
+RULE_HELP_BASE = (
+    "https://github.com/thangldw/awesome-maintainer-defense/"
+    f"blob/v{AUDITOR_VERSION}/docs/AUDITOR_RULES.md"
+)
 MANIFEST = ".maintainer-defense-kit.json"
 PROFILES = ("observe", "balanced", "hardened")
 LANGUAGES = ("en", "vi", "ja")
 EMBEDDED_FILES: dict[str, str] = {}
+_RULE_CATALOG: dict[str, dict] | None = None
 
 
 class KitError(Exception):
@@ -54,6 +59,45 @@ def read(path: str) -> bytes:
         except KeyError as exc:
             raise KitError(f"standalone installer is missing embedded asset: {path}") from exc
     return (ROOT / path).read_bytes()
+
+
+def rule_catalog() -> dict[str, dict]:
+    global _RULE_CATALOG
+    if _RULE_CATALOG is not None:
+        return _RULE_CATALOG
+    try:
+        data = json.loads(read("auditor-rules.json"))
+    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+        raise KitError(f"invalid embedded auditor rule registry: {exc}") from exc
+    if data.get("schema_version") != 1 or not isinstance(data.get("rules"), list):
+        raise KitError("unsupported or incomplete auditor rule registry")
+    catalog: dict[str, dict] = {}
+    required = {
+        "id", "title", "default_severity", "description", "safe_remediation",
+        "help_anchor", "mappings",
+    }
+    for item in data["rules"]:
+        if not isinstance(item, dict) or set(item) != required:
+            raise KitError("auditor rule registry contains an invalid entry")
+        rule_id = item["id"]
+        if rule_id in catalog or not re.fullmatch(r"MD-(?:GOV|WF|MOD)-[0-9]{3}", rule_id):
+            raise KitError(f"invalid or duplicate auditor rule ID: {rule_id!r}")
+        if item["default_severity"] not in SEVERITY_ORDER:
+            raise KitError(f"invalid severity for auditor rule {rule_id}")
+        catalog[rule_id] = item
+    _RULE_CATALOG = catalog
+    return catalog
+
+
+def rule_metadata(rule_id: str) -> dict:
+    try:
+        return rule_catalog()[rule_id]
+    except KeyError as exc:
+        raise KitError(f"finding uses undocumented rule ID: {rule_id}") from exc
+
+
+def rule_help_uri(rule_id: str) -> str:
+    return f"{RULE_HELP_BASE}#{rule_metadata(rule_id)['help_anchor']}"
 
 
 def detect_repository(target: Path) -> str | None:
@@ -346,6 +390,12 @@ def make_finding(
     after: str | None = None,
     fix_safety: str | None = None,
 ) -> dict:
+    metadata = rule_metadata(rule_id)
+    if severity != metadata["default_severity"]:
+        raise KitError(
+            f"finding severity {severity!r} does not match {rule_id} registry severity "
+            f"{metadata['default_severity']!r}"
+        )
     finding = {
         "rule_id": rule_id,
         "severity": severity,
@@ -682,30 +732,48 @@ def audit_repository(target: Path) -> dict:
     }
 
 
+def summary_headline(report: dict) -> str:
+    summary = report["summary"]
+    return " · ".join(
+        [f"{summary['total']} finding{'s' if summary['total'] != 1 else ''}"]
+        + [
+            f"{count} {severity}"
+            for severity, count in summary["by_severity"].items()
+            if count
+        ]
+    )
+
+
+def render_summary(report: dict) -> str:
+    rows = [summary_headline(report)]
+    if report["findings"]:
+        rows.append("")
+    for finding in report["findings"]:
+        rows.append(
+            f"{finding['severity'].upper():8} {finding['rule_id']}  {finding['message']}"
+        )
+    return "\n".join(rows) + "\n"
+
+
 def render_human(report: dict) -> str:
+    headline = summary_headline(report)
     if not report["findings"]:
-        return "No findings.\n"
-    rows = []
+        return headline + "\n"
+    rows = [headline, ""]
     for finding in report["findings"]:
         location = finding["location"]
         rows.extend(
             [
                 f"{finding['severity'].upper():8} {finding['rule_id']} {location['path']}:{location['line']}:{location['column']}",
-                f"  {finding['message']}",
-                f"  Threat: {finding['threat_scenario']}",
-                f"  Recommendation: {finding['recommendation']}",
+                f"  Evidence: {finding['message']}",
+                f"  Risk: {finding['threat_scenario']}",
+                f"  Safe remediation: {finding['recommendation']}",
+                f"  Rule: {rule_help_uri(finding['rule_id'])}",
             ]
         )
         if finding["fix"]["available"]:
             rows.append(f"  Patch: available ({finding['fix']['safety']})")
         rows.append("")
-    summary = report["summary"]
-    rows.append(
-        "Summary: " + ", ".join(
-            [f"{summary['total']} findings"]
-            + [f"{count} {severity}" for severity, count in summary["by_severity"].items() if count]
-        )
-    )
     return "\n".join(rows) + "\n"
 
 
@@ -715,15 +783,21 @@ def render_sarif(report: dict) -> dict:
     levels = {"critical": "error", "high": "error", "medium": "warning", "low": "note", "note": "note"}
     for finding in report["findings"]:
         rule_id = finding["rule_id"]
+        metadata = rule_metadata(rule_id)
+        mappings = [f"{item['framework']}:{item['id']}" for item in metadata["mappings"]]
         rules.setdefault(
             rule_id,
             {
                 "id": rule_id,
                 "name": rule_id.replace("-", "_"),
-                "shortDescription": {"text": finding["message"]},
-                "fullDescription": {"text": finding["threat_scenario"]},
-                "help": {"text": finding["recommendation"]},
-                "properties": {"security-severity": str(SEVERITY_ORDER[finding["severity"]] * 2.5)},
+                "shortDescription": {"text": metadata["title"]},
+                "fullDescription": {"text": metadata["description"]},
+                "help": {"text": metadata["safe_remediation"]},
+                "helpUri": rule_help_uri(rule_id),
+                "properties": {
+                    "security-severity": str(SEVERITY_ORDER[metadata["default_severity"]] * 2.5),
+                    "tags": mappings,
+                },
             },
         )
         location = finding["location"]
@@ -816,7 +890,9 @@ def parse_audit_args(command: str, arguments: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(prog=f"maintainer-defense {command}")
     parser.add_argument("target", nargs="?", default=".", type=Path, help="repository checkout")
     if command == "audit":
-        parser.add_argument("--format", choices=("human", "json", "sarif"), default="human")
+        parser.add_argument(
+            "--format", choices=("human", "summary", "json", "sarif"), default="human"
+        )
         parser.add_argument("--output", type=Path, help="write output to a file")
         parser.add_argument(
             "--fail-on", choices=("critical", "high", "medium", "low", "note"),
@@ -853,6 +929,8 @@ def run_auditor(command: str, arguments: list[str]) -> None:
         return
     if args.format == "human":
         content = render_human(report)
+    elif args.format == "summary":
+        content = render_summary(report)
     elif args.format == "json":
         content = json.dumps(report, ensure_ascii=False, indent=2) + "\n"
     else:

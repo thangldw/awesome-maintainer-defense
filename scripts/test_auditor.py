@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -88,7 +89,67 @@ class AuditorTests(unittest.TestCase):
             self.assertIn("threat_scenario", finding)
             sarif = module.render_sarif(report)
             self.assertEqual(sarif["version"], "2.1.0")
+            rule = next(
+                item
+                for item in sarif["runs"][0]["tool"]["driver"]["rules"]
+                if item["id"] == "MD-WF-003"
+            )
+            self.assertTrue(rule["helpUri"].endswith("AUDITOR_RULES.md#md-wf-003"))
+            self.assertEqual(
+                rule["shortDescription"]["text"],
+                "GitHub Action is not pinned to a full commit SHA",
+            )
             self.assertEqual(sarif["runs"][0]["results"][0]["locations"][0]["physicalLocation"]["region"]["startLine"], finding["location"]["line"])
+
+    def test_human_output_leads_with_summary_and_guidance(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            materialize(target, {"id": "human-output"})
+            workflow = target / ".github/workflows/ci.yml"
+            workflow.write_text(
+                BASE_FILES[".github/workflows/ci.yml"].replace(f"@{PIN}", "@v4"),
+                encoding="utf-8",
+            )
+            output = module.render_human(module.audit_repository(target))
+            self.assertEqual(output.splitlines()[0], "1 finding · 1 medium")
+            self.assertIn("Evidence:", output)
+            self.assertIn("Safe remediation:", output)
+            self.assertIn("AUDITOR_RULES.md#md-wf-003", output)
+
+    def test_readme_output_matches_published_corpus_case(self) -> None:
+        corpus = json.loads(CORPUS.read_text(encoding="utf-8"))
+        case = next(item for item in corpus["cases"] if item["id"] == "pwn-request")
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            materialize(target, case)
+            expected = "```text\n" + module.render_summary(module.audit_repository(target)) + "```"
+        readme = ROOT.joinpath("README.md").read_text(encoding="utf-8")
+        documented = readme.split("<!-- auditor-output:start -->", 1)[1].split(
+            "<!-- auditor-output:end -->", 1
+        )[0].strip()
+        self.assertEqual(documented, expected)
+
+    def test_rule_registry_matches_implementation_docs_and_corpus(self) -> None:
+        registry = module.rule_catalog()
+        implemented = set(
+            re.findall(r'"(MD-(?:GOV|WF|MOD)-[0-9]{3})"', CLI.read_text(encoding="utf-8"))
+        )
+        documented = set(
+            re.findall(
+                r"^### (MD-(?:GOV|WF|MOD)-[0-9]{3})$",
+                ROOT.joinpath("docs/AUDITOR_RULES.md").read_text(encoding="utf-8"),
+                re.MULTILINE,
+            )
+        )
+        corpus = json.loads(CORPUS.read_text(encoding="utf-8"))
+        expected = {
+            rule_id
+            for case in corpus["cases"]
+            for rule_id in case.get("expected", []) + case.get("absent", [])
+        }
+        self.assertEqual(set(registry), implemented)
+        self.assertEqual(set(registry), documented)
+        self.assertEqual(set(registry), expected)
 
     def test_fix_emits_patch_without_modifying_repository(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
