@@ -65,15 +65,19 @@ def gif_info(path: Path) -> tuple[int, int, int, int]:
 
 def main() -> None:
     preview = ROOT / "assets/social-preview.png"
+    audit_result = ROOT / "assets/audit-result.png"
     demo = ROOT / "assets/demo.gif"
     if png_size(preview) != (1280, 640):
         raise SystemExit("social preview must be exactly 1280x640")
+    if png_size(audit_result) != (1280, 720):
+        raise SystemExit("audit result screenshot must be exactly 1280x720")
     width, height, frames, duration_ms = gif_info(demo)
     if (width, height, frames) != (1280, 720, 8) or not 30_000 <= duration_ms <= 45_000:
         raise SystemExit(f"unexpected demo properties: {width}x{height}, {frames} frames, {duration_ms} ms")
     if preview.stat().st_size >= 1_000_000:
         raise SystemExit("social preview exceeds GitHub's 1 MB limit")
     print(f"OK social preview 1280x640 ({preview.stat().st_size} bytes)")
+    print(f"OK audit result 1280x720 ({audit_result.stat().st_size} bytes)")
     print(f"OK demo 1280x720, {frames} frames, {duration_ms / 1000:.1f}s")
 
 

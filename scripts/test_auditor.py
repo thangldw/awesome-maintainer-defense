@@ -122,12 +122,17 @@ class AuditorTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp)
             materialize(target, case)
-            expected = "```text\n" + module.render_summary(module.audit_repository(target)) + "```"
+            summary = module.render_summary(module.audit_repository(target))
+            expected = "```text\n" + summary + "```"
         readme = ROOT.joinpath("README.md").read_text(encoding="utf-8")
         documented = readme.split("<!-- auditor-output:start -->", 1)[1].split(
             "<!-- auditor-output:end -->", 1
         )[0].strip()
         self.assertEqual(documented, expected)
+        screenshot = ROOT.joinpath("assets/audit-result.svg").read_text(encoding="utf-8")
+        for line in summary.splitlines():
+            if line:
+                self.assertIn(line, screenshot)
 
     def test_rule_registry_matches_implementation_docs_and_corpus(self) -> None:
         registry = module.rule_catalog()
