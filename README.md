@@ -42,6 +42,17 @@ python3 maintainer-defense-kit.py audit . --format sarif > maintainer-defense.sa
 python3 maintainer-defense-kit.py fix . --output recommended.patch
 ```
 
+On Windows, the same download and verification with built-in PowerShell commands:
+
+```powershell
+Invoke-WebRequest -Uri https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1/maintainer-defense-kit.py -OutFile maintainer-defense-kit.py
+Invoke-WebRequest -Uri https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1/maintainer-defense-kit.py.sha256 -OutFile maintainer-defense-kit.py.sha256
+
+$expected = (Get-Content maintainer-defense-kit.py.sha256).Trim().Split(' ')[0]
+$actual   = (Get-FileHash maintainer-defense-kit.py -Algorithm SHA256).Hash
+if ($actual -ieq $expected) { 'Checksum OK' } else { throw "Checksum mismatch: expected $expected, got $actual" }
+```
+
 Or install the same v1.1 code through a package manager:
 
 ```bash
