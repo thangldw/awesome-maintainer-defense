@@ -17,8 +17,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-KIT_VERSION = "1.1"
-AUDITOR_VERSION = "1.1"
+KIT_VERSION = "1.0.0"
+AUDITOR_VERSION = "1.0.0"
 RULE_HELP_BASE = (
     "https://github.com/thangldw/awesome-maintainer-defense/"
     f"blob/v{AUDITOR_VERSION}/docs/AUDITOR_RULES.md"

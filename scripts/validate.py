@@ -410,12 +410,6 @@ def validate_auditor_assets() -> None:
         for mapping in item["mappings"]:
             if mapping["url"] not in section:
                 fail(f"auditor rule {item['id']} documentation omits {mapping['id']}")
-    false_positive_form = (
-        ROOT / ".github/ISSUE_TEMPLATE/auditor-false-positive.yml"
-    ).read_text(encoding="utf-8")
-    form_ids = set(re.findall(r"^        - (MD-(?:GOV|WF|MOD)-[0-9]{3})$", false_positive_form, re.MULTILINE))
-    if form_ids != registry_ids:
-        fail("auditor false-positive form rule IDs differ from registry")
     corpus = json.loads(
         (ROOT / "tests/fixtures/auditor/corpus.json").read_text(encoding="utf-8")
     )

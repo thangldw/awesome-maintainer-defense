@@ -32,7 +32,7 @@ jobs:
           AUDITOR_SHA256: 731670a8926134eda2348b53a81a92b7dfff00771a03100ab322bb9415c950a0
         run: |
           curl -fL --proto '=https' --tlsv1.2 \
-            https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1/maintainer-defense-kit.py \
+            https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.0.0/maintainer-defense-kit.py \
             -o maintainer-defense-kit.py
           printf '%s  %s\n' "$AUDITOR_SHA256" maintainer-defense-kit.py | sha256sum -c -
 
