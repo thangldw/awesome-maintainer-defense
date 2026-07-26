@@ -1,19 +1,28 @@
 # Awesome Maintainer Defense
 
-> Find risky GitHub settings and automated jobs without changing your repository.
+[English](#english) · [Tiếng Việt](#tiếng-việt) · [日本語](#日本語)
 
-[English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
+Offline repository-governance and GitHub Actions risk auditor with reversible defense profiles and an evidence-reviewed resource catalog.
 
-[![Quality](https://github.com/thangldw/awesome-maintainer-defense/actions/workflows/quality.yml/badge.svg)](https://github.com/thangldw/awesome-maintainer-defense/actions/workflows/quality.yml)
-[![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#FFFFFF","fontFamily":"Arial, sans-serif","lineColor":"#667085","primaryTextColor":"#172B4D"}}}%%
+flowchart LR
+    R["Repository<br/>Repo / リポジトリ"]:::yellow
+    A["Read-only audit<br/>Chỉ đọc / 読取監査"]:::blue
+    F["Evidence findings<br/>Phát hiện / 所見"]:::pink
+    P["Reviewable patch<br/>Patch / パッチ"]:::purple
+    H["Human decision<br/>Con người / 人の判断"]:::green
+    R --> A --> F --> P --> H
+    classDef yellow fill:#FFF4A3,stroke:#C9A227,stroke-width:2px,color:#172B4D
+    classDef blue fill:#D9EAFD,stroke:#4C78A8,stroke-width:2px,color:#172B4D
+    classDef pink fill:#FFE1E6,stroke:#C96A7B,stroke-width:2px,color:#172B4D
+    classDef purple fill:#E9DDF7,stroke:#8064A2,stroke-width:2px,color:#172B4D
+    classDef green fill:#DDF5E3,stroke:#4F9D69,stroke-width:2px,color:#172B4D
+```
 
-**Maintainer Defense Kit** is the product: a CLI auditor, reversible profiles, policies, and playbooks. **Awesome Maintainer Defense** is the evidence-reviewed community catalog in the same repository.
+## English
 
-The system is **anti-abuse, not anti-AI**. Findings are review inputs, never proof of authorship or intent.
-
-## Audit first
-
-This is unedited `--format summary` output from the published `pwn-request` corpus case:
+The dependency-free Python CLI audits repository policy and workflow trust boundaries without a network connection or GitHub token. `fix` emits a unified diff; it never edits a repository, changes settings, commits or pushes. Findings are review inputs, not proof of authorship, intent or safety.
 
 <!-- auditor-output:start -->
 ```text
@@ -25,78 +34,25 @@ MEDIUM   MD-WF-006  Checkout may persist a write-capable token in the workspace.
 ```
 <!-- auditor-output:end -->
 
-![Real Maintainer Defense audit result showing three workflow findings](assets/audit-result.png)
-
-Download the dependency-free v1.1 CLI and verify its checksum. Python 3.10+ is required; no network access or GitHub token is used during an audit.
-
 ```bash
-curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1/maintainer-defense-kit.py
-curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1/maintainer-defense-kit.py.sha256
-
-sha256sum -c maintainer-defense-kit.py.sha256
-# macOS: shasum -a 256 -c maintainer-defense-kit.py.sha256
-
-python3 maintainer-defense-kit.py audit .
-python3 maintainer-defense-kit.py audit . --format summary
-python3 maintainer-defense-kit.py audit . --format sarif > maintainer-defense.sarif
-python3 maintainer-defense-kit.py fix . --output recommended.patch
+python3 scripts/build_standalone.py
+python3 generated/maintainer-defense-kit.py audit .
+python3 generated/maintainer-defense-kit.py fix . --output recommended.patch
+python3 scripts/validate.py
+python3 scripts/test_auditor.py
 ```
 
-Or install the same v1.1 code through a package manager:
+## Tiếng Việt
 
-```bash
-pipx install https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1/maintainer_defense_kit-1.1.0-py3-none-any.whl
+CLI Python không dependency kiểm tra policy và ranh giới tin cậy của workflow mà không cần mạng hoặc GitHub token. Lệnh `fix` chỉ tạo unified diff; không sửa repo, đổi setting, commit hoặc push. Mỗi finding chỉ là bằng chứng cần con người xem xét, không phải kết luận về tác giả, ý định hay mức độ an toàn.
 
-brew tap thangldw/maintainer-defense https://github.com/thangldw/awesome-maintainer-defense
-brew install thangldw/maintainer-defense/maintainer-defense-kit
-```
+## 日本語
 
-`fix` emits a unified diff. It never edits files, changes GitHub settings, commits, or pushes. See the [rule reference](docs/AUDITOR_RULES.md), [synthetic per-rule evaluation](docs/AUDITOR_EVALUATION.md), [public-repository pilot](docs/AUDITOR_PILOT.md), [independent pilot program](docs/AUDITOR_PILOT_PROGRAM.md), and [read-only SARIF workflow](docs/examples/auditor-sarif.yml).
+依存関係のない Python CLI は、ネットワークや GitHub トークンなしでリポジトリ方針とワークフローの信頼境界を監査します。`fix` は unified diff を出力するだけで、ファイル編集、設定変更、commit、push は行いません。所見は人が確認するための根拠であり、作者、意図、安全性の証明ではありません。
 
-## Why this instead of X?
+The deployable kit keeps example `.github` directories because those files are product assets; they do not execute in this repository.
 
-Choose this kit for an offline, no-token first pass that checks both repository policy files and risky GitHub Actions patterns, then suggests reviewable patches without applying them. It complements more specialized or continuously managed tools:
-
-| Tool | Prefer it when you need |
-| --- | --- |
-| **Maintainer Defense Kit** | One local, read-only check across governance files and workflow trust boundaries |
-| [zizmor](https://github.com/zizmorcore/zizmor) | Deeper static analysis focused specifically on GitHub Actions |
-| [OpenSSF Scorecard](https://github.com/ossf/scorecard) | A broader security-health assessment using repository and GitHub-hosted signals |
-| [OpenSSF Allstar](https://github.com/ossf/allstar) | Continuous policy checks across repositories through an installed GitHub App |
-
-They can be used together; a passing result from any one tool is not proof that a repository is safe.
-
-## Install a defense profile
-
-Preview is the default. Review every planned `CREATE`/`KEEP` destination and the corresponding kit asset content before adding `--apply`.
-
-```bash
-python3 maintainer-defense-kit.py --target . --profile observe --language en --repo OWNER/REPOSITORY
-python3 maintainer-defense-kit.py --target . --profile observe --language en --repo OWNER/REPOSITORY --apply
-python3 maintainer-defense-kit.py --target . --verify
-```
-
-The installer refuses conflicting files, records ownership and hashes in a manifest, and will not uninstall modified installer-owned files.
-
-![35-second terminal demo: dry-run, install observe, verify, then uninstall](assets/demo.gif)
-
-## Choose the next move
-
-| Repository state | Recommended move |
-| --- | --- |
-| No baseline yet | Review [native controls](docs/NATIVE_CONTROLS.md), then run the auditor |
-| Normal contribution load | Install `observe`; collect data without contributor-visible action |
-| Measured review overload | Consider `balanced`; keep human review and an appeal path |
-| Supply-chain exposure | Add `hardened`; review pins, token permissions, and dependency policy |
-| Active abuse incident | Use the [incident playbook](docs/PLAYBOOK.md); time-bound every restriction |
-
-The [documentation hub](docs/README.md) maps product reference, operations, evidence, and deployable assets. The short [outcome roadmap](ROADMAP.md) states what must be proven before the project expands.
-
-## Resources
-
-[![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
-
-The catalog is generated from [`catalog.json`](catalog.json). ⭐ marks a practical starting point, not a ranking, endorsement, or paid placement.
+## Evidence-reviewed catalog
 
 <!-- catalog:start -->
 
@@ -171,19 +127,4 @@ Set expectations before problems arrive and respond consistently when they do.
 
 <!-- catalog:end -->
 
-## Safety contract
-
-- Evaluate submission quality and repository risk, not presumed authorship.
-- Run untrusted code only with read-only authority and no secrets.
-- Start with observation; require evidence before enforcement.
-- Prefer queues and status checks over automatic closing or locking.
-- Publish the rule, owner, review date, rollback, and appeal path.
-- Treat every scanner result and catalog listing as evidence to review—not certification.
-
-The kit's installation, pinning, permissions, and rollback behavior are tested. Moderation effectiveness is not yet field-proven. Read the [assurance case](docs/KIT_ASSURANCE.md) before production use.
-
-## Contribute
-
-Use [CONTRIBUTING.md](CONTRIBUTING.md) for catalog evidence requirements and safety review. Listings cannot be purchased, and inclusion is not a security endorsement.
-
-MIT licensed. Templates are starting points, not legal advice.
+Released under the [MIT License](LICENSE). Separate Vietnamese and Japanese catalog views remain in [README.vi.md](README.vi.md) and [README.ja.md](README.ja.md).

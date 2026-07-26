@@ -1,98 +1,18 @@
-# Awesome Maintainer Defense
+# Awesome Maintainer Defense — 日本語
 
-> リポジトリを変更せずに、危険なGitHub設定や自動処理を見つけます。
+[3言語ドキュメント](README.md) · [Tiếng Việt](README.vi.md)
 
-[English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
-
-[![Quality](https://github.com/thangldw/awesome-maintainer-defense/actions/workflows/quality.yml/badge.svg)](https://github.com/thangldw/awesome-maintainer-defense/actions/workflows/quality.yml)
-[![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-
-**Maintainer Defense Kit**がproductです。CLI auditor、rollback可能なprofile、policy、playbookを含みます。**Awesome Maintainer Defense**は同じrepository内の根拠確認済みcommunity catalogです。**不正利用への対策であり、反AIではありません**。findingはreview入力であり、作成者や意図の証明ではありません。
-
-## まず監査する
-
-次は公開corpusの`pwn-request` caseから取得した実際の`--format summary` outputです。
-
-```text
-3 findings · 1 critical · 1 high · 1 medium
-
-CRITICAL MD-WF-005  Untrusted pull-request input can reach a privileged workflow with secrets or write authority.
-HIGH     MD-WF-004  Privileged event pull_request_target checks out an attacker-influenced revision.
-MEDIUM   MD-WF-006  Checkout may persist a write-capable token in the workspace.
-```
-
-![ワークフローに3件のfindingを示すMaintainer Defenseの実際の監査結果](assets/audit-result.png)
-
-依存なしのv1.1 CLIを取得し、checksumを検証します。監査はnetworkやGitHub tokenを使いません。
+Maintainer Defense Kit は、repository policy と GitHub Actions の信頼境界を監査するオフライン Python CLI です。network や GitHub token は不要です。`fix` はレビュー用 unified diff を出力するだけで、ファイル編集、設定変更、commit、push を行いません。
 
 ```bash
-curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1/maintainer-defense-kit.py
-curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1/maintainer-defense-kit.py.sha256
-
-sha256sum -c maintainer-defense-kit.py.sha256
-# macOS: shasum -a 256 -c maintainer-defense-kit.py.sha256
-
-python3 maintainer-defense-kit.py audit .
-python3 maintainer-defense-kit.py audit . --format summary
-python3 maintainer-defense-kit.py audit . --format sarif > maintainer-defense.sarif
-python3 maintainer-defense-kit.py fix . --output recommended.patch
+python3 scripts/build_standalone.py
+python3 generated/maintainer-defense-kit.py audit .
+python3 generated/maintainer-defense-kit.py fix . --output recommended.patch
 ```
 
-または、package managerから同じv1.1 codeを導入できます。
+所見は人が確認するための証拠であり、作者、意図、安全性の結論ではありません。`kits/**/.github/` 内の workflow は製品サンプルであり、この repository では実行されません。
 
-```bash
-pipx install https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1/maintainer_defense_kit-1.1.0-py3-none-any.whl
-
-brew tap thangldw/maintainer-defense https://github.com/thangldw/awesome-maintainer-defense
-brew install thangldw/maintainer-defense/maintainer-defense-kit
-```
-
-`fix`はunified diffだけを出力し、file、GitHub設定、commit、pushを変更しません。[rule reference](docs/AUDITOR_RULES.md)、[rule別synthetic evaluation](docs/AUDITOR_EVALUATION.md)、[公開repository pilot](docs/AUDITOR_PILOT.md)、[独立pilot program](docs/AUDITOR_PILOT_PROGRAM.md)、[read-only SARIF workflow](docs/examples/auditor-sarif.yml)を参照してください。
-
-## Xではなく、このツールを使う理由
-
-Repository policy fileと危険なGitHub Actions patternの両方を、tokenなし・offline・read-onlyで最初に確認し、適用せずにreview可能なpatchを提案したい場合にこのkitを選びます。次のツールは、より専門的または継続的な用途を補完します。
-
-| ツール | 適した用途 |
-| --- | --- |
-| **Maintainer Defense Kit** | Governance fileとworkflow trust boundaryを横断するlocal・read-only検査 |
-| [zizmor](https://github.com/zizmorcore/zizmor) | GitHub Actionsに特化した、より深い静的解析 |
-| [OpenSSF Scorecard](https://github.com/ossf/scorecard) | RepositoryとGitHub上のsignalを使う、より広いsecurity-health評価 |
-| [OpenSSF Allstar](https://github.com/ossf/allstar) | GitHub Appによる複数repositoryの継続的policy検査 |
-
-これらは併用できます。どれか一つの合格結果だけでrepositoryの安全性が証明されるわけではありません。
-
-## 防御profileを導入する
-
-既定はpreviewです。予定されたすべての`CREATE`/`KEEP`出力先と対応するkit assetの内容を確認してから`--apply`を追加します。
-
-```bash
-python3 maintainer-defense-kit.py --target . --profile observe --language ja --repo OWNER/REPOSITORY
-python3 maintainer-defense-kit.py --target . --profile observe --language ja --repo OWNER/REPOSITORY --apply
-python3 maintainer-defense-kit.py --target . --verify
-```
-
-Installerは競合fileを拒否し、ownershipとhashをmanifestへ記録します。Installer所有fileが変更済みの場合はuninstallしません。
-
-![35秒のterminal demo：dry-run、observe導入、verify、uninstall](assets/demo.gif)
-
-## 次の操作を選ぶ
-
-| 状態 | 推奨操作 |
-| --- | --- |
-| baseline未整備 | [native controls](docs/NATIVE_CONTROLS.md)を確認してaudit |
-| 通常のcontribution量 | `observe`を導入し、利用者に見える操作なしで測定 |
-| 測定済みのreview overload | `balanced`を検討し、人間reviewと異議申立てを維持 |
-| supply-chain risk | `hardened`でpin、token、dependency policyを確認 |
-| 進行中のincident | [日本語playbook](docs/ja/PLAYBOOK.md)に従い、制限に期限を設定 |
-
-[documentation hub](docs/README.md)からproduct reference、operations、evidence、deployable assetsへ移動できます。[Outcome roadmap](ROADMAP.md)は、project拡張前に必要な根拠を示します。
-
-## リソース
-
-[![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
-
-Catalogは[`catalog.json`](catalog.json)から生成され、翻訳は[`i18n/ja.json`](i18n/ja.json)で管理されます。⭐は実用的な出発点であり、順位や有料掲載ではありません。
+## レビュー済みカタログ
 
 <!-- catalog:start -->
 
@@ -167,13 +87,4 @@ CI、依存関係、シークレット、マージ経路を悪意ある、また
 
 <!-- catalog:end -->
 
-## 安全契約
-
-- 作成者を推測せず、品質とrepository riskを評価します。
-- 未信頼codeをsecretやwrite token付きで実行しません。
-- 観察から始め、根拠がある場合だけ執行します。
-- 自動closeやlockより先にqueueとstatus checkを使います。
-- rule、owner、review date、rollback、異議申立て経路を公開します。
-- scanner resultやcatalog listingをsecurity certificationとして扱いません。
-
-production利用前に[日本語保証ケース](docs/ja/KIT_ASSURANCE.md)を確認してください。Templateは法的助言ではありません。本プロジェクトは[MIT License](LICENSE)です。
+正規リリース: `v1.0.0`。[MIT License](LICENSE)。

@@ -1,98 +1,18 @@
-# Awesome Maintainer Defense
+# Awesome Maintainer Defense — Tiếng Việt
 
-> Tìm thiết lập GitHub và tác vụ tự động có rủi ro mà không thay đổi kho mã nguồn của bạn.
+[Tài liệu ba ngôn ngữ](README.md) · [日本語](README.ja.md)
 
-[English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
-
-[![Quality](https://github.com/thangldw/awesome-maintainer-defense/actions/workflows/quality.yml/badge.svg)](https://github.com/thangldw/awesome-maintainer-defense/actions/workflows/quality.yml)
-[![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-
-**Maintainer Defense Kit** là sản phẩm: CLI auditor, profile có thể rollback, policy và playbook. **Awesome Maintainer Defense** là catalog cộng đồng đã review bằng chứng trong cùng repository. Hệ thống **chống lạm dụng, không chống AI**; finding là đầu vào để review, không phải bằng chứng về tác giả hay ý định.
-
-## Audit trước
-
-Output `--format summary` thật dưới đây được lấy nguyên văn từ case `pwn-request` trong corpus đã công bố:
-
-```text
-3 findings · 1 critical · 1 high · 1 medium
-
-CRITICAL MD-WF-005  Untrusted pull-request input can reach a privileged workflow with secrets or write authority.
-HIGH     MD-WF-004  Privileged event pull_request_target checks out an attacker-influenced revision.
-MEDIUM   MD-WF-006  Checkout may persist a write-capable token in the workspace.
-```
-
-![Kết quả audit thật của Maintainer Defense với ba finding trong workflow](assets/audit-result.png)
-
-Tải CLI v1.1 không có dependency và kiểm tra checksum. Audit không dùng mạng hay GitHub token.
+Maintainer Defense Kit là CLI Python chạy offline để kiểm tra policy và ranh giới tin cậy của GitHub Actions. Công cụ không cần network hoặc GitHub token. `fix` chỉ tạo unified diff để người dùng xem xét, không tự sửa file, đổi setting, commit hoặc push.
 
 ```bash
-curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1/maintainer-defense-kit.py
-curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1/maintainer-defense-kit.py.sha256
-
-sha256sum -c maintainer-defense-kit.py.sha256
-# macOS: shasum -a 256 -c maintainer-defense-kit.py.sha256
-
-python3 maintainer-defense-kit.py audit .
-python3 maintainer-defense-kit.py audit . --format summary
-python3 maintainer-defense-kit.py audit . --format sarif > maintainer-defense.sarif
-python3 maintainer-defense-kit.py fix . --output recommended.patch
+python3 scripts/build_standalone.py
+python3 generated/maintainer-defense-kit.py audit .
+python3 generated/maintainer-defense-kit.py fix . --output recommended.patch
 ```
 
-Hoặc cài cùng code v1.1 qua package manager:
+Finding là bằng chứng cần con người review, không phải kết luận về tác giả, ý định hoặc độ an toàn. Các workflow nằm bên trong `kits/**/.github/` là asset mẫu của sản phẩm và không chạy trong repo này.
 
-```bash
-pipx install https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1/maintainer_defense_kit-1.1.0-py3-none-any.whl
-
-brew tap thangldw/maintainer-defense https://github.com/thangldw/awesome-maintainer-defense
-brew install thangldw/maintainer-defense/maintainer-defense-kit
-```
-
-`fix` chỉ sinh unified diff; không sửa file, GitHub setting, commit hay push. Xem [rule reference](docs/AUDITOR_RULES.md), [đánh giá synthetic theo rule](docs/AUDITOR_EVALUATION.md), [pilot trên repository công khai](docs/AUDITOR_PILOT.md), [chương trình pilot độc lập](docs/AUDITOR_PILOT_PROGRAM.md) và [workflow SARIF read-only](docs/examples/auditor-sarif.yml).
-
-## Vì sao dùng công cụ này thay vì X?
-
-Chọn kit này khi cần một bước kiểm tra offline, không cần token, bao quát cả file chính sách lẫn mẫu GitHub Actions có rủi ro và chỉ đề xuất patch để review. Các công cụ sau bổ sung cho kit ở những nhu cầu chuyên biệt hơn:
-
-| Công cụ | Phù hợp hơn khi bạn cần |
-| --- | --- |
-| **Maintainer Defense Kit** | Một lần kiểm tra local, read-only cho file quản trị và trust boundary của workflow |
-| [zizmor](https://github.com/zizmorcore/zizmor) | Phân tích tĩnh sâu hơn, tập trung riêng vào GitHub Actions |
-| [OpenSSF Scorecard](https://github.com/ossf/scorecard) | Đánh giá tình trạng bảo mật rộng hơn bằng tín hiệu từ repository và GitHub |
-| [OpenSSF Allstar](https://github.com/ossf/allstar) | Kiểm tra policy liên tục trên nhiều repository bằng GitHub App |
-
-Có thể dùng chúng cùng nhau; kết quả pass từ một công cụ không chứng minh repository an toàn.
-
-## Cài profile phòng vệ
-
-Preview là mặc định. Review mọi đích `CREATE`/`KEEP` dự kiến và nội dung asset tương ứng trước khi thêm `--apply`.
-
-```bash
-python3 maintainer-defense-kit.py --target . --profile observe --language vi --repo OWNER/REPOSITORY
-python3 maintainer-defense-kit.py --target . --profile observe --language vi --repo OWNER/REPOSITORY --apply
-python3 maintainer-defense-kit.py --target . --verify
-```
-
-Installer từ chối file xung đột, ghi ownership và hash vào manifest, đồng thời không uninstall file do installer sở hữu nếu file đó đã bị sửa.
-
-![Demo terminal 35 giây: dry-run, cài observe, verify rồi uninstall](assets/demo.gif)
-
-## Chọn bước tiếp theo
-
-| Trạng thái | Hành động |
-| --- | --- |
-| Chưa có baseline | Review [native controls](docs/NATIVE_CONTROLS.md), rồi chạy audit |
-| Tải contribution bình thường | Cài `observe`; chưa tạo tác động nhìn thấy với contributor |
-| Review overload đã đo được | Cân nhắc `balanced`; giữ human review và đường khiếu nại |
-| Có rủi ro supply chain | Dùng `hardened`; review pin, token và dependency policy |
-| Đang có incident | Theo [playbook tiếng Việt](docs/vi/PLAYBOOK.md); mọi giới hạn phải có thời hạn |
-
-Xem [documentation hub](docs/README.md) để đi tới product reference, operations, evidence và deployable assets. [Roadmap theo outcome](ROADMAP.md) nêu rõ bằng chứng cần có trước khi dự án mở rộng.
-
-## Tài nguyên
-
-[![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
-
-Catalog được sinh từ [`catalog.json`](catalog.json); bản dịch nằm trong [`i18n/vi.json`](i18n/vi.json). ⭐ là điểm bắt đầu thực dụng, không phải xếp hạng hay vị trí trả phí.
+## Catalog đã review
 
 <!-- catalog:start -->
 
@@ -167,13 +87,4 @@ Bảo vệ CI, dependency, secret và đường merge khỏi contribution độc
 
 <!-- catalog:end -->
 
-## Hợp đồng an toàn
-
-- Đánh giá chất lượng và rủi ro repository, không đoán tác giả.
-- Không chạy code không tin cậy với secret hoặc write token.
-- Bắt đầu bằng quan sát; chỉ thực thi khi có bằng chứng.
-- Ưu tiên queue và status check trước khi tự động close hoặc lock.
-- Công bố rule, owner, review date, rollback và đường khiếu nại.
-- Không xem scanner result hay catalog listing là chứng nhận bảo mật.
-
-Đọc [hồ sơ đảm bảo tiếng Việt](docs/vi/KIT_ASSURANCE.md) trước khi dùng production. Template là điểm khởi đầu, không phải tư vấn pháp lý. Dự án dùng [MIT License](LICENSE).
+Phát hành chuẩn: `v1.0.0`. Giấy phép [MIT](LICENSE).

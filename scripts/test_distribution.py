@@ -10,8 +10,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / "dist"
-VERSION = "1.1"
-PACKAGE_VERSION = "1.1.0"
+VERSION = "1.0.0"
+PACKAGE_VERSION = "1.0.0"
 
 
 def main() -> None:
@@ -25,7 +25,7 @@ def main() -> None:
 
     wheels = list(DIST.glob(f"maintainer_defense_kit-{PACKAGE_VERSION}-py3-none-any.whl"))
     if len(wheels) != 1:
-        raise SystemExit("expected exactly one v1.1 universal wheel in dist/")
+        raise SystemExit("expected exactly one v1.0.0 universal wheel in dist/")
     with zipfile.ZipFile(wheels[0]) as archive:
         names = set(archive.namelist())
         module = "maintainer_defense_kit.py"
@@ -43,7 +43,7 @@ def main() -> None:
 
     formula = (ROOT / "Formula/maintainer-defense-kit.rb").read_text(encoding="utf-8")
     if f'/v{VERSION}/maintainer-defense-kit.py"' not in formula:
-        raise SystemExit("Homebrew formula does not use the v1.1 release asset")
+        raise SystemExit("Homebrew formula does not use the v1.0.0 release asset")
     match = re.search(r'^  sha256 "([0-9a-f]{64})"$', formula, re.MULTILINE)
     if not match or match.group(1) != digest:
         raise SystemExit("Homebrew formula checksum does not match the standalone artifact")
