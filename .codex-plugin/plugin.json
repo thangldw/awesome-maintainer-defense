@@ -13,7 +13,7 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Awesome Maintainer Defense",
-    "shortDescription": "Audit repository trust boundaries safely",
+    "shortDescription": "Audit repository trust safely",
     "longDescription": "Inspect repository policy, GitHub Actions trust boundaries, and moderation automation without network access or repository mutation; generate reviewable remediation patches on request.",
     "developerName": "Thang Luu",
     "category": "Productivity",
@@ -26,7 +26,7 @@
       "Explain the highest-risk workflow findings.",
       "Generate a reviewable patch without editing the repository."
     ],
-    "logo": "./assets/plugin-icon.svg",
-    "composerIcon": "./assets/plugin-icon.svg"
+    "logo": "./assets/plugin-icon.png",
+    "composerIcon": "./assets/plugin-icon.png"
   }
 }
