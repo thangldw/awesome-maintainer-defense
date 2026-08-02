@@ -14,7 +14,7 @@ Prepared: 2026-08-02
 - Category: Developer Tools / Security
 - Short description: Audit repository trust boundaries safely.
 - Long description: Awesome Maintainer Defense audits repository governance, GitHub Actions trust boundaries, token permissions, and moderation automation without a network connection or GitHub token. It explains evidence-backed findings and can generate a reviewable unified diff without editing the repository.
-- Developer: Thang Luu
+- Developer: DUC THANG LUU
 - Website: https://github.com/thangldw/awesome-maintainer-defense
 - Support: https://github.com/thangldw/awesome-maintainer-defense/blob/main/SUPPORT.md
 - Privacy: https://github.com/thangldw/awesome-maintainer-defense/blob/main/PRIVACY.md
