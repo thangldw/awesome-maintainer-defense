@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title">
+  <title id="title">Awesome Maintainer Defense</title>
+  <rect width="256" height="256" rx="48" fill="#0b1726"/>
+  <path d="M128 34c30 24 59 32 82 35v60c0 47-29 82-82 103-53-21-82-56-82-103V69c23-3 52-11 82-35z" fill="#102536" stroke="#a8ff60" stroke-width="10"/>
+  <path d="m85 132 28 28 61-68" fill="none" stroke="#71e6a2" stroke-linecap="round" stroke-linejoin="round" stroke-width="20"/>
+</svg>
