@@ -1,0 +1,32 @@
+{
+  "name": "awesome-maintainer-defense",
+  "version": "1.0.0",
+  "description": "Read-only repository governance and GitHub Actions risk audits with reviewable patches.",
+  "author": {
+    "name": "Thang Luu",
+    "url": "https://github.com/thangldw"
+  },
+  "homepage": "https://github.com/thangldw/awesome-maintainer-defense",
+  "repository": "https://github.com/thangldw/awesome-maintainer-defense",
+  "license": "MIT",
+  "keywords": ["github-actions", "repository-security", "governance", "maintainers", "audit"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Awesome Maintainer Defense",
+    "shortDescription": "Audit repository trust boundaries safely",
+    "longDescription": "Inspect repository policy, GitHub Actions trust boundaries, and moderation automation without network access or repository mutation; generate reviewable remediation patches on request.",
+    "developerName": "Thang Luu",
+    "category": "Productivity",
+    "capabilities": ["Read"],
+    "websiteURL": "https://github.com/thangldw/awesome-maintainer-defense",
+    "privacyPolicyURL": "https://github.com/thangldw/awesome-maintainer-defense/blob/main/PRIVACY.md",
+    "termsOfServiceURL": "https://github.com/thangldw/awesome-maintainer-defense/blob/main/TERMS.md",
+    "defaultPrompt": [
+      "Audit this repository's GitHub Actions trust boundaries.",
+      "Explain the highest-risk workflow findings.",
+      "Generate a reviewable patch without editing the repository."
+    ],
+    "logo": "./assets/social-preview.png",
+    "screenshots": ["./assets/audit-result.png"]
+  }
+}
