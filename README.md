@@ -52,6 +52,8 @@ CLI Python không dependency kiểm tra policy và ranh giới tin cậy của w
 
 The deployable kit keeps example `.github` directories because those files are product assets; they do not execute in this repository.
 
+The repository is also a local, skills-only plugin for ChatGPT, Codex, Claude Code and Cowork. It does not require a hosted connector. See the [directory submission package](docs/SUBMISSION.md), [privacy policy](PRIVACY.md), [terms](TERMS.md), and [support guidance](SUPPORT.md).
+
 ## Evidence-reviewed catalog
 
 <!-- catalog:start -->
