@@ -15,7 +15,7 @@
     "displayName": "Awesome Maintainer Defense",
     "shortDescription": "Audit repository trust safely",
     "longDescription": "Inspect repository policy, GitHub Actions trust boundaries, and moderation automation without network access or repository mutation; generate reviewable remediation patches on request.",
-    "developerName": "Thang Luu",
+    "developerName": "DUC THANG LUU",
     "category": "Productivity",
     "capabilities": ["Read"],
     "websiteURL": "https://github.com/thangldw/awesome-maintainer-defense",
