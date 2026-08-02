@@ -26,7 +26,7 @@
       "Explain the highest-risk workflow findings.",
       "Generate a reviewable patch without editing the repository."
     ],
-    "logo": "./assets/social-preview.png",
-    "screenshots": ["./assets/audit-result.png"]
+    "logo": "./assets/plugin-icon.svg",
+    "composerIcon": "./assets/plugin-icon.svg"
   }
 }
