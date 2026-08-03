@@ -1,5 +1,25 @@
 # Maintainer Defense changelog / Lịch sử thay đổi / 変更履歴
 
+## [1.0.1] - 2026-08-03
+
+### English
+
+- Refreshed all reviewed repository activity snapshots against the live GitHub API.
+- Advanced the verified CodeQL v4 pin to GitHub's signed release commit.
+- Rebuilt the standalone auditor and distribution metadata for the patch release.
+
+### Tiếng Việt
+
+- Làm mới toàn bộ snapshot hoạt động repository đã review từ GitHub API trực tiếp.
+- Cập nhật pin CodeQL v4 đã xác minh sang commit release được GitHub ký.
+- Build lại auditor độc lập và metadata phân phối cho bản vá.
+
+### 日本語
+
+- レビュー済み repository の activity snapshot を GitHub API の最新値に更新しました。
+- 検証済み CodeQL v4 pin を GitHub 署名済み release commit に更新しました。
+- Patch release 向けに standalone auditor と配布 metadata を再生成しました。
+
 ## [1.0.0] - 2026-07-26
 
 ### English
@@ -20,4 +40,5 @@
 - 製品データとしてのサンプル workflow は残し、このリポジトリ自身で実行される workflow を削除しました。
 - パッケージとリリースメタデータを `v1.0.0` に統一しました。
 
+[1.0.1]: https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.0.1
 [1.0.0]: https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.0.0

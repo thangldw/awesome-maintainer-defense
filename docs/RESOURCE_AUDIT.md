@@ -4,7 +4,7 @@
 
 ## Snapshot
 
-Verified against official project sources on **2026-07-15**.
+Verified against official project sources on **2026-08-03**.
 Repository activity is a point-in-time snapshot, not an endorsement or a guarantee of future maintenance.
 
 ## Impact vocabulary
@@ -93,7 +93,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** GitHub API, repository trust file
 - **Access:** Depends on action; write permission is required for close or lock behavior
 - **Important limitation:** Explicit trust can protect attention but can also create a closed or biased contributor network. Define transparent nomination and appeal rules.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-12T20:29:38Z`, GitHub license detection=`MIT`
+- **Repository snapshot:** archived=`false`, last source push=`2026-07-26T03:12:21Z`, GitHub license detection=`MIT`
 - **Evidence:** [source 1](https://github.com/mitchellh/vouch#who-is-vouched) · [source 2](https://github.com/mitchellh/vouch#github-actions)
 
 ### [Good Egg](https://github.com/2ndSetAI/good-egg)
@@ -117,7 +117,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** GitHub API
 - **Access:** Contents read and pull requests write
 - **Important limitation:** Using pull_request_target is dangerous if the same workflow checks out or executes untrusted PR code. Labeling rules can misroute contributions.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-12T04:12:15Z`, GitHub license detection=`MIT`
+- **Repository snapshot:** archived=`false`, last source push=`2026-07-31T02:54:14Z`, GitHub license detection=`MIT`
 - **Evidence:** [source 1](https://github.com/actions/labeler#recommended-permissions) · [source 2](https://github.com/actions/labeler#notes-regarding-pull_request_target-event)
 
 ### [Stale](https://github.com/actions/stale)
@@ -128,7 +128,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** GitHub API
 - **Access:** Issues and pull requests write; contents write only when deleting branches
 - **Important limitation:** Inactivity does not mean low value. Exempt security, roadmap, accessibility, and confirmed-bug labels before enabling closure.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-12T04:10:47Z`, GitHub license detection=`MIT`
+- **Repository snapshot:** archived=`false`, last source push=`2026-07-28T03:14:46Z`, GitHub license detection=`MIT`
 - **Evidence:** [source 1](https://github.com/actions/stale#recommended-permissions) · [source 2](https://github.com/actions/stale#all-options)
 
 ### [Lock Threads](https://github.com/dessant/lock-threads)
@@ -161,7 +161,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** GitHub API, workflow workspace
 - **Access:** Issues, pull requests, or discussions read according to the search query; publishing requires a separate step and permission
 - **Important limitation:** Response-time metrics do not measure answer quality or maintainer wellbeing. The official example uses a separate Action to publish the generated file as an issue; this tool does not publish it by itself.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-09T18:00:50Z`, GitHub license detection=`MIT`
+- **Repository snapshot:** archived=`false`, last source push=`2026-07-30T19:01:47Z`, GitHub license detection=`MIT`
 - **Evidence:** [source 1](https://github.com/github-community-projects/issue-metrics#available-metrics) · [source 2](https://github.com/github-community-projects/issue-metrics#usage)
 
 ## Repository Governance & Access
@@ -174,7 +174,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** GitHub API, OpenSSF-operated service when using the public app
 - **Access:** Read access to most repository settings and contents; issues and checks write for reporting and block mode
 - **Important limitation:** Organization-wide policy mistakes can affect many repositories. Start with opt-in scope and issue reporting before block enforcement.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-15T05:57:50Z`, GitHub license detection=`Apache-2.0`
+- **Repository snapshot:** archived=`false`, last source push=`2026-08-02T01:20:24Z`, GitHub license detection=`Apache-2.0`
 - **Evidence:** [source 1](https://github.com/ossf/allstar#using-the-public-allstar-app) · [source 2](https://github.com/ossf/allstar#configuration-definitions)
 
 ### [Safe Settings](https://github.com/github-community-projects/safe-settings)
@@ -185,7 +185,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** GitHub API, central admin repository
 - **Access:** Broad organization and repository administration permissions
 - **Important limitation:** Configuration errors have organization-wide blast radius. Restrict managed repositories, protect the admin repository, and require review for settings changes.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-10T15:30:03Z`, GitHub license detection=`ISC`
+- **Repository snapshot:** archived=`false`, last source push=`2026-07-31T17:20:00Z`, GitHub license detection=`ISC`
 - **Evidence:** [source 1](https://github.com/github-community-projects/safe-settings#how-it-works) · [source 2](https://github.com/github-community-projects/safe-settings#restrict-repositories)
 
 ### [Repository Settings App](https://github.com/repository-settings/app)
@@ -196,7 +196,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** GitHub API, repository configuration file
 - **Access:** Repository administration permissions
 - **Important limitation:** Anyone able to merge settings changes may gain or alter administrative access. Protect the configuration path with CODEOWNERS and required review.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-16T09:47:42Z`, GitHub license detection=`ISC`
+- **Repository snapshot:** archived=`false`, last source push=`2026-08-02T05:56:30Z`, GitHub license detection=`ISC`
 - **Evidence:** [source 1](https://github.com/repository-settings/app#repository-settings-app) · [source 2](https://github.com/repository-settings/app#security-implications)
 
 ## Workflow & Supply-Chain Defense
@@ -209,7 +209,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** runner telemetry, StepSecurity service
 - **Access:** Runs first in a CI job and observes process, file, and network activity
 - **Important limitation:** The community and enterprise tiers differ, and monitoring data is presented through an external service. Review data handling and supported runner type before adoption.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-07T09:27:49Z`, GitHub license detection=`Apache-2.0`
+- **Repository snapshot:** archived=`false`, last source push=`2026-07-29T17:04:03Z`, GitHub license detection=`Apache-2.0`
 - **Evidence:** [source 1](https://github.com/step-security/harden-runner#community-free) · [source 2](https://github.com/step-security/harden-runner#how-it-works)
 
 ### [OpenSSF Scorecard](https://github.com/ossf/scorecard)
@@ -220,7 +220,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** GitHub API, optional Scorecard API and public dataset
 - **Access:** Repository metadata read; additional permissions when uploading SARIF
 - **Important limitation:** Scorecard documents that checks are heuristics with false positives and negatives. Weekly public results omit some checks and can be stale.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-15T06:27:21Z`, GitHub license detection=`Apache-2.0`
+- **Repository snapshot:** archived=`false`, last source push=`2026-08-01T00:39:38Z`, GitHub license detection=`Apache-2.0`
 - **Evidence:** [source 1](https://github.com/ossf/scorecard#scorecard-checks) · [source 2](https://github.com/ossf/scorecard#public-data)
 
 ### [zizmor](https://github.com/zizmorcore/zizmor)
@@ -231,7 +231,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** local files, optional GitHub API for online audits
 - **Access:** Read access to workflow files; optional GitHub token
 - **Important limitation:** Static analysis cannot prove a workflow is safe and may miss runtime or third-party Action behavior. Review findings in context.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-15T12:45:20Z`, GitHub license detection=`MIT`
+- **Repository snapshot:** archived=`false`, last source push=`2026-08-02T21:07:38Z`, GitHub license detection=`MIT`
 - **Evidence:** [source 1](https://github.com/zizmorcore/zizmor) · [source 2](https://docs.zizmor.sh/audits/)
 
 ### [pinact](https://github.com/suzuki-shunsuke/pinact)
@@ -242,7 +242,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** local files, GitHub API unless offline mode is used
 - **Access:** Filesystem write for fixes; optional GitHub token for release and tag lookup
 - **Important limitation:** A pinned SHA limits tag movement but does not make third-party code trustworthy. Offline mode only checks SHA syntax.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-15T05:50:46Z`, GitHub license detection=`MIT`
+- **Repository snapshot:** archived=`false`, last source push=`2026-08-02T09:53:05Z`, GitHub license detection=`MIT`
 - **Evidence:** [source 1](https://github.com/suzuki-shunsuke/pinact#offline-check---no-api) · [source 2](https://github.com/suzuki-shunsuke/pinact#update-actions--update)
 
 ### [Dependency Review Action](https://github.com/actions/dependency-review-action)
@@ -253,7 +253,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** GitHub Dependency Graph API
 - **Access:** Contents read and pull requests read; optional pull requests write for comments
 - **Important limitation:** Supported for public repositories and private repositories with GitHub Advanced Security. Results depend on dependency graph coverage and advisory data.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-16T14:52:45Z`, GitHub license detection=`MIT`
+- **Repository snapshot:** archived=`false`, last source push=`2026-08-01T04:32:45Z`, GitHub license detection=`MIT`
 - **Evidence:** [source 1](https://github.com/actions/dependency-review-action#dependency-review-action) · [source 2](https://github.com/actions/dependency-review-action#configuration-options)
 
 ### [TruffleHog](https://github.com/trufflesecurity/trufflehog)
@@ -264,7 +264,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** scanned source, credential providers during verification
 - **Access:** Read access to scan targets; network access for verification
 - **Important limitation:** Verification can send authentication requests to third-party services. Redact output, scope scans carefully, and treat findings as sensitive incident data.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-16T13:36:49Z`, GitHub license detection=`AGPL-3.0`
+- **Repository snapshot:** archived=`false`, last source push=`2026-07-31T16:18:38Z`, GitHub license detection=`AGPL-3.0`
 - **Evidence:** [source 1](https://github.com/trufflesecurity/trufflehog#what-is-secret-verification) · [source 2](https://github.com/trufflesecurity/trufflehog#usage)
 
 ### [PRevent](https://github.com/apiiro/PRevent)
@@ -286,7 +286,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** OSV API and deps.dev, offline database option
 - **Access:** Read access to dependency artifacts; filesystem and package-manager access for fix mode
 - **Important limitation:** Coverage varies by ecosystem. Guided remediation can execute package-manager behavior from untrusted projects; do not run fix mode on untrusted code.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-15T21:18:29Z`, GitHub license detection=`Apache-2.0`
+- **Repository snapshot:** archived=`false`, last source push=`2026-08-02T21:17:51Z`, GitHub license detection=`Apache-2.0`
 - **Evidence:** [source 1](https://github.com/google/osv-scanner#offline-mode) · [source 2](https://github.com/google/osv-scanner#guided-remediation)
 
 ### [Gitleaks](https://github.com/gitleaks/gitleaks)
@@ -297,7 +297,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** local scan target
 - **Access:** Read access to files or Git history
 - **Important limitation:** Pattern detection has false positives and false negatives. Keep output redacted and rotate any real credential rather than merely deleting it from the latest commit.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-15T04:12:57Z`, GitHub license detection=`MIT`
+- **Repository snapshot:** archived=`false`, last source push=`2026-07-29T04:13:17Z`, GitHub license detection=`MIT`
 - **Evidence:** [source 1](https://github.com/gitleaks/gitleaks#readme) · [source 2](https://github.com/gitleaks/gitleaks#commands)
 
 ## Policies & Playbooks
@@ -310,7 +310,7 @@ Repository activity is a point-in-time snapshot, not an endorsement or a guarant
 - **Data boundaries:** none
 - **Access:** None
 - **Important limitation:** Policies differ by project and can change after collection. Confirm each linked source and seek legal advice for copyright, labor, or privacy questions.
-- **Repository snapshot:** archived=`false`, last source push=`2026-07-09T17:58:53Z`, GitHub license detection=`CC0-1.0`
+- **Repository snapshot:** archived=`false`, last source push=`2026-07-19T19:51:17Z`, GitHub license detection=`CC0-1.0`
 - **Evidence:** [source 1](https://github.com/melissawm/open-source-ai-contribution-policies)
 
 ### [OpenSSF AI-Slop Best-Practices Work Item](https://github.com/ossf/wg-vulnerability-disclosures/issues/178)

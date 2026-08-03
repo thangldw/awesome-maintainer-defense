@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "verified_on": "2026-07-15",
+  "verified_on": "2026-08-03",
   "pins": [
     {
       "repository": "actions/checkout",
@@ -40,7 +40,7 @@
     {
       "repository": "github/codeql-action",
       "tag": "v4",
-      "sha": "99df26d4f13ea111d4ec1a7dddef6063f76b97e9",
+      "sha": "f205ea1c3313d32999d8d6a48b4f6530d4437b38",
       "metadata_path": "upload-sarif/action.yml",
       "commit_verified": true
     }
