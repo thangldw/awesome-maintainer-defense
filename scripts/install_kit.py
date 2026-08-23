@@ -17,8 +17,8 @@ import sys
 import tarfile
 import tempfile
 from dataclasses import dataclass
-from datetime import datetime, timezone
-from pathlib import Path
+from datetime import date, datetime, timezone
+from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[1]
 KIT_VERSION = "1.0.1"
@@ -647,6 +647,119 @@ class WorkflowRecord:
     has_privileged_authority: bool
 
 
+@dataclass(frozen=True)
+class Suppression:
+    rule_id: str
+    reason: str
+    owner: str
+    expires_on: date
+    fingerprint: str | None = None
+    path: str | None = None
+    expired: bool = False
+
+
+def load_suppressions(path: Path, today: date) -> list[Suppression]:
+    try:
+        data = json.loads(path.expanduser().read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise KitError(f"invalid suppression JSON {path}: {exc}") from exc
+    if not isinstance(data, dict) or set(data) != {"schema_version", "suppressions"}:
+        raise KitError("suppression config must contain only schema_version and suppressions")
+    if data["schema_version"] != 1 or not isinstance(data["suppressions"], list):
+        raise KitError("suppression config must use schema_version 1 and a suppressions array")
+    required = {"rule_id", "reason", "owner", "expires_on"}
+    allowed = required | {"fingerprint", "path"}
+    entries: list[Suppression] = []
+    selectors: set[tuple[str, str | None, str | None]] = set()
+    for index, item in enumerate(data["suppressions"]):
+        label = f"suppression #{index + 1}"
+        if not isinstance(item, dict) or not required <= set(item) or not set(item) <= allowed:
+            raise KitError(f"{label} has missing or unknown fields")
+        rule_id = item["rule_id"]
+        if not isinstance(rule_id, str) or rule_id not in rule_catalog():
+            raise KitError(f"{label} uses unknown rule_id: {rule_id!r}")
+        reason = item["reason"]
+        owner = item["owner"]
+        if not isinstance(reason, str) or not reason.strip():
+            raise KitError(f"{label} requires a non-empty reason")
+        if not isinstance(owner, str) or not owner.strip():
+            raise KitError(f"{label} requires a non-empty owner")
+        raw_expiry = item["expires_on"]
+        if not isinstance(raw_expiry, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", raw_expiry):
+            raise KitError(f"{label} expires_on must use YYYY-MM-DD")
+        try:
+            expires_on = date.fromisoformat(raw_expiry)
+        except ValueError as exc:
+            raise KitError(f"{label} has invalid expires_on date: {raw_expiry}") from exc
+        fingerprint = item.get("fingerprint")
+        relative = item.get("path")
+        if fingerprint is None and relative is None:
+            raise KitError(f"{label} requires fingerprint or path")
+        if fingerprint is not None and (
+            not isinstance(fingerprint, str) or not re.fullmatch(r"[0-9a-f]{24}", fingerprint)
+        ):
+            raise KitError(f"{label} fingerprint must be 24 lowercase hexadecimal characters")
+        if relative is not None:
+            if not isinstance(relative, str) or not relative or "\\" in relative:
+                raise KitError(f"{label} path must be a non-empty repository-relative POSIX path")
+            normalized = PurePosixPath(relative)
+            if normalized.is_absolute() or ".." in normalized.parts or str(normalized) != relative:
+                raise KitError(f"{label} path must be a normalized repository-relative POSIX path")
+        selector = (rule_id, fingerprint, relative)
+        if selector in selectors:
+            raise KitError(f"duplicate suppression selector for {rule_id}")
+        selectors.add(selector)
+        entries.append(
+            Suppression(
+                rule_id=rule_id,
+                reason=reason.strip(),
+                owner=owner.strip(),
+                expires_on=expires_on,
+                fingerprint=fingerprint,
+                path=relative,
+                expired=expires_on < today,
+            )
+        )
+    return entries
+
+
+def apply_suppressions(
+    report: dict, entries: list[Suppression]
+) -> tuple[dict, int, list[str]]:
+    active = [(index, entry) for index, entry in enumerate(entries) if not entry.expired]
+    warnings = [
+        f"Suppression {entry.rule_id} owned by {entry.owner} expired on {entry.expires_on.isoformat()}"
+        for entry in entries
+        if entry.expired
+    ]
+    matched: set[int] = set()
+    emitted: list[dict] = []
+    suppressed = 0
+    for finding in report["findings"]:
+        matching = []
+        for index, entry in active:
+            if entry.rule_id != finding["rule_id"]:
+                continue
+            if entry.fingerprint is not None and entry.fingerprint != finding["fingerprint"]:
+                continue
+            if entry.path is not None and entry.path != finding["location"]["path"]:
+                continue
+            matching.append(index)
+        if matching:
+            matched.update(matching)
+            suppressed += 1
+        else:
+            emitted.append(finding)
+    unmatched = [entry for index, entry in active if index not in matched]
+    if unmatched:
+        entry = unmatched[0]
+        selector = entry.fingerprint or entry.path
+        raise KitError(
+            f"active suppression {entry.rule_id} selector {selector!r} matches no finding"
+        )
+    return report_with_findings(report, emitted), suppressed, warnings
+
+
 def inline_yaml_values(value: str) -> frozenset[str]:
     value = value.split("#", 1)[0].strip()
     if value.startswith("[") and value.endswith("]"):
@@ -1272,6 +1385,10 @@ def parse_audit_args(command: str, arguments: list[str]) -> argparse.Namespace:
         comparison.add_argument("--baseline", type=Path, help="schema-v1 JSON report")
         comparison.add_argument("--compare-ref", help="local Git commit to audit as baseline")
         parser.add_argument(
+            "--config", type=Path,
+            help="suppression config (default: TARGET/.maintainer-defense.json when present)",
+        )
+        parser.add_argument(
             "--new-only", action="store_true",
             help="emit only fingerprints absent from exactly one comparison source",
         )
@@ -1311,6 +1428,15 @@ def run_auditor(command: str, arguments: list[str]) -> None:
         patch = combined_patch(report, args.safe_only)
         emit_output(patch, args.output)
         return
+    config_path = args.config.expanduser() if args.config else target / ".maintainer-defense.json"
+    if args.config or config_path.is_file():
+        entries = load_suppressions(config_path, date.today())
+        report, suppressed, warnings = apply_suppressions(report, entries)
+        for warning in warnings:
+            print(f"WARNING: {warning}", file=sys.stderr)
+        if suppressed:
+            noun = "finding" if suppressed == 1 else "findings"
+            print(f"Suppressed {suppressed} {noun} via {config_path}", file=sys.stderr)
     if args.new_only:
         if args.baseline:
             fingerprints = load_baseline(args.baseline)

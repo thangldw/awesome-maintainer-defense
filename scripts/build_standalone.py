@@ -18,7 +18,7 @@ SENTINEL = "EMBEDDED_FILES: dict[str, str] = {}"
 
 
 def asset_paths() -> list[str]:
-    paths: list[str] = ["auditor-rules.json"]
+    paths: list[str] = ["auditor-rules.json", "maintainer-defense-config.schema.json"]
     for language in ("en", "vi", "ja"):
         base = f"kits/maintainer-defense-kit/locales/{language}"
         paths.extend(

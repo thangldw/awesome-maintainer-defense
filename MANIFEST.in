@@ -3,6 +3,7 @@ include README.md
 include pyproject.toml
 include build_backend.py
 include auditor-rules.json
+include maintainer-defense-config.schema.json
 include generated/maintainer_defense_kit.py
 include scripts/build_standalone.py
 include scripts/install_kit.py
