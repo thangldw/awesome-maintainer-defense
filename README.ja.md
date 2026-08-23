@@ -6,8 +6,8 @@ Maintainer Defense Kit は、repository policy と GitHub Actions の信頼境�
 
 ```bash
 python3 scripts/build_standalone.py
-python3 generated/maintainer-defense-kit.py audit .
-python3 generated/maintainer-defense-kit.py fix . --output recommended.patch
+python3 dist/maintainer-defense-kit.py audit .
+python3 dist/maintainer-defense-kit.py fix . --output recommended.patch
 ```
 
 所見は人が確認するための証拠であり、作者、意図、安全性の結論ではありません。`kits/**/.github/` 内の workflow は製品サンプルであり、この repository では実行されません。
@@ -87,4 +87,4 @@ CI、依存関係、シークレット、マージ経路を悪意ある、また
 
 <!-- catalog:end -->
 
-正規リリース: `v1.0.0`。[MIT License](LICENSE)。
+正規リリース: `v1.1.0`。[MIT License](LICENSE)。

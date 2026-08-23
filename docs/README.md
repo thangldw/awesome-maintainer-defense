@@ -37,6 +37,7 @@ Deployment translations:
 | What did the synthetic corpus measure? | [Auditor evaluation](AUDITOR_EVALUATION.md) |
 | What changed after testing public repositories? | [Auditor pilot](AUDITOR_PILOT.md) |
 | How can an OSS maintainer join an independent pilot? | [Auditor pilot program](AUDITOR_PILOT_PROGRAM.md) |
+| Where are reproducible pilot bundles published? | [Pilot evidence](../pilots/README.md) |
 | What material corrections have been made? | [Audit log](AUDIT_LOG.md) |
 
 ## Deployable assets

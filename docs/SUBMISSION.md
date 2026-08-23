@@ -1,6 +1,6 @@
 # Awesome Maintainer Defense directory submission
 
-Prepared: 2026-08-02
+Prepared: 2026-08-23
 
 Published on the OpenAI Plugin Directory: https://chatgpt.com/plugins/plugins_6a6edab2886c81918be9c9772e4ca904
 
@@ -43,6 +43,12 @@ Published on the OpenAI Plugin Directory: https://chatgpt.com/plugins/plugins_6a
    Expected: Use `--fail-on high` and interpret exit code 2 as a policy result.
 5. Prompt: Generate safe remediation suggestions as a patch.
    Expected: Use `fix --safe-only`, emit a unified diff, and verify the target worktree itself was not edited.
+6. Prompt: Show only findings introduced since `origin/main`.
+   Expected: Use `--compare-ref origin/main --new-only`; explain that the ref must exist locally and that only emitted new findings affect the policy threshold.
+7. Prompt: Apply the repository's accepted exceptions.
+   Expected: Load `.maintainer-defense.json`; reject unknown, duplicate, expired-as-active, or unmatched exceptions; report expired exceptions without hiding findings.
+8. Prompt: Audit from a saved baseline and return JSON.
+   Expected: Use `--baseline BASELINE.json --new-only --format json` and preserve the schema-v1 contract.
 
 ## Negative review tests
 
@@ -57,14 +63,18 @@ Published on the OpenAI Plugin Directory: https://chatgpt.com/plugins/plugins_6a
 
 No account, token, dependency install, or network access is required. Run `python3 skills/audit-repository-workflows/scripts/run_auditor.py audit .`. The OpenAI ZIP includes the generated standalone auditor; the GitHub plugin uses the canonical repository source. The patch command writes only a requested patch file and never edits the target repository.
 
-## Initial release notes
+## Release provenance
 
-Initial public plugin submission. The plugin bundles a dependency-free, local repository auditor; human-readable, JSON, summary, and SARIF output; reviewable patch generation; and explicit safeguards against mutation and contributor attribution.
+The `v1.1.0` tag workflow builds every public artifact once, uploads the same wheel and sdist to PyPI through OIDC Trusted Publishing, and publishes the complete checksummed set to GitHub Releases. Reruns replace the same GitHub assets and skip already-published immutable PyPI files, so a partial publication can resume. The expected PyPI publisher is repository `thangldw/awesome-maintainer-defense`, workflow `release.yml`, environment `pypi`; no long-lived PyPI token belongs in GitHub secrets.
+
+## v1.1.0 update notes
+
+The update adds complete GitHub write-scope modeling, direct event-data shell-injection detection, cross-workflow artifact trust paths, baseline and Git-ref delta audits, expiring governed suppressions, and reproducible pilot evidence. The plugin remains skills-only, read-only by default, local, dependency-free, and patch-only for remediation.
 
 ## Final portal checks
 
 - Verify the publisher identity and public GitHub repository.
 - Confirm the screenshot and logo do not contain private repository data.
 - Confirm public support, privacy, terms, security, and rule documentation links resolve.
-- For OpenAI, submit the five positive and three negative tests above.
+- For OpenAI, submit the eight positive and three negative tests above and upload `dist/awesome-maintainer-defense-openai-skills-v1.1.0.zip`.
 - For Claude, run `claude plugin validate . --strict` before submission.

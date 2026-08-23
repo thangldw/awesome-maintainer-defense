@@ -10,16 +10,33 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from datetime import date
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 CLI = ROOT / "scripts/install_kit.py"
 CORPUS = ROOT / "tests/fixtures/auditor/corpus.json"
 PIN = "9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0"
+UPLOAD_PIN = "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+DOWNLOAD_PIN = "3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c"
+VALID_SUPPRESSION = {
+    "schema_version": 1,
+    "suppressions": [
+        {
+            "rule_id": "MD-WF-003",
+            "path": ".github/workflows/ci.yml",
+            "reason": "Migration is tracked in issue 42",
+            "owner": "@maintainers",
+            "expires_on": "2026-12-31",
+        }
+    ],
+}
 
 spec = importlib.util.spec_from_file_location("maintainer_defense", CLI)
 assert spec and spec.loader
 module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 
 BASE_FILES = {
@@ -43,6 +60,43 @@ jobs:
 """,
 }
 
+UNTRUSTED_ARTIFACT_PRODUCER = f"""name: PR Tests
+on:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: mkdir -p output && printf '#!/bin/sh\\necho report\\n' > output/report.sh
+      - uses: actions/upload-artifact@{UPLOAD_PIN}
+        with:
+          name: pr-output
+          path: output
+"""
+
+PRIVILEGED_ARTIFACT_CONSUMER = f"""name: Publish
+on:
+  workflow_run:
+    workflows: [\"PR Tests\"]
+    types: [completed]
+permissions: {{}}
+jobs:
+  publish:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@{DOWNLOAD_PIN}
+        with:
+          name: pr-output
+          path: downloaded
+          github-token: ${{{{ github.token }}}}
+          run-id: ${{{{ github.event.workflow_run.id }}}}
+      - run: sh downloaded/report.sh
+"""
+
 
 def materialize(target: Path, case: dict) -> None:
     files = dict(BASE_FILES)
@@ -58,6 +112,20 @@ def materialize(target: Path, case: dict) -> None:
 
 
 class AuditorTests(unittest.TestCase):
+    def run_cli(self, *arguments: object) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [sys.executable, str(CLI), *(str(value) for value in arguments)],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+    def audit_files(self, files: dict[str, str]) -> dict:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            materialize(target, {"id": "multi-file", "files": files})
+            return module.audit_repository(target)
+
     def test_labeled_corpus(self) -> None:
         corpus = json.loads(CORPUS.read_text(encoding="utf-8"))
         self.assertGreaterEqual(len(corpus["cases"]), 50)
@@ -213,6 +281,369 @@ class AuditorTests(unittest.TestCase):
                 workflow.write_text(mutate(workflow.read_text(encoding="utf-8")), encoding="utf-8")
                 rules = {item["rule_id"] for item in module.audit_repository(target)["findings"]}
                 self.assertIn(expected[name], rules)
+
+    def test_all_write_scopes_count_as_job_authority(self) -> None:
+        write_scopes = (
+            "actions",
+            "artifact-metadata",
+            "attestations",
+            "checks",
+            "code-quality",
+            "contents",
+            "deployments",
+            "discussions",
+            "id-token",
+            "issues",
+            "packages",
+            "pages",
+            "pull-requests",
+            "security-events",
+            "statuses",
+        )
+        for scope in write_scopes:
+            with self.subTest(scope=scope), tempfile.TemporaryDirectory() as tmp:
+                target = Path(tmp)
+                materialize(
+                    target,
+                    {
+                        "id": scope,
+                        "workflow": f"""name: dangerous
+on:
+  pull_request_target:
+permissions: {{}}
+jobs:
+  publish:
+    permissions:
+      {scope}: write
+    runs-on: ubuntu-latest
+    steps:
+      - run: git fetch origin refs/pull/1/head && ./publish.sh
+""",
+                    },
+                )
+                rules = {item["rule_id"] for item in module.audit_repository(target)["findings"]}
+                self.assertIn("MD-WF-005", rules)
+
+    def test_untrusted_job_does_not_borrow_unrelated_job_authority(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            materialize(
+                target,
+                {
+                    "id": "separate-authority",
+                    "workflow": """name: separated
+on:
+  pull_request_target:
+permissions: {}
+jobs:
+  inspect:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - run: git fetch origin refs/pull/1/head && ./inspect.sh
+  publish:
+    permissions:
+      checks: write
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo publish trusted metadata
+""",
+                },
+            )
+            rules = {item["rule_id"] for item in module.audit_repository(target)["findings"]}
+            self.assertNotIn("MD-WF-005", rules)
+
+    def test_untrusted_artifact_to_privileged_workflow(self) -> None:
+        report = self.audit_files(
+            {
+                ".github/workflows/test.yml": UNTRUSTED_ARTIFACT_PRODUCER,
+                ".github/workflows/publish.yml": PRIVILEGED_ARTIFACT_CONSUMER,
+            }
+        )
+        findings = [item for item in report["findings"] if item["rule_id"] == "MD-WF-008"]
+        self.assertEqual(len(findings), 1)
+        self.assertIn(".github/workflows/test.yml", findings[0]["threat_scenario"])
+        self.assertIn(".github/workflows/publish.yml", findings[0]["threat_scenario"])
+
+    def test_artifact_trust_path_requires_execution_and_authority(self) -> None:
+        download_only = PRIVILEGED_ARTIFACT_CONSUMER.replace(
+            "      - run: sh downloaded/report.sh\n", "      - run: sha256sum downloaded/report.sh\n"
+        )
+        no_authority = PRIVILEGED_ARTIFACT_CONSUMER.replace(
+            "    permissions:\n      contents: write\n", "    permissions: {}\n"
+        )
+        for name, consumer in (("download-only", download_only), ("no-authority", no_authority)):
+            with self.subTest(case=name):
+                report = self.audit_files(
+                    {
+                        ".github/workflows/test.yml": UNTRUSTED_ARTIFACT_PRODUCER,
+                        ".github/workflows/publish.yml": consumer,
+                    }
+                )
+                rules = {item["rule_id"] for item in report["findings"]}
+                self.assertNotIn("MD-WF-008", rules)
+
+    def test_artifact_trust_path_requires_matching_downloaded_content(self) -> None:
+        cases = (
+            ("shell", "sh downloaded/report.sh", "downloaded", True),
+            ("source", "source ./downloaded/env.sh", "downloaded", True),
+            ("dot-source", ". downloaded/env.sh", "downloaded", True),
+            ("direct", "./downloaded/tool", "downloaded", True),
+            ("relative-direct", "downloaded/tool", "downloaded", True),
+            ("top-level-python", "python downloaded.py", ".", True),
+            ("unrelated-script", "sh scripts/trusted-release.sh", "downloaded", False),
+        )
+        for name, command, destination, expected in cases:
+            with self.subTest(case=name):
+                consumer = PRIVILEGED_ARTIFACT_CONSUMER.replace(
+                    "path: downloaded", f"path: {destination}"
+                ).replace("sh downloaded/report.sh", command)
+                report = self.audit_files(
+                    {
+                        ".github/workflows/test.yml": UNTRUSTED_ARTIFACT_PRODUCER,
+                        ".github/workflows/publish.yml": consumer,
+                    }
+                )
+                rules = {item["rule_id"] for item in report["findings"]}
+                self.assertEqual("MD-WF-008" in rules, expected)
+
+    def test_artifact_trust_path_detects_downloaded_local_action(self) -> None:
+        consumer = PRIVILEGED_ARTIFACT_CONSUMER.replace(
+            "      - run: sh downloaded/report.sh\n",
+            "      - uses: ./downloaded/action\n",
+        )
+        report = self.audit_files(
+            {
+                ".github/workflows/test.yml": UNTRUSTED_ARTIFACT_PRODUCER,
+                ".github/workflows/publish.yml": consumer,
+            }
+        )
+        rules = {item["rule_id"] for item in report["findings"]}
+        self.assertIn("MD-WF-008", rules)
+
+    def test_artifact_trust_path_ignores_commented_local_action(self) -> None:
+        consumer = PRIVILEGED_ARTIFACT_CONSUMER.replace(
+            "      - run: sh downloaded/report.sh\n",
+            "      # - uses: ./downloaded/action\n"
+            "      - run: sh scripts/trusted-release.sh\n",
+        )
+        report = self.audit_files(
+            {
+                ".github/workflows/test.yml": UNTRUSTED_ARTIFACT_PRODUCER,
+                ".github/workflows/publish.yml": consumer,
+            }
+        )
+        rules = {item["rule_id"] for item in report["findings"]}
+        self.assertNotIn("MD-WF-008", rules)
+
+    def test_artifact_trust_path_requires_remote_run_and_matching_name(self) -> None:
+        missing_run = PRIVILEGED_ARTIFACT_CONSUMER.replace(
+            "          run-id: ${{ github.event.workflow_run.id }}\n", ""
+        )
+        wrong_name = PRIVILEGED_ARTIFACT_CONSUMER.replace("name: pr-output", "name: other")
+        for name, consumer in (("missing-run", missing_run), ("wrong-name", wrong_name)):
+            with self.subTest(case=name):
+                report = self.audit_files(
+                    {
+                        ".github/workflows/test.yml": UNTRUSTED_ARTIFACT_PRODUCER,
+                        ".github/workflows/publish.yml": consumer,
+                    }
+                )
+                rules = {item["rule_id"] for item in report["findings"]}
+                self.assertNotIn("MD-WF-008", rules)
+
+    def test_new_only_accepts_one_baseline_source(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            materialize(target, {"id": "baseline", "remove": ["SECURITY.md"]})
+            baseline_path = target / "baseline.json"
+            baseline_path.write_text(
+                json.dumps(module.audit_repository(target)), encoding="utf-8"
+            )
+            workflow = target / ".github/workflows/ci.yml"
+            workflow.write_text(
+                workflow.read_text(encoding="utf-8").replace(f"@{PIN}", "@v4"),
+                encoding="utf-8",
+            )
+            result = self.run_cli(
+                "audit", target, "--baseline", baseline_path, "--new-only", "--format", "json"
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            report = json.loads(result.stdout)
+            self.assertEqual([item["rule_id"] for item in report["findings"]], ["MD-WF-003"])
+            self.assertEqual(report["summary"]["total"], 1)
+
+    def test_new_only_rejects_invalid_comparison_sources(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            materialize(target, {"id": "comparison-errors"})
+            malformed = target / "malformed.json"
+            malformed.write_text('{"schema_version": 2, "findings": []}', encoding="utf-8")
+            cases = (
+                ("missing", ("audit", target, "--new-only"), 1),
+                (
+                    "both",
+                    (
+                        "audit", target, "--new-only", "--baseline", malformed,
+                        "--compare-ref", "HEAD",
+                    ),
+                    1,
+                ),
+                (
+                    "malformed",
+                    ("audit", target, "--new-only", "--baseline", malformed),
+                    1,
+                ),
+                (
+                    "unknown-ref",
+                    ("audit", target, "--new-only", "--compare-ref", "not-a-ref"),
+                    1,
+                ),
+            )
+            for name, arguments, expected_code in cases:
+                with self.subTest(case=name):
+                    result = self.run_cli(*arguments)
+                    self.assertEqual(result.returncode, expected_code, result.stderr)
+
+    def test_output_write_is_atomic_on_replace_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "report.json"
+            output.write_text("original\n", encoding="utf-8")
+            with mock.patch.object(module.os, "replace", side_effect=OSError("simulated")):
+                with self.assertRaises(OSError):
+                    module.emit_output("replacement\n", output)
+            self.assertEqual(output.read_text(encoding="utf-8"), "original\n")
+            self.assertEqual(list(output.parent.glob(f".{output.name}.*")), [])
+
+    def test_compare_ref_reports_only_findings_added_after_commit(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            materialize(target, {"id": "git-delta"})
+            subprocess.run(["git", "init", "-q"], cwd=target, check=True)
+            subprocess.run(["git", "config", "user.name", "Test"], cwd=target, check=True)
+            subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=target, check=True)
+            subprocess.run(["git", "add", "."], cwd=target, check=True)
+            subprocess.run(["git", "commit", "-qm", "safe baseline"], cwd=target, check=True)
+            workflow = target / ".github/workflows/ci.yml"
+            workflow.write_text(
+                workflow.read_text(encoding="utf-8").replace(f"@{PIN}", "@v4"),
+                encoding="utf-8",
+            )
+            subprocess.run(["git", "add", "."], cwd=target, check=True)
+            subprocess.run(["git", "commit", "-qm", "introduce finding"], cwd=target, check=True)
+            result = self.run_cli(
+                "audit", target, "--compare-ref", "HEAD^", "--new-only", "--format", "json"
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            report = json.loads(result.stdout)
+            self.assertEqual([item["rule_id"] for item in report["findings"]], ["MD-WF-003"])
+
+    def test_valid_path_and_fingerprint_suppressions(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            materialize(target, {"id": "suppression"})
+            workflow = target / ".github/workflows/ci.yml"
+            workflow.write_text(
+                workflow.read_text(encoding="utf-8").replace(f"@{PIN}", "@v4"),
+                encoding="utf-8",
+            )
+            report = module.audit_repository(target)
+            finding = next(item for item in report["findings"] if item["rule_id"] == "MD-WF-003")
+            path_config = target / "path.json"
+            path_config.write_text(json.dumps(VALID_SUPPRESSION), encoding="utf-8")
+            entries = module.load_suppressions(path_config, date(2026, 8, 23))
+            effective, count, warnings = module.apply_suppressions(report, entries)
+            self.assertEqual((count, warnings, effective["summary"]["total"]), (1, [], 0))
+
+            fingerprint_config = target / "fingerprint.json"
+            payload = json.loads(json.dumps(VALID_SUPPRESSION))
+            payload["suppressions"][0].pop("path")
+            payload["suppressions"][0]["fingerprint"] = finding["fingerprint"]
+            fingerprint_config.write_text(json.dumps(payload), encoding="utf-8")
+            entries = module.load_suppressions(fingerprint_config, date(2026, 8, 23))
+            _, count, _ = module.apply_suppressions(report, entries)
+            self.assertEqual(count, 1)
+
+    def test_suppression_validation_is_fail_closed(self) -> None:
+        mutations = {
+            "unknown-rule": lambda item: item.update(rule_id="MD-WF-999"),
+            "empty-reason": lambda item: item.update(reason="  "),
+            "empty-owner": lambda item: item.update(owner=""),
+            "invalid-date": lambda item: item.update(expires_on="2026-02-30"),
+            "no-selector": lambda item: item.pop("path"),
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for name, mutate in mutations.items():
+                with self.subTest(case=name):
+                    payload = json.loads(json.dumps(VALID_SUPPRESSION))
+                    mutate(payload["suppressions"][0])
+                    path = root / f"{name}.json"
+                    path.write_text(json.dumps(payload), encoding="utf-8")
+                    with self.assertRaises(module.KitError):
+                        module.load_suppressions(path, date(2026, 8, 23))
+
+            duplicate = json.loads(json.dumps(VALID_SUPPRESSION))
+            duplicate["suppressions"].append(dict(duplicate["suppressions"][0]))
+            duplicate_path = root / "duplicate.json"
+            duplicate_path.write_text(json.dumps(duplicate), encoding="utf-8")
+            with self.assertRaises(module.KitError):
+                module.load_suppressions(duplicate_path, date(2026, 8, 23))
+
+    def test_expired_and_unmatched_suppressions_do_not_hide_findings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            materialize(target, {"id": "expired-suppression"})
+            workflow = target / ".github/workflows/ci.yml"
+            workflow.write_text(
+                workflow.read_text(encoding="utf-8").replace(f"@{PIN}", "@v4"),
+                encoding="utf-8",
+            )
+            report = module.audit_repository(target)
+            expired = json.loads(json.dumps(VALID_SUPPRESSION))
+            expired["suppressions"][0]["expires_on"] = "2026-08-22"
+            expired_path = target / "expired.json"
+            expired_path.write_text(json.dumps(expired), encoding="utf-8")
+            entries = module.load_suppressions(expired_path, date(2026, 8, 23))
+            effective, count, warnings = module.apply_suppressions(report, entries)
+            self.assertEqual(count, 0)
+            self.assertEqual(effective["summary"]["total"], report["summary"]["total"])
+            self.assertTrue(any("expired" in warning.lower() for warning in warnings))
+
+            unmatched = json.loads(json.dumps(VALID_SUPPRESSION))
+            unmatched["suppressions"][0]["path"] = ".github/workflows/other.yml"
+            unmatched_path = target / "unmatched.json"
+            unmatched_path.write_text(json.dumps(unmatched), encoding="utf-8")
+            entries = module.load_suppressions(unmatched_path, date(2026, 8, 23))
+            with self.assertRaises(module.KitError):
+                module.apply_suppressions(report, entries)
+
+    def test_default_config_and_standalone_apply_identical_suppressions(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            materialize(target, {"id": "standalone-suppression"})
+            workflow = target / ".github/workflows/ci.yml"
+            workflow.write_text(
+                workflow.read_text(encoding="utf-8").replace(f"@{PIN}", "@v4"),
+                encoding="utf-8",
+            )
+            target.joinpath(".maintainer-defense.json").write_text(
+                json.dumps(VALID_SUPPRESSION), encoding="utf-8"
+            )
+            subprocess.run([sys.executable, str(ROOT / "scripts/build_standalone.py")], check=True)
+            arguments = ("audit", target, "--format", "json", "--fail-on", "note")
+            source = self.run_cli(*arguments)
+            standalone = subprocess.run(
+                [sys.executable, str(ROOT / "dist/maintainer-defense-kit.py"), *(str(v) for v in arguments)],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(source.returncode, 0, source.stderr)
+            self.assertEqual(standalone.returncode, 0, standalone.stderr)
+            self.assertEqual(json.loads(source.stdout), json.loads(standalone.stdout))
+            self.assertIn("suppressed 1 finding", source.stderr.lower())
 
     def test_fail_on_threshold(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

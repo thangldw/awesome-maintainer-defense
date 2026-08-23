@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/thangldw/awesome-maintainer-defense/maintainer-defense-config.schema.json",
+  "title": "Maintainer Defense configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "suppressions"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "suppressions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["rule_id", "reason", "owner", "expires_on"],
+        "anyOf": [
+          {"required": ["fingerprint"]},
+          {"required": ["path"]}
+        ],
+        "properties": {
+          "rule_id": {"type": "string", "pattern": "^MD-(GOV|WF|MOD)-[0-9]{3}$"},
+          "fingerprint": {"type": "string", "pattern": "^[0-9a-f]{24}$"},
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$"
+          },
+          "reason": {"type": "string", "minLength": 1},
+          "owner": {"type": "string", "minLength": 1},
+          "expires_on": {"type": "string", "format": "date"}
+        }
+      }
+    }
+  }
+}

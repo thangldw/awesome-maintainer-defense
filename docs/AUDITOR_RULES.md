@@ -16,6 +16,10 @@ Rule IDs are part of the auditor's public output contract. An ID is never reassi
 
 Mappings below are cross-references, not claims that every finding is a vulnerability. OpenSSF mappings refer to the closest [Scorecard check](https://github.com/ossf/scorecard/blob/main/docs/checks.md); CWE is included only when a software-weakness category is a useful fit.
 
+## Governed suppressions
+
+An accepted exception belongs in `.maintainer-defense.json` with a rule ID, exact path or fingerprint, reason, owner, and expiry date. Expired entries no longer hide findings. Invalid, duplicate, or unmatched active entries fail closed so suppressions remain reviewable maintenance records rather than permanent ignore lists.
+
 ## Governance rules
 
 ### MD-GOV-001
@@ -114,8 +118,8 @@ Mappings below are cross-references, not claims that every finding is a vulnerab
 
 **Untrusted input reaches secrets or write authority · critical**
 
-- **Evidence:** a privileged-event workflow references attacker-influenced pull-request content while secrets, inherited secrets, or write permissions are present.
-- **Review before accepting:** the rule is intentionally conservative and does not prove that every referenced value is executed. Trace the value into commands, reusable workflows, and actions before declaring exploitability.
+- **Evidence:** one job in a privileged-event workflow references attacker-influenced pull-request content while that same job has secrets, inherited secrets, a write-capable GitHub permission, or `id-token: write` credential-minting authority.
+- **Review before accepting:** authority is evaluated per job so an untrusted job does not borrow a separate job's write scope. The rule is intentionally conservative and does not prove that every referenced value is executed; trace the value into commands, reusable workflows, and actions before declaring exploitability.
 - **Safe remediation:** remove secrets and writes from the untrusted path, isolate contributor-code execution in a read-only `pull_request` workflow, and pass only validated artifacts or metadata into any later privileged stage.
 - **Mapping:** OpenSSF Scorecard [`Dangerous-Workflow`](https://github.com/ossf/scorecard/blob/main/docs/checks.md#dangerous-workflow); [CWE-829](https://cwe.mitre.org/data/definitions/829.html). A more specific CWE requires source-to-sink validation.
 
@@ -123,10 +127,28 @@ Mappings below are cross-references, not claims that every finding is a vulnerab
 
 **Checkout may persist a write-capable token · medium**
 
-- **Evidence:** an `actions/checkout` step is in a write-capable permission scope and its own step block does not set `persist-credentials: false`.
+- **Evidence:** an `actions/checkout` step is in a job with any GitHub write-capable permission or `id-token: write`, and its own step block does not set `persist-credentials: false`.
 - **Review before accepting:** authenticated Git operations may be an intentional, reviewed part of a release job. The finding does not prove that a later step can be influenced by an attacker.
 - **Safe remediation:** set `persist-credentials: false` unless authenticated Git is required. If it is required, isolate the push into a narrow job, minimize permissions, and ensure untrusted code cannot run before credential use.
 - **Mapping:** related to OpenSSF Scorecard [`Token-Permissions`](https://github.com/ossf/scorecard/blob/main/docs/checks.md#token-permissions). No CWE is assigned without evidence that credentials are exposed.
+
+### MD-WF-007
+
+**Untrusted event data interpolated into a shell command · high**
+
+- **Evidence:** an expression derived from an attacker-influenced GitHub event context appears directly inside a `run` scalar or block.
+- **Review before accepting:** the rule identifies a direct source-to-shell boundary but does not parse shell grammar or prove the payload is exploitable on every runner. Expressions under the step's `env` mapping do not trigger this rule.
+- **Safe remediation:** assign the expression to an environment variable or pass it as a reviewed action input, then quote the shell variable for the selected shell.
+- **Mapping:** [CWE-78](https://cwe.mitre.org/data/definitions/78.html).
+
+### MD-WF-008
+
+**Privileged workflow executes a pull-request artifact · critical**
+
+- **Evidence:** a local `pull_request` workflow uploads a literal artifact name; a named `workflow_run` consumer downloads that artifact from `github.event.workflow_run.id`, executes or sources a literal path under the configured download destination in the same job, and that job has secrets, OIDC, or a GitHub write permission.
+- **Review before accepting:** the scanner requires matching producer/consumer names, an authenticated remote-run download, and a destination-to-command path edge. It does not interpret dynamically generated paths or prove the payload succeeds on the selected runner.
+- **Safe remediation:** treat the artifact as untrusted data. Verify an immutable digest and parse it without execution, or rebuild it from trusted source inside the privileged workflow.
+- **Mapping:** OpenSSF Scorecard [`Dangerous-Workflow`](https://github.com/ossf/scorecard/blob/main/docs/checks.md#dangerous-workflow); [CWE-829](https://cwe.mitre.org/data/definitions/829.html).
 
 ## Moderation rules
 
