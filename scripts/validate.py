@@ -258,6 +258,11 @@ def validate_workflows(pins: set[tuple[str, str]]) -> None:
         fail("release and quality workflows must fetch pilot provenance history")
     if "gh release upload" not in release or "--clobber" not in release or "skip-existing: true" not in release:
         fail("release publication must be resumable after a partial GitHub or PyPI success")
+    publish_github = release.split("\n  publish-github:\n", 1)[1].split(
+        "\n  publish-pypi:\n", 1
+    )[0]
+    if "actions/checkout@" not in publish_github or "persist-credentials: false" not in publish_github:
+        fail("GitHub release publication must verify tags from a credential-free checkout")
 
 
 def validate_kit_safety() -> None:
