@@ -114,8 +114,8 @@ Mappings below are cross-references, not claims that every finding is a vulnerab
 
 **Untrusted input reaches secrets or write authority · critical**
 
-- **Evidence:** a privileged-event workflow references attacker-influenced pull-request content while secrets, inherited secrets, or write permissions are present.
-- **Review before accepting:** the rule is intentionally conservative and does not prove that every referenced value is executed. Trace the value into commands, reusable workflows, and actions before declaring exploitability.
+- **Evidence:** one job in a privileged-event workflow references attacker-influenced pull-request content while that same job has secrets, inherited secrets, a write-capable GitHub permission, or `id-token: write` credential-minting authority.
+- **Review before accepting:** authority is evaluated per job so an untrusted job does not borrow a separate job's write scope. The rule is intentionally conservative and does not prove that every referenced value is executed; trace the value into commands, reusable workflows, and actions before declaring exploitability.
 - **Safe remediation:** remove secrets and writes from the untrusted path, isolate contributor-code execution in a read-only `pull_request` workflow, and pass only validated artifacts or metadata into any later privileged stage.
 - **Mapping:** OpenSSF Scorecard [`Dangerous-Workflow`](https://github.com/ossf/scorecard/blob/main/docs/checks.md#dangerous-workflow); [CWE-829](https://cwe.mitre.org/data/definitions/829.html). A more specific CWE requires source-to-sink validation.
 
@@ -123,7 +123,7 @@ Mappings below are cross-references, not claims that every finding is a vulnerab
 
 **Checkout may persist a write-capable token · medium**
 
-- **Evidence:** an `actions/checkout` step is in a write-capable permission scope and its own step block does not set `persist-credentials: false`.
+- **Evidence:** an `actions/checkout` step is in a job with any GitHub write-capable permission or `id-token: write`, and its own step block does not set `persist-credentials: false`.
 - **Review before accepting:** authenticated Git operations may be an intentional, reviewed part of a release job. The finding does not prove that a later step can be influenced by an attacker.
 - **Safe remediation:** set `persist-credentials: false` unless authenticated Git is required. If it is required, isolate the push into a narrow job, minimize permissions, and ensure untrusted code cannot run before credential use.
 - **Mapping:** related to OpenSSF Scorecard [`Token-Permissions`](https://github.com/ossf/scorecard/blob/main/docs/checks.md#token-permissions). No CWE is assigned without evidence that credentials are exposed.

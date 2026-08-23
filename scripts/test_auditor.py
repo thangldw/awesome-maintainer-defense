@@ -214,6 +214,78 @@ class AuditorTests(unittest.TestCase):
                 rules = {item["rule_id"] for item in module.audit_repository(target)["findings"]}
                 self.assertIn(expected[name], rules)
 
+    def test_all_write_scopes_count_as_job_authority(self) -> None:
+        write_scopes = (
+            "actions",
+            "artifact-metadata",
+            "attestations",
+            "checks",
+            "code-quality",
+            "contents",
+            "deployments",
+            "discussions",
+            "id-token",
+            "issues",
+            "packages",
+            "pages",
+            "pull-requests",
+            "security-events",
+            "statuses",
+        )
+        for scope in write_scopes:
+            with self.subTest(scope=scope), tempfile.TemporaryDirectory() as tmp:
+                target = Path(tmp)
+                materialize(
+                    target,
+                    {
+                        "id": scope,
+                        "workflow": f"""name: dangerous
+on:
+  pull_request_target:
+permissions: {{}}
+jobs:
+  publish:
+    permissions:
+      {scope}: write
+    runs-on: ubuntu-latest
+    steps:
+      - run: git fetch origin refs/pull/1/head && ./publish.sh
+""",
+                    },
+                )
+                rules = {item["rule_id"] for item in module.audit_repository(target)["findings"]}
+                self.assertIn("MD-WF-005", rules)
+
+    def test_untrusted_job_does_not_borrow_unrelated_job_authority(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            materialize(
+                target,
+                {
+                    "id": "separate-authority",
+                    "workflow": """name: separated
+on:
+  pull_request_target:
+permissions: {}
+jobs:
+  inspect:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - run: git fetch origin refs/pull/1/head && ./inspect.sh
+  publish:
+    permissions:
+      checks: write
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo publish trusted metadata
+""",
+                },
+            )
+            rules = {item["rule_id"] for item in module.audit_repository(target)["findings"]}
+            self.assertNotIn("MD-WF-005", rules)
+
     def test_fail_on_threshold(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp)
