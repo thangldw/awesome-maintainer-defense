@@ -1,19 +1,23 @@
-## Problem
+## Authorized scope
 
-<!-- What user-visible or maintainer-approved problem does this solve? Link an issue when possible. -->
+Link the approved issue or maintainer request. State the smallest user or maintainer problem addressed.
 
-## Approach
+## Evidence and verification
 
-<!-- Explain the smallest meaningful change and alternatives considered. -->
+Provide a reproduction, behavioral test, and exact verification commands. State what is not verified.
 
-## Verification
+## Permissions and effects
 
-<!-- Provide exact commands, test output, screenshots, or a minimal reproduction. -->
+List changed workflow permissions, external data recipients, contributor-visible actions, and repository settings. Write `none` where applicable.
 
-## Scope
+## Rollback
 
-- [ ] This change is focused and avoids unrelated formatting or refactoring.
-- [ ] I searched for existing issues and pull requests.
-- [ ] I understand the submitted code and can answer review questions.
-- [ ] I added or updated tests where behavior changed.
-- [ ] I disclosed substantial automated assistance if the project policy requires it.
+Give the exact revert, feature-disable, or workflow-removal path and its owner.
+
+## Human authorization
+
+- [ ] I understand the submitted change and can answer review questions.
+- [ ] The scope is authorized and excludes unrelated generated changes.
+- [ ] No secret or private report is included.
+- [ ] A human reviewed automated assistance and security-sensitive behavior.
+- [ ] Tests cover the changed behavior and rollback is practical.

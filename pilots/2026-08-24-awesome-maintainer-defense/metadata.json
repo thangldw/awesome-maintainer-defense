@@ -1,0 +1,19 @@
+{
+  "pilot_id": "2026-08-24-awesome-maintainer-defense",
+  "disclosure": "repository-and-sanitized-results",
+  "pilot_type": "internal-owner-directed",
+  "reviewer_role": "implementation-agent-under-owner-direction",
+  "run_at": "2026-08-23T18:00:07Z",
+  "auditor_version": "1.1.1",
+  "source_commit": "3d63257d4d2b7e05239ad98211235e02d3b0fb6c",
+  "standalone_sha256": "e8f82d980c47abd082f3e7746a99cdde452aa79d8a23295423402b5de3fe35bd",
+  "command": "python3 dist/maintainer-defense-kit.py audit . --format json",
+  "target_repository": "thangldw/awesome-maintainer-defense",
+  "target_commit": "3d63257d4d2b7e05239ad98211235e02d3b0fb6c",
+  "allow_aggregate_metrics": false,
+  "limitations": [
+    "Owner-directed dogfood performed by the implementation agent under owner direction; not an independent review.",
+    "One self-audit cannot establish real-world precision, recall, usefulness, or representativeness.",
+    "The offline auditor cannot observe GitHub-hosted rulesets, branch protection, organization policy, or other external settings."
+  ]
+}

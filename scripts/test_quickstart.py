@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise the source-checkout quickstart published in every README."""
+"""Exercise the built artifact referenced by each public quickstart."""
 
 from __future__ import annotations
 
@@ -12,22 +12,55 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+EXPECTED_VERSION = "1.1.1"
 READMES = ("README.md", "README.vi.md", "README.ja.md")
+INSTALL_PAGES = READMES + (
+    "docs/GETTING_STARTED.md",
+    "docs/vi/GETTING_STARTED.md",
+    "docs/ja/GETTING_STARTED.md",
+)
 AUDIT_COMMAND = re.compile(
     r"^python3\s+(?P<path>\S*maintainer-defense-kit\.py)\s+audit\s+\.$",
+    re.MULTILINE,
+)
+SOURCE_QUICKSTART = re.compile(
+    r"^make standalone\npython3\s+(?P<path>\S*maintainer-defense-kit\.py)\s+audit\s+\.$",
     re.MULTILINE,
 )
 
 
 class QuickstartTests(unittest.TestCase):
+    def test_public_install_paths_are_pinned_to_release_version(self) -> None:
+        expected_pipx = f"pipx install maintainer-defense-kit=={EXPECTED_VERSION}"
+        expected_release = f"/releases/download/v{EXPECTED_VERSION}/maintainer-defense-kit.py"
+        for filename in INSTALL_PAGES:
+            with self.subTest(page=filename):
+                text = (ROOT / filename).read_text(encoding="utf-8")
+                self.assertIn(expected_pipx, text)
+                if filename in {"README.md", "docs/GETTING_STARTED.md"}:
+                    self.assertIn(expected_release, text)
+
+    def test_root_locale_audit_commands_use_the_same_artifact(self) -> None:
+        paths = {}
+        for filename in READMES:
+            text = (ROOT / filename).read_text(encoding="utf-8")
+            match = AUDIT_COMMAND.search(text)
+            self.assertIsNotNone(match, f"{filename} has no source-checkout audit command")
+            paths[filename] = match.group("path")
+        self.assertEqual(set(paths.values()), {"dist/maintainer-defense-kit.py"})
+
     def test_documented_built_artifact_exists_and_runs(self) -> None:
+        root_readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        source_quickstart = SOURCE_QUICKSTART.search(root_readme)
+        self.assertIsNotNone(source_quickstart, "README.md has no executable source quickstart")
         subprocess.run(
-            [sys.executable, "scripts/build_standalone.py"],
+            ["make", "standalone"],
             cwd=ROOT,
             check=True,
             capture_output=True,
             text=True,
         )
+        self.assertEqual(source_quickstart.group("path"), "dist/maintainer-defense-kit.py")
 
         for filename in READMES:
             with self.subTest(readme=filename):

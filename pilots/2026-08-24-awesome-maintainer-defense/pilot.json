@@ -1,0 +1,75 @@
+{
+  "metadata": {
+    "allow_aggregate_metrics": false,
+    "auditor_version": "1.1.1",
+    "command": "python3 dist/maintainer-defense-kit.py audit . --format json",
+    "disclosure": "repository-and-sanitized-results",
+    "limitations": [
+      "Owner-directed dogfood performed by the implementation agent under owner direction; not an independent review.",
+      "One self-audit cannot establish real-world precision, recall, usefulness, or representativeness.",
+      "The offline auditor cannot observe GitHub-hosted rulesets, branch protection, organization policy, or other external settings."
+    ],
+    "pilot_id": "2026-08-24-awesome-maintainer-defense",
+    "pilot_type": "internal-owner-directed",
+    "reviewer_role": "implementation-agent-under-owner-direction",
+    "run_at": "2026-08-23T18:00:07Z",
+    "source_commit": "3d63257d4d2b7e05239ad98211235e02d3b0fb6c",
+    "standalone_sha256": "e8f82d980c47abd082f3e7746a99cdde452aa79d8a23295423402b5de3fe35bd",
+    "target_commit": "3d63257d4d2b7e05239ad98211235e02d3b0fb6c",
+    "target_repository": "thangldw/awesome-maintainer-defense"
+  },
+  "reports": {
+    "effective": {
+      "findings": [],
+      "schema_version": 1,
+      "summary": {
+        "by_severity": {
+          "critical": 0,
+          "high": 0,
+          "low": 0,
+          "medium": 0,
+          "note": 0
+        },
+        "total": 0
+      },
+      "target": ".",
+      "tool": {
+        "name": "maintainer-defense",
+        "version": "1.1.1"
+      }
+    },
+    "raw": {
+      "findings": [],
+      "schema_version": 1,
+      "summary": {
+        "by_severity": {
+          "critical": 0,
+          "high": 0,
+          "low": 0,
+          "medium": 0,
+          "note": 0
+        },
+        "total": 0
+      },
+      "target": ".",
+      "tool": {
+        "name": "maintainer-defense",
+        "version": "1.1.1"
+      }
+    }
+  },
+  "reviews": [],
+  "schema_version": 1,
+  "summary": {
+    "classification_counts": {
+      "false-positive": 0,
+      "not-applicable": 0,
+      "true-positive": 0,
+      "unresolved": 0
+    },
+    "effective_findings": 0,
+    "independently_labeled": 0,
+    "raw_findings": 0,
+    "suppressed_findings": 0
+  }
+}

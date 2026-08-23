@@ -1,11 +1,9 @@
 # Code of conduct
 
-> Community behavior and enforcement contract. Technical contribution requirements live in [CONTRIBUTING.md](CONTRIBUTING.md); private vulnerability reports belong in [SECURITY.md](SECURITY.md).
+This project protects maintainer attention while treating contributors as people rather than risk scores.
 
-This project exists to protect maintainer attention without dehumanizing contributors.
+Be specific, respectful, and evidence-led. Disclose relevant affiliations. Critique code, permissions, policies, claims, and outcomes—not identity, language ability, experience, writing style, or presumed use of AI. Harassment, threats, impersonation, spam, doxxing, and coordinated pressure are not accepted.
 
-Participants must be respectful, disclose relevant affiliations, accept evidence-based corrections, and avoid harassment, threats, impersonation, spam, or coordinated pressure. Critique tools, policies, permissions, and outcomes—not a person's identity, writing style, presumed use of AI, or experience level.
+Maintainers may reject off-scope work, edit or remove promotion, lock disruptive discussions, and restrict participation to keep the project safe and operable. Enforcement decisions should be proportionate, documented, and reversible where practical.
 
-Maintainers may edit or remove promotional submissions, lock disruptive threads, reject repeated low-effort changes, and restrict participation when needed to keep the project safe and workable. Good-faith disagreement about inclusion or automated moderation is welcome when it remains specific and constructive.
-
-Report conduct concerns privately through the contact method on the repository owner's GitHub profile. Reports will be handled with appropriate confidentiality. Project maintainers are responsible for clarifying and enforcing these standards.
+Report conduct concerns privately through the contact route on the repository owner's GitHub profile. Do not include sensitive reports in public issues. Maintainers will limit disclosure to people needed to assess and respond.

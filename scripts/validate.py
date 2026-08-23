@@ -11,6 +11,11 @@ from datetime import date, datetime
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
+from documentation_contract import (
+    DocumentationContractError,
+    validate_documentation_contract,
+)
+
 ROOT = Path(__file__).resolve().parents[1]
 ALLOWED_TYPES = {
     "awesome-list",
@@ -174,19 +179,18 @@ def validate_audits(catalog: dict) -> dict:
     return data
 
 
-def validate_readme(data: dict) -> None:
-    for filename in ("README.md", "README.vi.md", "README.ja.md"):
-        readme = (ROOT / filename).read_text(encoding="utf-8")
-        if "<!-- catalog:start -->" not in readme or "<!-- catalog:end -->" not in readme:
-            fail(f"{filename} catalog markers are missing")
-        catalog_section = readme.split("<!-- catalog:start -->", 1)[1].split(
-            "<!-- catalog:end -->", 1
-        )[0]
-        for item in data["resources"]:
-            if catalog_section.count(item["url"]) != 1:
-                fail(
-                    f"{filename} generated catalog must contain {item['url']} exactly once"
-                )
+def validate_catalog_document(data: dict) -> None:
+    path = ROOT / "docs/CATALOG.md"
+    document = path.read_text(encoding="utf-8")
+    if "Generated from `catalog.json` and `audits.json`" not in document:
+        fail("docs/CATALOG.md must identify its structured sources")
+    for category in data["categories"]:
+        if document.count(f"## {category['name']}\n") != 1:
+            fail(f"docs/CATALOG.md must contain category {category['id']} exactly once")
+    for item in data["resources"]:
+        heading = f"### [{item['name']}]({item['url']})"
+        if document.count(heading) != 1:
+            fail(f"docs/CATALOG.md must contain resource {item['id']} exactly once")
 
 
 def validate_pins() -> set[tuple[str, str]]:
@@ -396,15 +400,11 @@ def validate_issue_forms() -> None:
 
 def validate_generated_files() -> None:
     paths = [
-        ROOT / "README.md",
-        ROOT / "README.vi.md",
-        ROOT / "README.ja.md",
-        ROOT / "docs/RESOURCE_AUDIT.md",
+        ROOT / "docs/CATALOG.md",
         ROOT / "docs/AUDITOR_EVALUATION.md",
     ]
     before = {path: path.read_text(encoding="utf-8") for path in paths}
     subprocess.run([sys.executable, str(ROOT / "scripts/render.py")], check=True)
-    subprocess.run([sys.executable, str(ROOT / "scripts/render_audit.py")], check=True)
     subprocess.run([sys.executable, str(ROOT / "scripts/evaluate_auditor.py")], check=True)
     after = {path: path.read_text(encoding="utf-8") for path in paths}
     changed = [str(path.relative_to(ROOT)) for path in paths if before[path] != after[path]]
@@ -487,15 +487,19 @@ def validate_auditor_assets() -> None:
 
 
 def main() -> None:
+    try:
+        validate_documentation_contract(ROOT)
+    except DocumentationContractError as exc:
+        fail(str(exc))
     catalog = validate_catalog()
     audits = validate_audits(catalog)
     pins = validate_pins()
-    validate_readme(catalog)
     validate_repository_contracts()
     validate_workflows(pins)
     validate_kit_safety()
     validate_issue_forms()
     validate_auditor_assets()
+    validate_catalog_document(catalog)
     validate_local_markdown_links()
     validate_generated_files()
     print(

@@ -53,6 +53,17 @@ class InstallerTests(unittest.TestCase):
                     )
                     self.assertEqual(manifest["profile"], profile)
                     self.assertEqual(manifest["language"], language)
+                    installed = {item["path"] for item in manifest["files"]}
+                    self.assertTrue(
+                        {
+                            ".github/PULL_REQUEST_TEMPLATE.md",
+                            "docs/maintainer-defense/AI_CONTRIBUTIONS.md",
+                            "docs/maintainer-defense/UNSOLICITED_PULL_REQUESTS.md",
+                            "docs/maintainer-defense/PLAYBOOK.md",
+                            "docs/maintainer-defense/ADOPTION_RECORD.md",
+                        }
+                        <= installed
+                    )
                     self.assertEqual(len(list((target / ".github/workflows").glob("*.yml"))), expected_workflows[profile])
                     bug = (target / ".github/ISSUE_TEMPLATE/bug.yml").read_text(encoding="utf-8")
                     self.assertIn(markers[language], bug)

@@ -1,41 +1,20 @@
 # Maintainer Defense Kit
 
-> 導入可能なkitです。[documentation hub](../../docs/README.md)から開始してください。
-
 [English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
 
-AI作成の判定を主張せず、メンテナーのレビュー負荷を減らす、導入・ロールバック可能なベースラインです。インストーラーは既定でdry-runとなり、内容が異なる既存ファイルを上書きせず、各ファイルのハッシュを記録して検証と安全な削除を行えます。
+元に戻せるリポジトリ方針と読み取り専用 workflow を導入します。既定は preview です。Apply は異なる既存内容を上書きせず、所有権と hash を記録し、危険な path と symlink を拒否し、変更済みファイルを削除しません。
 
-## プロファイル
+## Profile
 
-| プロファイル | トークン権限 | 効果 |
-| --- | --- | --- |
-| `observe`（既定） | 読み取り専用 | job summaryのみ。シグナルと誤検知を測定 |
-| `balanced` | 読み取り専用 | 名前付きquality status checkを失敗させる。コメント、ラベル、close、lockなし |
-| `hardened` | 読み取り専用 | `balanced`に依存関係レビューとワークフロー静的解析を追加 |
+| Profile | 実行時の効果 |
+| --- | --- |
+| `observe` | PR の読み取り専用分析と job summary。コントリビューターに見える操作なし |
+| `balanced` | 同じ signal contract と失敗可能な status check。comment、label、close、lock なし |
+| `hardened` | `balanced` に dependency review と GitHub Actions 静的解析を追加 |
 
-すべてのプロファイルは、`en`、`vi`、`ja`の構造的に完全なIssueフォーム、PRテンプレート、ポリシー、プレイブック、ラベル仕様、導入記録をインストールします。ベトナム語・日本語表現の母語セキュリティ・法務専門家による独立レビューは未完了です。
+各 profile は bug form、PR template、policy、playbook、任意の手動 label 仕様、adoption record を English、Vietnamese、Japanese のいずれかで導入します。
 
-## プロファイルの選択
-
-```mermaid
-flowchart TD
-    A{ネイティブ制御は準備済み?}
-    A -- いいえ --> B[ネイティブ制御を確認]
-    B --> C[observeを導入]
-    A -- はい --> C
-    C --> D{データは十分?}
-    D -- いいえ --> C
-    D -- はい --> E{必須quality checkが必要?}
-    E -- いいえ --> F[observeを継続]
-    E -- はい --> G{supply chain検査も必要?}
-    G -- いいえ --> H[balancedを使用]
-    G -- はい --> I[hardenedを使用]
-```
-
-## 安全な導入
-
-Python 3.10以降が必要です。CIはLinux（3.10、3.12、3.14）とmacOS（3.12）で検証します。このリポジトリから実行し、最初のコマンドはプレビューのみです。
+## Preview、apply、verify
 
 ```bash
 python3 scripts/install_kit.py --target /path/to/project --profile observe --language ja --repo OWNER/REPOSITORY
@@ -43,7 +22,7 @@ python3 scripts/install_kit.py --target /path/to/project --profile observe --lan
 python3 scripts/install_kit.py --target /path/to/project --verify
 ```
 
-特権的な`pull_request_target`設計は、zizmorが危険なtrust boundaryを検出したため削除しました。`balanced`は読み取り専用の`pull_request`を使い、制御された`result`出力を`PR quality gate` status checkに変換します。十分に測定した後だけ、GitHubのネイティブrulesetでこのcheckをrequiredにしてください。同梱ラベル仕様は手動triage用で、前提条件ではありません。
+インストーラーはローカルファイルだけを書き込み、GitHub API、label 作成、required check 設定、commit、push は行いません。オンライン設定は repository owner が別途行います。
 
 ## ロールバック
 
@@ -51,6 +30,4 @@ python3 scripts/install_kit.py --target /path/to/project --verify
 python3 scripts/install_kit.py --target /path/to/project --uninstall
 ```
 
-アンインストールはインストーラーが作成したファイルだけを削除し、変更済みなら停止します。インストーラーはGitHub APIの呼び出し、ラベル作成、設定変更、コミットを行いません。Actionはcommit SHAで固定され、[`pins.json`](../../pins.json)で追跡されます。
-
-これは技術的にテストされたベースラインであり、セキュリティ認証ではありません。[PR品質シグナル契約](../../docs/PROFILE_SIGNALS.md)と[保証ケース](../../docs/ja/KIT_ASSURANCE.md)に、保証済みの範囲と実地証拠がない範囲を記載しています。
+Uninstall は変更されていない installer-owned file だけを削除し、編集済みなら停止します。`observe` から開始し、代表標本、owner の承認、異議申立て、検証済み rollback が揃ってから status gate に進んでください。[安全上の制約](../../docs/ja/SAFETY.md)と[プレイブック](../../docs/ja/PLAYBOOK.md)を参照してください。
