@@ -16,6 +16,8 @@ python3 scripts/install_kit.py audit . --format summary
 python3 scripts/install_kit.py audit . --format json
 python3 scripts/install_kit.py audit . --format sarif > maintainer-defense.sarif
 python3 scripts/install_kit.py audit . --fail-on high
+python3 scripts/install_kit.py audit . --baseline previous.json --new-only --format json
+python3 scripts/install_kit.py audit . --compare-ref origin/main --new-only --fail-on high
 python3 scripts/install_kit.py fix . --output recommended.patch
 python3 scripts/install_kit.py fix . --safe-only
 ```
@@ -30,6 +32,8 @@ python3 maintainer-defense.py install --target . --profile observe
 The v1.0.1 release provides the verified standalone artifact, a wheel for `pipx`, and a Homebrew formula. Distribution commands and checksums are documented in the repository README.
 
 `fix` never edits the target, changes GitHub settings, commits, pushes, or opens a pull request. It emits a unified diff for human review. `--dry-run` is accepted for clarity but is redundant because patch-only behavior is unconditional.
+
+`--new-only` requires exactly one comparison source. `--baseline` reads fingerprints from a schema-v1 JSON audit report. `--compare-ref` resolves a local Git commit, archives it into a temporary directory, and audits that snapshot without checking it out or executing repository code. The emitted summary, SARIF/JSON findings, and `--fail-on` threshold contain only fingerprints absent from the comparison. A changed rule message changes its fingerprint and is therefore reported as new.
 
 ## Rule families
 

@@ -8,11 +8,14 @@ import base64
 import difflib
 import gzip
 import hashlib
+import io
 import json
 import os
 import re
 import subprocess
 import sys
+import tarfile
+import tempfile
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -1025,6 +1028,80 @@ def audit_repository(target: Path) -> dict:
     }
 
 
+def report_with_findings(report: dict, findings: list[dict]) -> dict:
+    counts = {severity: 0 for severity in SEVERITY_ORDER}
+    for finding in findings:
+        counts[finding["severity"]] += 1
+    updated = dict(report)
+    updated["findings"] = findings
+    updated["summary"] = {"total": len(findings), "by_severity": counts}
+    return updated
+
+
+def load_baseline(path: Path) -> set[str]:
+    try:
+        data = json.loads(path.expanduser().read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise KitError(f"invalid baseline JSON {path}: {exc}") from exc
+    if not isinstance(data, dict) or data.get("schema_version") != 1:
+        raise KitError("baseline must be a schema-v1 maintainer-defense JSON report")
+    findings = data.get("findings")
+    if not isinstance(findings, list):
+        raise KitError("baseline report must contain a findings array")
+    fingerprints: set[str] = set()
+    for finding in findings:
+        fingerprint = finding.get("fingerprint") if isinstance(finding, dict) else None
+        if not isinstance(fingerprint, str) or not fingerprint:
+            raise KitError("every baseline finding must contain a non-empty fingerprint")
+        fingerprints.add(fingerprint)
+    return fingerprints
+
+
+def filter_new(report: dict, baseline_fingerprints: set[str]) -> dict:
+    findings = [
+        finding for finding in report["findings"]
+        if finding["fingerprint"] not in baseline_fingerprints
+    ]
+    return report_with_findings(report, findings)
+
+
+def audit_git_ref(target: Path, ref: str) -> dict:
+    """Archive and audit one local commit without executing repository code."""
+    verify = subprocess.run(
+        ["git", "-C", str(target), "rev-parse", "--verify", "--end-of-options", f"{ref}^{{commit}}"],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if verify.returncode != 0:
+        raise KitError(f"unknown or non-commit Git ref: {ref}")
+    commit = verify.stdout.strip()
+    archived = subprocess.run(
+        ["git", "-C", str(target), "archive", "--format=tar", commit],
+        capture_output=True,
+        check=False,
+    )
+    if archived.returncode != 0:
+        detail = archived.stderr.decode(errors="replace").strip()
+        raise KitError(f"cannot archive Git ref {ref}: {detail}")
+    with tempfile.TemporaryDirectory(prefix="maintainer-defense-ref-") as tmp:
+        snapshot = Path(tmp)
+        with tarfile.open(fileobj=io.BytesIO(archived.stdout), mode="r:") as archive:
+            for member in archive.getmembers():
+                parts = Path(member.name).parts
+                if member.name.startswith("/") or ".." in parts:
+                    raise KitError(f"unsafe path in Git archive: {member.name}")
+                if not member.isfile():
+                    continue
+                source = archive.extractfile(member)
+                if source is None:
+                    continue
+                destination = snapshot.joinpath(*parts)
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_bytes(source.read())
+        return audit_repository(snapshot)
+
+
 def summary_headline(report: dict) -> str:
     summary = report["summary"]
     return " · ".join(
@@ -1191,6 +1268,13 @@ def parse_audit_args(command: str, arguments: list[str]) -> argparse.Namespace:
             "--fail-on", choices=("critical", "high", "medium", "low", "note"),
             help="exit 2 when a finding at or above this severity is present",
         )
+        comparison = parser.add_mutually_exclusive_group()
+        comparison.add_argument("--baseline", type=Path, help="schema-v1 JSON report")
+        comparison.add_argument("--compare-ref", help="local Git commit to audit as baseline")
+        parser.add_argument(
+            "--new-only", action="store_true",
+            help="emit only fingerprints absent from exactly one comparison source",
+        )
     else:
         parser.add_argument("--output", type=Path, help="write unified diff to a file")
         parser.add_argument("--safe-only", action="store_true", help="exclude review-required patches")
@@ -1198,7 +1282,14 @@ def parse_audit_args(command: str, arguments: list[str]) -> argparse.Namespace:
             "--dry-run", action="store_true",
             help="compatibility flag; fix always emits a patch and never edits files",
         )
-    return parser.parse_args(arguments)
+    args = parser.parse_args(arguments)
+    if command == "audit":
+        has_comparison = bool(args.baseline or args.compare_ref)
+        if args.new_only and not has_comparison:
+            parser.error("--new-only requires exactly one of --baseline or --compare-ref")
+        if has_comparison and not args.new_only:
+            parser.error("--baseline and --compare-ref require --new-only")
+    return args
 
 
 def emit_output(content: str, output: Path | None) -> None:
@@ -1220,6 +1311,13 @@ def run_auditor(command: str, arguments: list[str]) -> None:
         patch = combined_patch(report, args.safe_only)
         emit_output(patch, args.output)
         return
+    if args.new_only:
+        if args.baseline:
+            fingerprints = load_baseline(args.baseline)
+        else:
+            baseline_report = audit_git_ref(target, args.compare_ref)
+            fingerprints = {item["fingerprint"] for item in baseline_report["findings"]}
+        report = filter_new(report, fingerprints)
     if args.format == "human":
         content = render_human(report)
     elif args.format == "summary":
