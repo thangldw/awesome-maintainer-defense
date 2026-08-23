@@ -31,6 +31,7 @@ REQUIRED_REPOSITORY_FILES = (
     ".github/dependabot.yml",
     ".github/pull_request_template.md",
     ".github/workflows/quality.yml",
+    ".github/workflows/release.yml",
     ".github/workflows/workflow-security.yml",
 )
 
@@ -245,6 +246,11 @@ def validate_workflows(pins: set[tuple[str, str]]) -> None:
                     f"{path.relative_to(ROOT)} uses {repository}@{action_ref} "
                     "without matching provenance in pins.json"
                 )
+    release = (ROOT / ".github/workflows/release.yml").read_text(encoding="utf-8")
+    if 'tags: ["v*"]' not in release or "gh release create" not in release or "--verify-tag" not in release:
+        fail("release.yml must publish only a verified pushed version tag")
+    if "environment: pypi" not in release or "id-token: write" not in release:
+        fail("release.yml must use PyPI Trusted Publishing through the pypi environment")
 
 
 def validate_kit_safety() -> None:

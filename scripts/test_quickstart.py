@@ -78,6 +78,42 @@ class QuickstartTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("field-report.yml", result.stderr)
 
+    def test_validator_rejects_a_missing_release_workflow(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "repository"
+            shutil.copytree(ROOT, target, ignore=shutil.ignore_patterns(".git", ".worktrees", "dist"))
+            target.joinpath(".github/workflows/release.yml").unlink(missing_ok=True)
+            result = subprocess.run(
+                [sys.executable, str(target / "scripts/validate.py")],
+                cwd=target,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("release.yml", result.stderr)
+
+    def test_validator_rejects_release_without_pypi_trusted_publishing(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "repository"
+            shutil.copytree(ROOT, target, ignore=shutil.ignore_patterns(".git", ".worktrees", "dist"))
+            release = target / ".github/workflows/release.yml"
+            release.write_text(
+                release.read_text(encoding="utf-8")
+                .replace("environment: pypi", "environment: test")
+                .replace("id-token: write", "id-token: none"),
+                encoding="utf-8",
+            )
+            result = subprocess.run(
+                [sys.executable, str(target / "scripts/validate.py")],
+                cwd=target,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Trusted Publishing", result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
