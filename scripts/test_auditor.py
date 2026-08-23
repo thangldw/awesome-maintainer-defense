@@ -16,10 +16,13 @@ ROOT = Path(__file__).resolve().parents[1]
 CLI = ROOT / "scripts/install_kit.py"
 CORPUS = ROOT / "tests/fixtures/auditor/corpus.json"
 PIN = "9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0"
+UPLOAD_PIN = "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+DOWNLOAD_PIN = "3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c"
 
 spec = importlib.util.spec_from_file_location("maintainer_defense", CLI)
 assert spec and spec.loader
 module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 
 BASE_FILES = {
@@ -43,6 +46,41 @@ jobs:
 """,
 }
 
+UNTRUSTED_ARTIFACT_PRODUCER = f"""name: PR Tests
+on:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: mkdir -p output && printf '#!/bin/sh\\necho report\\n' > output/report.sh
+      - uses: actions/upload-artifact@{UPLOAD_PIN}
+        with:
+          name: pr-output
+          path: output
+"""
+
+PRIVILEGED_ARTIFACT_CONSUMER = f"""name: Publish
+on:
+  workflow_run:
+    workflows: [\"PR Tests\"]
+    types: [completed]
+permissions: {{}}
+jobs:
+  publish:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@{DOWNLOAD_PIN}
+        with:
+          name: pr-output
+          path: downloaded
+      - run: sh downloaded/report.sh
+"""
+
 
 def materialize(target: Path, case: dict) -> None:
     files = dict(BASE_FILES)
@@ -58,6 +96,12 @@ def materialize(target: Path, case: dict) -> None:
 
 
 class AuditorTests(unittest.TestCase):
+    def audit_files(self, files: dict[str, str]) -> dict:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            materialize(target, {"id": "multi-file", "files": files})
+            return module.audit_repository(target)
+
     def test_labeled_corpus(self) -> None:
         corpus = json.loads(CORPUS.read_text(encoding="utf-8"))
         self.assertGreaterEqual(len(corpus["cases"]), 50)
@@ -285,6 +329,36 @@ jobs:
             )
             rules = {item["rule_id"] for item in module.audit_repository(target)["findings"]}
             self.assertNotIn("MD-WF-005", rules)
+
+    def test_untrusted_artifact_to_privileged_workflow(self) -> None:
+        report = self.audit_files(
+            {
+                ".github/workflows/test.yml": UNTRUSTED_ARTIFACT_PRODUCER,
+                ".github/workflows/publish.yml": PRIVILEGED_ARTIFACT_CONSUMER,
+            }
+        )
+        findings = [item for item in report["findings"] if item["rule_id"] == "MD-WF-008"]
+        self.assertEqual(len(findings), 1)
+        self.assertIn(".github/workflows/test.yml", findings[0]["threat_scenario"])
+        self.assertIn(".github/workflows/publish.yml", findings[0]["threat_scenario"])
+
+    def test_artifact_trust_path_requires_execution_and_authority(self) -> None:
+        download_only = PRIVILEGED_ARTIFACT_CONSUMER.replace(
+            "      - run: sh downloaded/report.sh\n", "      - run: sha256sum downloaded/report.sh\n"
+        )
+        no_authority = PRIVILEGED_ARTIFACT_CONSUMER.replace(
+            "    permissions:\n      contents: write\n", "    permissions: {}\n"
+        )
+        for name, consumer in (("download-only", download_only), ("no-authority", no_authority)):
+            with self.subTest(case=name):
+                report = self.audit_files(
+                    {
+                        ".github/workflows/test.yml": UNTRUSTED_ARTIFACT_PRODUCER,
+                        ".github/workflows/publish.yml": consumer,
+                    }
+                )
+                rules = {item["rule_id"] for item in report["findings"]}
+                self.assertNotIn("MD-WF-008", rules)
 
     def test_fail_on_threshold(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

@@ -149,6 +149,18 @@
       ]
     },
     {
+      "id": "MD-WF-008",
+      "title": "Privileged workflow executes a pull-request artifact",
+      "default_severity": "critical",
+      "description": "A workflow_run consumer can execute content produced by untrusted pull-request code while holding secrets or write authority.",
+      "safe_remediation": "Verify and parse the artifact as untrusted data, or rebuild it from trusted source inside the privileged workflow; never execute the downloaded artifact.",
+      "help_anchor": "md-wf-008",
+      "mappings": [
+        {"framework": "OpenSSF Scorecard", "id": "Dangerous-Workflow", "url": "https://github.com/ossf/scorecard/blob/main/docs/checks.md#dangerous-workflow"},
+        {"framework": "CWE", "id": "CWE-829", "url": "https://cwe.mitre.org/data/definitions/829.html"}
+      ]
+    },
+    {
       "id": "MD-MOD-001",
       "title": "Destructive moderation is enabled",
       "default_severity": "high",

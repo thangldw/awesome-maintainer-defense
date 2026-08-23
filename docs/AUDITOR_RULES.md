@@ -137,6 +137,15 @@ Mappings below are cross-references, not claims that every finding is a vulnerab
 - **Safe remediation:** assign the expression to an environment variable or pass it as a reviewed action input, then quote the shell variable for the selected shell.
 - **Mapping:** [CWE-78](https://cwe.mitre.org/data/definitions/78.html).
 
+### MD-WF-008
+
+**Privileged workflow executes a pull-request artifact · critical**
+
+- **Evidence:** a local `pull_request` workflow uploads an artifact; a named `workflow_run` consumer downloads it, executes a local file after the download in the same job, and that job has secrets, OIDC, or a GitHub write permission.
+- **Review before accepting:** the scanner requires a complete named producer-consumer path but cannot prove which archive member reaches the command. Confirm the artifact identity, download inputs, and execution path before declaring exploitability.
+- **Safe remediation:** treat the artifact as untrusted data. Verify an immutable digest and parse it without execution, or rebuild it from trusted source inside the privileged workflow.
+- **Mapping:** OpenSSF Scorecard [`Dangerous-Workflow`](https://github.com/ossf/scorecard/blob/main/docs/checks.md#dangerous-workflow); [CWE-829](https://cwe.mitre.org/data/definitions/829.html).
+
 ## Moderation rules
 
 ### MD-MOD-001
