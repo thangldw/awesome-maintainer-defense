@@ -10,6 +10,14 @@
 
 This is a smoke test, not a representative benchmark. Repository selection was purposive, the project author performed the review, and the repositories differ in organization-level policy and feature settings that an offline checkout cannot see. Consequently, this document does **not** publish real-world precision or recall.
 
+## v1.1.0 pinned dogfood evidence
+
+The 2026-08-23 release-candidate dogfood audited the exact source and target commit `2e60ab11122bd9798a0f727ed6573ade247f7808` through the generated 1.1.0 standalone artifact with SHA-256 `7e3175e4e8a8ab6048fcc92673e7bece673f152d143dbf2f919292a0607a95ea`. Both raw and effective reports contain zero findings and zero suppressions.
+
+The complete [pilot bundle](../pilots/2026-08-23-awesome-maintainer-defense/README.md) publishes metadata, raw/effective schema-v1 reports, empty labels, deterministic JSON, and generated Markdown. It is explicitly `internal-owner-directed`: the implementation agent ran it under the repository owner's direction, no independent maintainer classified results, and a clean self-audit does not establish field precision, recall, usefulness, or representativeness.
+
+This dogfood bundle is separate from the earlier ten-repository smoke test below. The dogfood proves release-candidate provenance and self-consistency; the historical smoke test records parser and applicability corrections.
+
 ## Results after corrections
 
 | Repository | Commit | Findings | Rule distribution |
