@@ -6,10 +6,10 @@
 
 - Pilot type: `internal-owner-directed`
 - Disclosure: `public`
-- Run timestamp: `2026-08-23T07:01:21Z`
-- Auditor: `1.1.0` at `79564dd422a516c238f72727aaaadb58d2a47a7b`
-- Standalone SHA-256: `0fae945f1c2b45fe4c8f21c00525f2c276783409b5eefaf106e289e39c4ca8b3`
-- Target: `thangldw/awesome-maintainer-defense@79564dd422a516c238f72727aaaadb58d2a47a7b`
+- Run timestamp: `2026-08-23T07:12:08Z`
+- Auditor: `1.1.0` at `8d269f01bc046395d01a4a38aeddfe1ed40b4f5d`
+- Standalone SHA-256: `c2a54334ff737920d242b5622426647694f272ba4672fca319083be108edd0fb`
+- Target: `thangldw/awesome-maintainer-defense@8d269f01bc046395d01a4a38aeddfe1ed40b4f5d`
 - Command: `python3 dist/maintainer-defense-kit.py audit . --format json`
 
 ## Summary

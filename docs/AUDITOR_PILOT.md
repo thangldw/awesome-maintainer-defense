@@ -12,7 +12,7 @@ This is a smoke test, not a representative benchmark. Repository selection was p
 
 ## v1.1.0 pinned dogfood evidence
 
-The 2026-08-23 release-candidate dogfood audited the exact source and target commit `79564dd422a516c238f72727aaaadb58d2a47a7b` through the generated 1.1.0 standalone artifact with SHA-256 `0fae945f1c2b45fe4c8f21c00525f2c276783409b5eefaf106e289e39c4ca8b3`. Both raw and effective reports contain zero findings and zero suppressions. `make pilot-verify` rebuilds the pinned standalone, re-audits the archived target commit, checks runtime-source provenance, and byte-compares the generated bundle before release.
+The 2026-08-23 release-candidate dogfood audited the exact source and target commit `8d269f01bc046395d01a4a38aeddfe1ed40b4f5d` through the generated 1.1.0 standalone artifact with SHA-256 `c2a54334ff737920d242b5622426647694f272ba4672fca319083be108edd0fb`. Both raw and effective reports contain zero findings and zero suppressions. `make pilot-verify` rebuilds the pinned standalone, re-audits the archived target commit, proves both revisions are ancestors of release `HEAD`, checks runtime-source provenance, and byte-compares the generated bundle before release.
 
 The complete [pilot bundle](../pilots/2026-08-23-awesome-maintainer-defense/README.md) publishes metadata, raw/effective schema-v1 reports, empty labels, deterministic JSON, and generated Markdown. It is explicitly `internal-owner-directed`: the implementation agent ran it under the repository owner's direction, no independent maintainer classified results, and a clean self-audit does not establish field precision, recall, usefulness, or representativeness.
 
