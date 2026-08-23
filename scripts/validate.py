@@ -396,6 +396,7 @@ def validate_generated_files() -> None:
 def validate_auditor_assets() -> None:
     for relative in (
         "auditor.schema.json", "auditor-rules.json", "maintainer-defense-config.schema.json",
+        "pilot.schema.json", "pilots/fixtures/minimal-input.json",
         "tests/fixtures/auditor/corpus.json",
     ):
         path = ROOT / relative
