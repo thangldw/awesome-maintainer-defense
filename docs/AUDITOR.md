@@ -18,6 +18,7 @@ python3 scripts/install_kit.py audit . --format sarif > maintainer-defense.sarif
 python3 scripts/install_kit.py audit . --fail-on high
 python3 scripts/install_kit.py audit . --baseline previous.json --new-only --format json
 python3 scripts/install_kit.py audit . --compare-ref origin/main --new-only --fail-on high
+python3 scripts/install_kit.py audit . --config .maintainer-defense.json --format json
 python3 scripts/install_kit.py fix . --output recommended.patch
 python3 scripts/install_kit.py fix . --safe-only
 ```
@@ -34,6 +35,8 @@ The v1.0.1 release provides the verified standalone artifact, a wheel for `pipx`
 `fix` never edits the target, changes GitHub settings, commits, pushes, or opens a pull request. It emits a unified diff for human review. `--dry-run` is accepted for clarity but is redundant because patch-only behavior is unconditional.
 
 `--new-only` requires exactly one comparison source. `--baseline` reads fingerprints from a schema-v1 JSON audit report. `--compare-ref` resolves a local Git commit, archives it into a temporary directory, and audits that snapshot without checking it out or executing repository code. The emitted summary, SARIF/JSON findings, and `--fail-on` threshold contain only fingerprints absent from the comparison. A changed rule message changes its fingerprint and is therefore reported as new.
+
+The auditor discovers only `TARGET/.maintainer-defense.json`, unless `--config PATH` is explicit. Each suppression requires `rule_id`, non-empty `reason` and `owner`, an ISO `expires_on`, and at least one exact `path` or `fingerprint` selector. Expired entries warn and stop suppressing; unknown rules, malformed or duplicate selectors, and active selectors that match no current finding fail closed. Suppressions affect emitted findings and `--fail-on`, never the raw repository or fix patches. The strict format is defined by [`maintainer-defense-config.schema.json`](../maintainer-defense-config.schema.json).
 
 ## Rule families
 

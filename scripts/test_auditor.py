@@ -10,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -18,6 +19,18 @@ CORPUS = ROOT / "tests/fixtures/auditor/corpus.json"
 PIN = "9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0"
 UPLOAD_PIN = "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
 DOWNLOAD_PIN = "3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c"
+VALID_SUPPRESSION = {
+    "schema_version": 1,
+    "suppressions": [
+        {
+            "rule_id": "MD-WF-003",
+            "path": ".github/workflows/ci.yml",
+            "reason": "Migration is tracked in issue 42",
+            "owner": "@maintainers",
+            "expires_on": "2026-12-31",
+        }
+    ],
+}
 
 spec = importlib.util.spec_from_file_location("maintainer_defense", CLI)
 assert spec and spec.loader
@@ -443,6 +456,112 @@ jobs:
             self.assertEqual(result.returncode, 0, result.stderr)
             report = json.loads(result.stdout)
             self.assertEqual([item["rule_id"] for item in report["findings"]], ["MD-WF-003"])
+
+    def test_valid_path_and_fingerprint_suppressions(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            materialize(target, {"id": "suppression"})
+            workflow = target / ".github/workflows/ci.yml"
+            workflow.write_text(
+                workflow.read_text(encoding="utf-8").replace(f"@{PIN}", "@v4"),
+                encoding="utf-8",
+            )
+            report = module.audit_repository(target)
+            finding = next(item for item in report["findings"] if item["rule_id"] == "MD-WF-003")
+            path_config = target / "path.json"
+            path_config.write_text(json.dumps(VALID_SUPPRESSION), encoding="utf-8")
+            entries = module.load_suppressions(path_config, date(2026, 8, 23))
+            effective, count, warnings = module.apply_suppressions(report, entries)
+            self.assertEqual((count, warnings, effective["summary"]["total"]), (1, [], 0))
+
+            fingerprint_config = target / "fingerprint.json"
+            payload = json.loads(json.dumps(VALID_SUPPRESSION))
+            payload["suppressions"][0].pop("path")
+            payload["suppressions"][0]["fingerprint"] = finding["fingerprint"]
+            fingerprint_config.write_text(json.dumps(payload), encoding="utf-8")
+            entries = module.load_suppressions(fingerprint_config, date(2026, 8, 23))
+            _, count, _ = module.apply_suppressions(report, entries)
+            self.assertEqual(count, 1)
+
+    def test_suppression_validation_is_fail_closed(self) -> None:
+        mutations = {
+            "unknown-rule": lambda item: item.update(rule_id="MD-WF-999"),
+            "empty-reason": lambda item: item.update(reason="  "),
+            "empty-owner": lambda item: item.update(owner=""),
+            "invalid-date": lambda item: item.update(expires_on="2026-02-30"),
+            "no-selector": lambda item: item.pop("path"),
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for name, mutate in mutations.items():
+                with self.subTest(case=name):
+                    payload = json.loads(json.dumps(VALID_SUPPRESSION))
+                    mutate(payload["suppressions"][0])
+                    path = root / f"{name}.json"
+                    path.write_text(json.dumps(payload), encoding="utf-8")
+                    with self.assertRaises(module.KitError):
+                        module.load_suppressions(path, date(2026, 8, 23))
+
+            duplicate = json.loads(json.dumps(VALID_SUPPRESSION))
+            duplicate["suppressions"].append(dict(duplicate["suppressions"][0]))
+            duplicate_path = root / "duplicate.json"
+            duplicate_path.write_text(json.dumps(duplicate), encoding="utf-8")
+            with self.assertRaises(module.KitError):
+                module.load_suppressions(duplicate_path, date(2026, 8, 23))
+
+    def test_expired_and_unmatched_suppressions_do_not_hide_findings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            materialize(target, {"id": "expired-suppression"})
+            workflow = target / ".github/workflows/ci.yml"
+            workflow.write_text(
+                workflow.read_text(encoding="utf-8").replace(f"@{PIN}", "@v4"),
+                encoding="utf-8",
+            )
+            report = module.audit_repository(target)
+            expired = json.loads(json.dumps(VALID_SUPPRESSION))
+            expired["suppressions"][0]["expires_on"] = "2026-08-22"
+            expired_path = target / "expired.json"
+            expired_path.write_text(json.dumps(expired), encoding="utf-8")
+            entries = module.load_suppressions(expired_path, date(2026, 8, 23))
+            effective, count, warnings = module.apply_suppressions(report, entries)
+            self.assertEqual(count, 0)
+            self.assertEqual(effective["summary"]["total"], report["summary"]["total"])
+            self.assertTrue(any("expired" in warning.lower() for warning in warnings))
+
+            unmatched = json.loads(json.dumps(VALID_SUPPRESSION))
+            unmatched["suppressions"][0]["path"] = ".github/workflows/other.yml"
+            unmatched_path = target / "unmatched.json"
+            unmatched_path.write_text(json.dumps(unmatched), encoding="utf-8")
+            entries = module.load_suppressions(unmatched_path, date(2026, 8, 23))
+            with self.assertRaises(module.KitError):
+                module.apply_suppressions(report, entries)
+
+    def test_default_config_and_standalone_apply_identical_suppressions(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            materialize(target, {"id": "standalone-suppression"})
+            workflow = target / ".github/workflows/ci.yml"
+            workflow.write_text(
+                workflow.read_text(encoding="utf-8").replace(f"@{PIN}", "@v4"),
+                encoding="utf-8",
+            )
+            target.joinpath(".maintainer-defense.json").write_text(
+                json.dumps(VALID_SUPPRESSION), encoding="utf-8"
+            )
+            subprocess.run([sys.executable, str(ROOT / "scripts/build_standalone.py")], check=True)
+            arguments = ("audit", target, "--format", "json", "--fail-on", "note")
+            source = self.run_cli(*arguments)
+            standalone = subprocess.run(
+                [sys.executable, str(ROOT / "dist/maintainer-defense-kit.py"), *(str(v) for v in arguments)],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(source.returncode, 0, source.stderr)
+            self.assertEqual(standalone.returncode, 0, standalone.stderr)
+            self.assertEqual(json.loads(source.stdout), json.loads(standalone.stdout))
+            self.assertIn("suppressed 1 finding", source.stderr.lower())
 
     def test_fail_on_threshold(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

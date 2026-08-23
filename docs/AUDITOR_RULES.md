@@ -16,6 +16,10 @@ Rule IDs are part of the auditor's public output contract. An ID is never reassi
 
 Mappings below are cross-references, not claims that every finding is a vulnerability. OpenSSF mappings refer to the closest [Scorecard check](https://github.com/ossf/scorecard/blob/main/docs/checks.md); CWE is included only when a software-weakness category is a useful fit.
 
+## Governed suppressions
+
+An accepted exception belongs in `.maintainer-defense.json` with a rule ID, exact path or fingerprint, reason, owner, and expiry date. Expired entries no longer hide findings. Invalid, duplicate, or unmatched active entries fail closed so suppressions remain reviewable maintenance records rather than permanent ignore lists.
+
 ## Governance rules
 
 ### MD-GOV-001
