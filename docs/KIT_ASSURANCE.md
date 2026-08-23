@@ -14,6 +14,8 @@ Status: engineering-verified baseline. The kit is not security-certified, and re
 | Three-language deployment structure | English, Vietnamese, and Japanese assets installed by matrix | Profile × language tests | Native security/legal review is not claimed |
 | Reproducible pilot bundle | Pinned source/target commits, artifact digest, raw/effective reports, labels | Pilot schema and provenance verification | Owner-directed dogfood is not independent or representative |
 
+The current [1.1.1 owner-directed pilot](../pilots/2026-08-24-awesome-maintainer-defense/README.md) reproduced a zero-finding self-audit at its pinned release-candidate commit. This verifies artifact and evidence reproducibility only; it adds no independent field-accuracy evidence.
+
 ## Acceptance gate
 
 Before production enforcement, a repository owner should:

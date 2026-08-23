@@ -34,8 +34,9 @@
       ],
       "properties": {
         "pilot_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"},
-        "disclosure": {"enum": ["public", "sanitized", "private"]},
+        "disclosure": {"enum": ["public", "sanitized", "private", "repository-and-sanitized-results"]},
         "pilot_type": {"enum": ["internal-owner-directed", "external-maintainer-reviewed"]},
+        "reviewer_role": {"type": "string", "minLength": 1},
         "run_at": {"type": "string", "format": "date-time"},
         "auditor_version": {"type": "string", "minLength": 1},
         "source_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},

@@ -8,4 +8,9 @@ Historical pilots are rebuilt with their recorded source code and do not claim e
 
 Owner-directed dogfood must be labeled non-independent and non-representative. Aggregate precision is permitted only when an external maintainer authorized it and every finding has an independent, non-unresolved label. Finding-only bundles cannot establish recall.
 
+## Published evidence
+
+- [1.1.1 owner-directed dogfood](2026-08-24-awesome-maintainer-defense/README.md): current release-candidate reproducibility evidence; zero findings; not independent or representative.
+- [1.1.0 owner-directed dogfood](2026-08-23-awesome-maintainer-defense/README.md): historical reproducibility evidence at its pinned runtime.
+
 `fixtures/minimal-input.json` demonstrates the schema and is not field evidence. Participation authority, disclosure choices, and publication limits are defined in the [pilot program](../docs/AUDITOR_PILOT_PROGRAM.md).

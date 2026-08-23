@@ -11,6 +11,11 @@ from datetime import date, datetime
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
+from documentation_contract import (
+    DocumentationContractError,
+    validate_documentation_contract,
+)
+
 ROOT = Path(__file__).resolve().parents[1]
 ALLOWED_TYPES = {
     "awesome-list",
@@ -482,6 +487,10 @@ def validate_auditor_assets() -> None:
 
 
 def main() -> None:
+    try:
+        validate_documentation_contract(ROOT)
+    except DocumentationContractError as exc:
+        fail(str(exc))
     catalog = validate_catalog()
     audits = validate_audits(catalog)
     pins = validate_pins()
