@@ -54,6 +54,26 @@ class DistributionTests(unittest.TestCase):
         self.assertIn(f"/v{EXPECTED_VERSION}/maintainer-defense-kit.py\"", formula)
         self.assertIn(f'  sha256 "{digest}"', formula)
         self.assertIn(f"auditor {EXPECTED_VERSION}; kit {EXPECTED_VERSION}", formula)
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "repository"
+            target.mkdir()
+            version = subprocess.run(
+                [sys.executable, str(standalone), "--version"],
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+            self.assertEqual(
+                version.stdout.strip(),
+                f"maintainer-defense auditor {EXPECTED_VERSION}; kit {EXPECTED_VERSION}",
+            )
+            audit = subprocess.run(
+                [sys.executable, str(standalone), "audit", str(target), "--format", "json"],
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+            self.assertEqual(json.loads(audit.stdout)["schema_version"], 1)
 
     def test_wheel_and_sdist_contracts(self) -> None:
         wheel_name = f"maintainer_defense_kit-{EXPECTED_VERSION}-py3-none-any.whl"
@@ -117,6 +137,28 @@ class DistributionTests(unittest.TestCase):
                 check=True,
             )
             self.assertEqual(json.loads(audit.stdout)["schema_version"], 1)
+
+    def test_clean_sdist_install_smoke(self) -> None:
+        sdist = DIST / f"maintainer_defense_kit-{EXPECTED_VERSION}.tar.gz"
+        self.assertTrue(sdist.is_file(), f"missing {sdist}; run make package")
+        with tempfile.TemporaryDirectory() as tmp:
+            environment = Path(tmp) / "venv"
+            subprocess.run([sys.executable, "-m", "venv", str(environment)], check=True)
+            python = environment / "bin/python"
+            executable = environment / "bin/maintainer-defense"
+            subprocess.run(
+                [str(python), "-m", "pip", "install", "--no-deps", str(sdist)],
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+            version = subprocess.run(
+                [str(executable), "--version"], text=True, capture_output=True, check=True
+            )
+            self.assertEqual(
+                version.stdout.strip(),
+                f"maintainer-defense auditor {EXPECTED_VERSION}; kit {EXPECTED_VERSION}",
+            )
 
 
 if __name__ == "__main__":

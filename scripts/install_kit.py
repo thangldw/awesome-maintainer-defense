@@ -12,6 +12,7 @@ import io
 import json
 import os
 import re
+import shlex
 import subprocess
 import sys
 import tarfile
@@ -36,6 +37,12 @@ _RULE_CATALOG: dict[str, dict] | None = None
 
 class KitError(Exception):
     pass
+
+
+class UsageArgumentParser(argparse.ArgumentParser):
+    def error(self, message: str) -> None:
+        self.print_usage(sys.stderr)
+        self.exit(1, f"{self.prog}: error: {message}\n")
 
 
 SEVERITY_ORDER = {"critical": 4, "high": 3, "medium": 2, "low": 1, "note": 0}
@@ -642,8 +649,10 @@ class WorkflowRecord:
     triggers: frozenset[str]
     workflow_run_names: frozenset[str]
     uploads_artifact: bool
+    uploaded_artifact_names: frozenset[str]
     downloads_artifact: bool
     executes_downloaded_content: bool
+    executed_artifact_names: frozenset[str]
     has_privileged_authority: bool
 
 
@@ -852,14 +861,72 @@ def run_scalar_text(lines: list[str], run_index: int) -> str:
     return "\n".join(chunks)
 
 
-def executes_local_file(command: str) -> bool:
-    interpreter = re.search(
-        r"(?:^|[;&|]\s*|\n\s*)(?:bash|sh|python(?:3)?|node|ruby|perl)\s+"
-        r"(?:['\"])?(?:\./)?[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)+",
-        command,
-    )
-    direct = re.search(r"(?:^|[;&|]\s*|\n\s*)\./[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*", command)
-    return bool(interpreter or direct)
+def action_inputs(lines: list[str], action_index: int) -> dict[str, str]:
+    action_indent = len(lines[action_index]) - len(lines[action_index].lstrip())
+    with_indent: int | None = None
+    inputs: dict[str, str] = {}
+    for candidate in lines[action_index + 1 :]:
+        stripped = candidate.lstrip()
+        indentation = len(candidate) - len(stripped)
+        if stripped and indentation <= action_indent:
+            break
+        if re.match(r"^with\s*:\s*$", stripped):
+            with_indent = indentation
+            continue
+        if with_indent is None:
+            continue
+        if stripped and indentation <= with_indent:
+            break
+        match = re.match(r"^([A-Za-z0-9_-]+)\s*:\s*(.*?)\s*$", stripped)
+        if match:
+            inputs[match.group(1)] = match.group(2).split(" #", 1)[0].strip().strip("\"'")
+    return inputs
+
+
+def literal_relative_path(value: str) -> PurePosixPath | None:
+    if not value or "${{" in value or any(character in value for character in "`$<>\\"):
+        return None
+    path = PurePosixPath(value.removeprefix("./"))
+    if path.is_absolute() or ".." in path.parts:
+        return None
+    return path
+
+
+def executed_local_paths(command: str) -> frozenset[PurePosixPath]:
+    paths: set[PurePosixPath] = set()
+    interpreters = {"bash", "sh", "python", "python3", "node", "ruby", "perl"}
+    for segment in re.split(r"(?:&&|\|\||[;|\n])", command):
+        try:
+            tokens = shlex.split(segment, comments=True, posix=True)
+        except ValueError:
+            continue
+        while tokens and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*=.*", tokens[0]):
+            tokens.pop(0)
+        if not tokens:
+            continue
+        candidate: str | None = None
+        executable = PurePosixPath(tokens[0]).name
+        if executable in interpreters:
+            for token in tokens[1:]:
+                if token in {"-c", "-m"}:
+                    candidate = None
+                    break
+                if not token.startswith("-"):
+                    candidate = token
+                    break
+        elif tokens[0] in {"source", "."} and len(tokens) > 1:
+            candidate = tokens[1]
+        elif tokens[0].startswith("./"):
+            candidate = tokens[0]
+        if candidate:
+            path = literal_relative_path(candidate)
+            if path is not None:
+                paths.add(path)
+    return frozenset(paths)
+
+
+def path_is_within(path: PurePosixPath, destination: PurePosixPath) -> bool:
+    return destination == PurePosixPath(".") or path == destination or destination in path.parents
 
 
 def index_workflows(target: Path) -> list[WorkflowRecord]:
@@ -873,29 +940,48 @@ def index_workflows(target: Path) -> list[WorkflowRecord]:
         lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
         name_match = next((re.match(r"^name\s*:\s*(.*?)\s*$", line) for line in lines if re.match(r"^name\s*:", line)), None)
         name = name_match.group(1).strip("\"'") if name_match else path.stem
-        uploads = any(re.search(r"uses:\s*[\"']?actions/upload-artifact@", line) for line in lines)
+        upload_indexes = [
+            index for index, line in enumerate(lines)
+            if re.search(r"uses:\s*[\"']?actions/upload-artifact@", line)
+        ]
+        uploaded_names: set[str] = set()
+        for upload_index in upload_indexes:
+            upload_name = action_inputs(lines, upload_index).get("name", "artifact")
+            if upload_name and "${{" not in upload_name:
+                uploaded_names.add(upload_name)
         download_indexes = [
             index for index, line in enumerate(lines)
             if re.search(r"uses:\s*[\"']?actions/download-artifact@", line)
         ]
-        executes_download = False
+        executed_names: set[str] = set()
         privileged = False
         for download_index in download_indexes:
+            inputs = action_inputs(lines, download_index)
+            destination = literal_relative_path(inputs.get("path", "."))
+            remote_run = "github.event.workflow_run.id" in inputs.get("run-id", "")
+            authenticated = bool(inputs.get("github-token"))
+            if destination is None or not remote_run or not authenticated:
+                continue
             _, job_end = yaml_job_bounds(lines, download_index)
             for run_index in range(download_index + 1, job_end):
                 if not re.match(r"^\s*(?:-\s*)?run\s*:", lines[run_index]):
                     continue
-                if not executes_local_file(run_scalar_text(lines, run_index)):
+                executed_paths = executed_local_paths(run_scalar_text(lines, run_index))
+                if not any(path_is_within(path, destination) for path in executed_paths):
                     continue
-                executes_download = True
                 job_start, _ = yaml_job_bounds(lines, run_index)
                 job_text = "\n".join(lines[job_start:job_end])
-                privileged = bool(
+                execution_is_privileged = bool(
                     permission_scope(lines, run_index)
                     or re.search(r"\$\{\{\s*secrets\.|secrets:\s*inherit", job_text)
                 )
-                break
-            if executes_download:
+                if execution_is_privileged:
+                    name = inputs.get("name")
+                    if name and "${{" not in name:
+                        executed_names.add(name)
+                    elif not name:
+                        executed_names.add("*")
+                    privileged = True
                 break
         records.append(
             WorkflowRecord(
@@ -903,9 +989,11 @@ def index_workflows(target: Path) -> list[WorkflowRecord]:
                 name=name,
                 triggers=workflow_triggers(lines),
                 workflow_run_names=workflow_run_sources(lines),
-                uploads_artifact=uploads,
+                uploads_artifact=bool(upload_indexes),
+                uploaded_artifact_names=frozenset(uploaded_names),
                 downloads_artifact=bool(download_indexes),
-                executes_downloaded_content=executes_download,
+                executes_downloaded_content=bool(executed_names),
+                executed_artifact_names=frozenset(executed_names),
                 has_privileged_authority=privileged,
             )
         )
@@ -928,6 +1016,11 @@ def artifact_trust_findings(target: Path, records: list[WorkflowRecord]) -> list
             continue
         for producer in producers:
             if producer.name not in consumer.workflow_run_names:
+                continue
+            if not (
+                "*" in consumer.executed_artifact_names
+                or producer.uploaded_artifact_names & consumer.executed_artifact_names
+            ):
                 continue
             producer_rel = relative_path(target, producer.path)
             consumer_rel = relative_path(target, consumer.path)
@@ -1357,7 +1450,7 @@ def combined_patch(report: dict, safe_only: bool) -> str:
 
 
 def parse_install_args(arguments: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = UsageArgumentParser(description=__doc__)
     parser.add_argument("--target", required=True, type=Path, help="target repository")
     parser.add_argument("--profile", choices=PROFILES, default="observe")
     parser.add_argument("--language", choices=LANGUAGES, default="en")
@@ -1370,7 +1463,7 @@ def parse_install_args(arguments: list[str] | None = None) -> argparse.Namespace
 
 
 def parse_audit_args(command: str, arguments: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(prog=f"maintainer-defense {command}")
+    parser = UsageArgumentParser(prog=f"maintainer-defense {command}")
     parser.add_argument("target", nargs="?", default=".", type=Path, help="repository checkout")
     if command == "audit":
         parser.add_argument(
@@ -1414,7 +1507,19 @@ def emit_output(content: str, output: Path | None) -> None:
         sys.stdout.write(content)
         return
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(content, encoding="utf-8")
+    descriptor, temporary = tempfile.mkstemp(prefix=f".{output.name}.", dir=output.parent)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, output)
+    except BaseException:
+        try:
+            os.unlink(temporary)
+        except FileNotFoundError:
+            pass
+        raise
     print(f"WROTE {output}", file=sys.stderr)
 
 
