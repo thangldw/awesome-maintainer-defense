@@ -138,6 +138,17 @@
       ]
     },
     {
+      "id": "MD-WF-007",
+      "title": "Untrusted event data is interpolated into a shell command",
+      "default_severity": "high",
+      "description": "Attacker-controlled event text can alter the generated shell program and execute unintended commands in the job.",
+      "safe_remediation": "Assign the expression to an environment variable or pass it as a reviewed action input, then quote the shell variable for the selected shell.",
+      "help_anchor": "md-wf-007",
+      "mappings": [
+        {"framework": "CWE", "id": "CWE-78", "url": "https://cwe.mitre.org/data/definitions/78.html"}
+      ]
+    },
+    {
       "id": "MD-MOD-001",
       "title": "Destructive moderation is enabled",
       "default_severity": "high",
