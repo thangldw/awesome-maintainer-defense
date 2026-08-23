@@ -17,7 +17,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / "dist"
-EXPECTED_VERSION = "1.1.0"
+EXPECTED_VERSION = "1.1.1"
 
 
 class DistributionTests(unittest.TestCase):

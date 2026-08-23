@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / "dist"
-VERSION = "1.1.0"
+VERSION = "1.1.1"
 BUNDLE_NAME = f"awesome-maintainer-defense-openai-skills-v{VERSION}.zip"
 FIXED_TIME = (1980, 1, 1, 0, 0, 0)
 RELEASE_FILES = (
