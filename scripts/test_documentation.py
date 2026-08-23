@@ -4,9 +4,11 @@
 from __future__ import annotations
 
 import json
+import re
 import tempfile
 import unittest
 from pathlib import Path
+from urllib.parse import unquote, urlparse
 
 from documentation_contract import (
     DocumentationContractError,
@@ -122,6 +124,30 @@ class RepositoryDocumentationTests(unittest.TestCase):
         for relative in MANIFEST["forbidden_paths"]:
             with self.subTest(path=relative):
                 self.assertFalse(ROOT.joinpath(relative).exists(), relative)
+
+    def test_locale_essential_paths_exist(self) -> None:
+        for language in ("vi", "ja"):
+            for filename in ("README.md", "GETTING_STARTED.md", "SAFETY.md", "PILOTS.md", "PLAYBOOK.md"):
+                relative = f"docs/{language}/{filename}"
+                with self.subTest(path=relative):
+                    self.assertTrue(ROOT.joinpath(relative).is_file(), relative)
+
+    def test_locale_essential_local_links_resolve(self) -> None:
+        link_pattern = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
+        generated = {ROOT.joinpath(relative).resolve() for relative in MANIFEST["generated_markdown"]}
+        paths = [ROOT / "README.vi.md", ROOT / "README.ja.md"]
+        paths.extend(ROOT.glob("docs/vi/*.md"))
+        paths.extend(ROOT.glob("docs/ja/*.md"))
+        for path in paths:
+            for target in link_pattern.findall(path.read_text(encoding="utf-8")):
+                parsed = urlparse(target.strip().split(" ", 1)[0].strip("<>"))
+                if parsed.scheme or target.startswith("#") or not parsed.path:
+                    continue
+                resolved = (path.parent / unquote(parsed.path)).resolve()
+                if resolved in generated and not resolved.exists():
+                    continue
+                with self.subTest(source=path.relative_to(ROOT), target=target):
+                    self.assertTrue(resolved.exists(), target)
 
 
 if __name__ == "__main__":

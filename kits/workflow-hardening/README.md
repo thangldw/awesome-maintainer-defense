@@ -1,14 +1,9 @@
-# Workflow-hardening starter kit
+# Workflow-hardening profile
 
-> Deployable asset. Start from the [documentation hub](../../docs/README.md).
+This profile adds dependency review and GitHub Actions static analysis to the balanced status gate.
 
-This kit adds two independent checks:
+Both workflows use `pull_request`, explicit read-only repository permissions, and full-SHA Action pins recorded in `pins.json`. They inspect the patch and workflow definitions but do not run the repository build, install dependencies, or execute pull-request code.
 
-- dependency review for newly introduced vulnerabilities and license policy;
-- zizmor static analysis for GitHub Actions workflows.
+Before adoption, review upstream source and release notes, confirm product availability for the repository, define vulnerability and license thresholds, and test recovery after an intentional failure. Dependency Review availability depends on repository visibility and GitHub security features; zizmor reports through the job log in this profile.
 
-Both Actions are pinned to full commit SHAs. Review those commits and upstream release notes before updating. Dependency Review is available for public repositories and private repositories with GitHub Advanced Security. The zizmor workflow is configured without Advanced Security and reports through the job log.
-
-The workflows use `pull_request`, not `pull_request_target`, and receive read-only repository permissions. They inspect untrusted content but do not run the project's build or package-manager commands.
-
-Adjust vulnerability severity and license policy to your project. A passing result is not proof that a contribution is safe.
+A passing check covers only the configured analyzers and revision. It does not prove the change or supply chain is safe. Install through the [Maintainer Defense Kit](../maintainer-defense-kit/README.md) so preview, ownership, verification, and rollback are recorded.

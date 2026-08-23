@@ -1,21 +1,22 @@
-## Problem
+## Authorized scope
 
-<!-- Versioned deployment asset from Awesome Maintainer Defense v1.0.0. -->
+Link the issue or maintainer request and state the bounded outcome.
 
-<!-- What user-visible or maintainer-approved problem does this solve? Link an issue when possible. -->
+## Evidence
 
-## Approach
+Provide reproduction steps, tests, and exact verification commands. State unresolved limitations.
 
-<!-- Explain the smallest meaningful change and alternatives considered. -->
+## Permissions and effects
 
-## Verification
+List workflow permissions, external data flows, contributor-visible actions, and setting changes. Write `none` where applicable.
 
-<!-- Provide exact commands, test output, screenshots, or a minimal reproduction. -->
+## Rollback
 
-## Scope
+Name the owner and exact revert or disable action.
 
-- [ ] This change is focused and avoids unrelated formatting or refactoring.
-- [ ] I searched for existing issues and pull requests.
-- [ ] I understand the submitted code and can answer review questions.
-- [ ] I added or updated tests where behavior changed.
-- [ ] I disclosed substantial automated assistance if the project policy requires it.
+## Human authorization
+
+- [ ] A human understands and accepts the submitted change.
+- [ ] Automated assistance has been reviewed and disclosed as required.
+- [ ] No secret, personal data, or private vulnerability detail is included.
+- [ ] Tests cover the changed behavior and rollback path.

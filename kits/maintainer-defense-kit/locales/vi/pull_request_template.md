@@ -1,21 +1,22 @@
-## Vấn đề
+## Phạm vi được phê duyệt
 
-<!-- Asset triển khai có phiên bản từ Awesome Maintainer Defense v1.0.0. -->
+Liên kết issue hoặc yêu cầu của maintainer và nêu kết quả có giới hạn.
 
-<!-- Thay đổi này giải quyết vấn đề nào đã được maintainer đồng ý hoặc ảnh hưởng trực tiếp đến người dùng? Hãy liên kết issue nếu có. -->
+## Bằng chứng
 
-## Cách tiếp cận
+Cung cấp reproduction, test và lệnh xác minh chính xác. Nêu rõ giới hạn chưa giải quyết.
 
-<!-- Giải thích thay đổi nhỏ nhất có ý nghĩa và các phương án đã cân nhắc. -->
+## Permissions và tác động
 
-## Xác minh
+Liệt kê workflow permission, data flow bên ngoài, thao tác nhìn thấy bởi contributor và thay đổi setting. Ghi `không có` nếu phù hợp.
 
-<!-- Cung cấp lệnh chính xác, kết quả test, ảnh chụp hoặc ví dụ tái hiện tối thiểu. -->
+## Rollback
 
-## Phạm vi
+Nêu owner và thao tác revert hoặc disable chính xác.
 
-- [ ] Thay đổi này tập trung, không kèm định dạng lại hoặc refactor không liên quan.
-- [ ] Tôi đã tìm issue và pull request hiện có.
-- [ ] Tôi hiểu mã đã gửi và có thể trả lời câu hỏi review.
-- [ ] Tôi đã thêm hoặc cập nhật test khi hành vi thay đổi.
-- [ ] Tôi đã công khai việc dùng hỗ trợ tự động đáng kể nếu policy của dự án yêu cầu.
+## Phê duyệt của con người
+
+- [ ] Một người chịu trách nhiệm hiểu và chấp nhận thay đổi.
+- [ ] Automated assistance đã được review và disclosure theo policy.
+- [ ] Không có secret, personal data hay chi tiết vulnerability private.
+- [ ] Test bao phủ hành vi thay đổi và rollback.

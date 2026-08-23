@@ -1,17 +1,21 @@
-# Auditor commands
+# Auditor command reference
 
-- Human-readable audit: `python3 scripts/run_auditor.py audit TARGET`
-- JSON audit: `python3 scripts/run_auditor.py audit TARGET --format json`
-- SARIF audit: `python3 scripts/run_auditor.py audit TARGET --format sarif --output REPORT.sarif`
-- Policy threshold: `python3 scripts/run_auditor.py audit TARGET --fail-on high`
-- New findings against a saved report: `python3 scripts/run_auditor.py audit TARGET --baseline BASELINE.json --new-only --format json`
-- New findings against a local commit: `python3 scripts/run_auditor.py audit TARGET --compare-ref origin/main --new-only --fail-on high`
-- Governed exceptions: `python3 scripts/run_auditor.py audit TARGET --config TARGET/.maintainer-defense.json --format json`
-- Reviewable patch: `python3 scripts/run_auditor.py fix TARGET --output recommended.patch`
-- Safer subset of patches: add `--safe-only` to `fix`.
+Run commands from this skill directory; `scripts/run_auditor.py` selects the bundled standalone auditor in a release package and the canonical implementation in a source checkout.
 
-The audit command is read-only. The fix command writes only the requested patch file; it does not modify the target repository.
+```bash
+python3 scripts/run_auditor.py audit TARGET
+python3 scripts/run_auditor.py audit TARGET --format json --output REPORT.json
+python3 scripts/run_auditor.py audit TARGET --format sarif --output REPORT.sarif
+python3 scripts/run_auditor.py audit TARGET --fail-on high
+python3 scripts/run_auditor.py audit TARGET --baseline BASELINE.json --new-only --format json
+python3 scripts/run_auditor.py audit TARGET --compare-ref origin/main --new-only --fail-on high
+python3 scripts/run_auditor.py audit TARGET --config TARGET/.maintainer-defense.json --format json
+python3 scripts/run_auditor.py fix TARGET --output recommended.patch
+python3 scripts/run_auditor.py fix TARGET --safe-only --output recommended.patch
+```
 
-`--new-only` requires exactly one of `--baseline` or `--compare-ref`. The Git-ref mode uses only local Git objects and audits a temporary archive; fetch the desired ref separately when needed.
+`audit` is read-only. `fix` generates a unified diff and writes only `--output`; it never applies the patch or changes the target repository.
 
-The public OpenAI upload bundle places the generated dependency-free standalone auditor beside `run_auditor.py`. A GitHub plugin checkout uses the canonical repository implementation.
+`--new-only` requires exactly one comparison source. `--baseline` reads a schema-v1 report. `--compare-ref` uses an already-present local Git object and audits a temporary archive; it does not fetch or check out the ref. Fetching requires separate network authorization.
+
+Default suppression discovery is limited to `TARGET/.maintainer-defense.json`. Invalid or unmatched active suppressions fail closed. `--fail-on` returns 2 for a matched severity threshold, 1 for an input or configuration error, and 0 otherwise.
