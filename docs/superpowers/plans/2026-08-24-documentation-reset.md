@@ -208,7 +208,7 @@ git commit -m "test: define the documentation reset contract"
 
 **Interfaces:**
 - Consumes: auditor CLI and existing rule registry without behavioral changes.
-- Produces: the complete English product journey, stable auditor help anchors, stable root public-contract URLs, and no legacy narrative paths.
+- Produces: the complete English product journey, stable auditor help anchors, stable root public-contract URLs, and no legacy narrative paths. Human prose is reviewed directly; automated tests exercise documented commands, paths, links, and generated outputs rather than grepping wording.
 
 - [ ] **Step 1: Add failing English content-contract tests**
 
@@ -216,10 +216,6 @@ In `scripts/test_documentation.py`, assert:
 
 ```python
 def test_english_product_journey_is_complete(self) -> None:
-    readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    self.assertIn("Maintainer Defense Kit", readme)
-    self.assertIn("python3 dist/maintainer-defense-kit.py audit .", readme)
-    self.assertLess(readme.index("## Quickstart"), readme.index("## Curated catalog"))
     for path in (
         "docs/GETTING_STARTED.md",
         "docs/AUDITOR.md",
@@ -236,7 +232,7 @@ def test_removed_narratives_are_absent(self) -> None:
         self.assertFalse((ROOT / path).exists(), path)
 ```
 
-Keep the existing rule registry test: each `### MD-*` section, severity marker, standards URL, and `help_anchor` must remain exact.
+Keep the existing rule registry test: each `### MD-*` section, severity marker, standards URL, and `help_anchor` must remain exact. `scripts/test_quickstart.py` continues to extract and execute the documented source-checkout command instead of asserting prose.
 
 - [ ] **Step 2: Run focused tests and record the expected failures**
 
@@ -319,17 +315,7 @@ git commit -m "docs: replace the canonical product documentation"
 
 - [ ] **Step 1: Add failing locale parity tests**
 
-Extract fenced shell/PowerShell commands and require exact equality between each root README and its locale counterpart for the shared quickstart blocks. Require semantic markers:
-
-```python
-LOCALE_MARKERS = {
-    "en": ("offline", "does not execute repository code", "does not apply the patch", "consent"),
-    "vi": ("ngoại tuyến", "không thực thi mã", "không áp dụng bản vá", "đồng ý"),
-    "ja": ("オフライン", "リポジトリのコードを実行しない", "パッチを適用しない", "同意"),
-}
-```
-
-Test that every locale links to canonical `PRIVACY.md`, `TERMS.md`, `SUPPORT.md`, `docs/AUDITOR.md`, and `docs/AUDITOR_RULES.md` with a valid relative path.
+Extend `scripts/test_quickstart.py` so each root locale README's documented source-checkout audit command is extracted and executed in a temporary checkout. Keep `scripts/test_install_kit.py::test_profile_language_matrix` as the consumer-level proof that every locale produces the same required installed file set and safe profile behavior. Test local link resolution across every locale page. Review translated safety and consent meaning directly against the approved spec instead of asserting vocabulary strings.
 
 - [ ] **Step 2: Run locale tests and verify expected failures**
 
@@ -525,7 +511,7 @@ git commit -m "docs: replace legacy visuals with accessible diagrams"
 
 - [ ] **Step 1: Change expected versions in tests first**
 
-Set `EXPECTED_VERSION = "1.1.1"` in distribution and plugin tests. Add an assertion that release-facing Markdown—root READMEs, localized getting-started pages, `docs/GETTING_STARTED.md`, `docs/DISTRIBUTION.md`, kit READMEs, and the skill command reference—contains no `v1.1.0`, `==1.1.0`, or old plugin bundle filename. Historical pilot reports and the approved design/plan remain truthful records and are excluded from this assertion.
+Set `EXPECTED_VERSION = "1.1.1"` in distribution and plugin tests. Extend quickstart/package tests to execute versioned install paths and assert produced artifact names at 1.1.1. Review release-facing Markdown for stale version references during Task 8; historical pilot reports and the approved design/plan remain truthful records.
 
 - [ ] **Step 2: Run distribution tests red**
 
