@@ -9,6 +9,7 @@
 - Added Git-ref and JSON baselines, expiring governed suppressions, and deterministic pilot evidence bundles.
 - Added verified wheel/sdist, Homebrew, checksums, and ChatGPT/Codex skills-only release artifacts.
 - Re-verified all nine Action pins on 2026-08-23 and advanced the moved CodeQL v4 tag to its current verified commit.
+- Added release-gated pilot provenance checks, atomic CLI outputs, exit-code contract enforcement, and destination-aware artifact execution tracing.
 
 ### Tiếng Việt
 

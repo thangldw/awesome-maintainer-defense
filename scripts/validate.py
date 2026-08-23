@@ -251,6 +251,11 @@ def validate_workflows(pins: set[tuple[str, str]]) -> None:
         fail("release.yml must publish only a verified pushed version tag")
     if "environment: pypi" not in release or "id-token: write" not in release:
         fail("release.yml must use PyPI Trusted Publishing through the pypi environment")
+    if "make pilot-verify" not in release:
+        fail("release.yml must verify committed pilot evidence before publishing")
+    quality = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
+    if "fetch-depth: 0" not in release or "fetch-depth: 0" not in quality:
+        fail("release and quality workflows must fetch pilot provenance history")
 
 
 def validate_kit_safety() -> None:

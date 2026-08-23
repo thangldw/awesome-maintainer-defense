@@ -114,6 +114,44 @@ class QuickstartTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("Trusted Publishing", result.stderr)
 
+    def test_validator_rejects_release_without_pinned_pilot_verification(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "repository"
+            shutil.copytree(ROOT, target, ignore=shutil.ignore_patterns(".git", ".worktrees", "dist"))
+            release = target / ".github/workflows/release.yml"
+            release.write_text(
+                release.read_text(encoding="utf-8").replace("make pilot-verify && ", ""),
+                encoding="utf-8",
+            )
+            result = subprocess.run(
+                [sys.executable, str(target / "scripts/validate.py")],
+                cwd=target,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("pilot evidence", result.stderr)
+
+    def test_validator_rejects_shallow_release_provenance(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "repository"
+            shutil.copytree(ROOT, target, ignore=shutil.ignore_patterns(".git", ".worktrees", "dist"))
+            release = target / ".github/workflows/release.yml"
+            release.write_text(
+                release.read_text(encoding="utf-8").replace("fetch-depth: 0", "fetch-depth: 1"),
+                encoding="utf-8",
+            )
+            result = subprocess.run(
+                [sys.executable, str(target / "scripts/validate.py")],
+                cwd=target,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("provenance history", result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

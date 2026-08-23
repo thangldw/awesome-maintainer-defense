@@ -11,10 +11,10 @@
     ],
     "pilot_id": "2026-08-23-awesome-maintainer-defense",
     "pilot_type": "internal-owner-directed",
-    "run_at": "2026-08-23T06:37:36Z",
-    "source_commit": "2e60ab11122bd9798a0f727ed6573ade247f7808",
-    "standalone_sha256": "7e3175e4e8a8ab6048fcc92673e7bece673f152d143dbf2f919292a0607a95ea",
-    "target_commit": "2e60ab11122bd9798a0f727ed6573ade247f7808",
+    "run_at": "2026-08-23T07:01:21Z",
+    "source_commit": "79564dd422a516c238f72727aaaadb58d2a47a7b",
+    "standalone_sha256": "0fae945f1c2b45fe4c8f21c00525f2c276783409b5eefaf106e289e39c4ca8b3",
+    "target_commit": "79564dd422a516c238f72727aaaadb58d2a47a7b",
     "target_repository": "thangldw/awesome-maintainer-defense"
   },
   "reports": {
@@ -31,7 +31,7 @@
         },
         "total": 0
       },
-      "target": "/private/tmp/amd-v1.1.0-pilot.2KCwMw",
+      "target": "/private/tmp/amd-v1.1.0-pilot.VgiAK3",
       "tool": {
         "name": "maintainer-defense",
         "version": "1.1.0"
@@ -50,7 +50,7 @@
         },
         "total": 0
       },
-      "target": "/private/tmp/amd-v1.1.0-pilot.2KCwMw",
+      "target": "/private/tmp/amd-v1.1.0-pilot.VgiAK3",
       "tool": {
         "name": "maintainer-defense",
         "version": "1.1.0"
