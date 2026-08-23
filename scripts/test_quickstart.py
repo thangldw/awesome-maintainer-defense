@@ -63,6 +63,21 @@ class QuickstartTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("auditor-pilot.yml", result.stderr)
 
+    def test_validator_rejects_a_missing_field_report_form(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "repository"
+            shutil.copytree(ROOT, target, ignore=shutil.ignore_patterns(".git", ".worktrees", "dist"))
+            target.joinpath(".github/ISSUE_TEMPLATE/field-report.yml").unlink()
+            result = subprocess.run(
+                [sys.executable, str(target / "scripts/validate.py")],
+                cwd=target,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("field-report.yml", result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

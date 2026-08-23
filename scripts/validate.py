@@ -26,6 +26,7 @@ REQUIRED_REPOSITORY_FILES = (
     ".github/ISSUE_TEMPLATE/auditor-false-positive.yml",
     ".github/ISSUE_TEMPLATE/auditor-pilot.yml",
     ".github/ISSUE_TEMPLATE/documentation.yml",
+    ".github/ISSUE_TEMPLATE/field-report.yml",
     ".github/ISSUE_TEMPLATE/config.yml",
     ".github/dependabot.yml",
     ".github/pull_request_template.md",
