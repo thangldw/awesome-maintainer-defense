@@ -2,7 +2,7 @@ class MaintainerDefenseKit < Formula
   desc "Audit repository governance and GitHub Actions risk offline"
   homepage "https://github.com/thangldw/awesome-maintainer-defense"
   url "https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1.0/maintainer-defense-kit.py"
-  sha256 "7e3175e4e8a8ab6048fcc92673e7bece673f152d143dbf2f919292a0607a95ea"
+  sha256 "0fae945f1c2b45fe4c8f21c00525f2c276783409b5eefaf106e289e39c4ca8b3"
   license "MIT"
 
   depends_on "python@3.12"

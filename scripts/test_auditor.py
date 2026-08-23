@@ -12,6 +12,7 @@ import tempfile
 import unittest
 from datetime import date
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 CLI = ROOT / "scripts/install_kit.py"
@@ -91,6 +92,8 @@ jobs:
         with:
           name: pr-output
           path: downloaded
+          github-token: ${{{{ github.token }}}}
+          run-id: ${{{{ github.event.workflow_run.id }}}}
       - run: sh downloaded/report.sh
 """
 
@@ -381,6 +384,45 @@ jobs:
                 rules = {item["rule_id"] for item in report["findings"]}
                 self.assertNotIn("MD-WF-008", rules)
 
+    def test_artifact_trust_path_requires_matching_downloaded_content(self) -> None:
+        cases = (
+            ("shell", "sh downloaded/report.sh", "downloaded", True),
+            ("source", "source ./downloaded/env.sh", "downloaded", True),
+            ("dot-source", ". downloaded/env.sh", "downloaded", True),
+            ("direct", "./downloaded/tool", "downloaded", True),
+            ("top-level-python", "python downloaded.py", ".", True),
+            ("unrelated-script", "sh scripts/trusted-release.sh", "downloaded", False),
+        )
+        for name, command, destination, expected in cases:
+            with self.subTest(case=name):
+                consumer = PRIVILEGED_ARTIFACT_CONSUMER.replace(
+                    "path: downloaded", f"path: {destination}"
+                ).replace("sh downloaded/report.sh", command)
+                report = self.audit_files(
+                    {
+                        ".github/workflows/test.yml": UNTRUSTED_ARTIFACT_PRODUCER,
+                        ".github/workflows/publish.yml": consumer,
+                    }
+                )
+                rules = {item["rule_id"] for item in report["findings"]}
+                self.assertEqual("MD-WF-008" in rules, expected)
+
+    def test_artifact_trust_path_requires_remote_run_and_matching_name(self) -> None:
+        missing_run = PRIVILEGED_ARTIFACT_CONSUMER.replace(
+            "          run-id: ${{ github.event.workflow_run.id }}\n", ""
+        )
+        wrong_name = PRIVILEGED_ARTIFACT_CONSUMER.replace("name: pr-output", "name: other")
+        for name, consumer in (("missing-run", missing_run), ("wrong-name", wrong_name)):
+            with self.subTest(case=name):
+                report = self.audit_files(
+                    {
+                        ".github/workflows/test.yml": UNTRUSTED_ARTIFACT_PRODUCER,
+                        ".github/workflows/publish.yml": consumer,
+                    }
+                )
+                rules = {item["rule_id"] for item in report["findings"]}
+                self.assertNotIn("MD-WF-008", rules)
+
     def test_new_only_accepts_one_baseline_source(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp)
@@ -409,14 +451,14 @@ jobs:
             malformed = target / "malformed.json"
             malformed.write_text('{"schema_version": 2, "findings": []}', encoding="utf-8")
             cases = (
-                ("missing", ("audit", target, "--new-only"), 2),
+                ("missing", ("audit", target, "--new-only"), 1),
                 (
                     "both",
                     (
                         "audit", target, "--new-only", "--baseline", malformed,
                         "--compare-ref", "HEAD",
                     ),
-                    2,
+                    1,
                 ),
                 (
                     "malformed",
@@ -433,6 +475,16 @@ jobs:
                 with self.subTest(case=name):
                     result = self.run_cli(*arguments)
                     self.assertEqual(result.returncode, expected_code, result.stderr)
+
+    def test_output_write_is_atomic_on_replace_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "report.json"
+            output.write_text("original\n", encoding="utf-8")
+            with mock.patch.object(module.os, "replace", side_effect=OSError("simulated")):
+                with self.assertRaises(OSError):
+                    module.emit_output("replacement\n", output)
+            self.assertEqual(output.read_text(encoding="utf-8"), "original\n")
+            self.assertEqual(list(output.parent.glob(f".{output.name}.*")), [])
 
     def test_compare_ref_reports_only_findings_added_after_commit(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
