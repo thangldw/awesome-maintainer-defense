@@ -15,6 +15,8 @@ A repository maintainer or explicitly authorized representative starts a pilot t
 5. Add a regression fixture before publishing any parser or rule correction.
 6. Build and validate the reproducible bundle against `pilot.schema.json`.
 
+The [consent-to-evidence diagram](diagrams/consent-to-evidence.html) summarizes this flow: explicit maintainer authority precedes a pinned offline audit; human labels, including unresolved findings, remain in the record; the disclosure choice limits which fields can enter the deterministic publication bundle.
+
 ## Publication gate
 
 Publish only the fields allowed by the participant's disclosure choice. Remove credentials, personal data, private issue content, and unnecessary repository material. The bundle must state reviewer authority, whether review is independent, unresolved context, and limitations.

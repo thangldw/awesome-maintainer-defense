@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
 import json
 import re
 import tempfile
@@ -114,6 +115,15 @@ class DocumentationContractTests(unittest.TestCase):
 
 
 class RepositoryDocumentationTests(unittest.TestCase):
+    def test_retained_plugin_icons_match_pre_reset_digests(self) -> None:
+        expected = {
+            "assets/plugin-icon.png": "518944a11f4d9e62d2a60728e73698291e2c29ae9ccdd025b575beea691355bb",
+            "assets/plugin-icon.svg": "dac8592e6cd607320f612d1f895037ed13bafac0bf52c8787883e459e7614603",
+        }
+        for relative, digest in expected.items():
+            with self.subTest(path=relative):
+                self.assertEqual(hashlib.sha256(ROOT.joinpath(relative).read_bytes()).hexdigest(), digest)
+
     def test_catalog_generator_owns_only_catalog_page_and_is_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

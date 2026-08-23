@@ -8,4 +8,6 @@ PR 由来の信頼できないコードを、secret、OIDC、write token を持�
 
 オンラインの ruleset、branch protection、組織方針、GitHub App、role、label、private reporting 設定、外部サービスの挙動は監査範囲外です。所見がゼロでも、リポジトリ全体の安全性は保証されません。
 
+[信頼境界図](../diagrams/trust-boundaries.html)も同じ原則を示します。checkout はオフライン監査、所見、レビュー可能な patch までのローカル経路に留まり、apply にはメンテナーの承認が必要です。オンラインの GitHub 設定は監査境界外です。
+
 [英語版](../../SECURITY.md)の security、privacy、support、terms、license が正本です。

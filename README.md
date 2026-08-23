@@ -34,6 +34,8 @@ git apply --check recommended.patch
 
 Review the evidence and patch in repository context. Apply it only through the repository's normal ownership and CI process.
 
+The [audit-to-action diagram](docs/diagrams/audit-to-action.html) shows the complete governance path: scope the authorized target, inspect it offline, assess evidence, propose a patch, obtain an owner decision, then apply and record the change through the normal repository workflow.
+
 ## Evidence boundaries
 
 Tested contracts cover deterministic detection, JSON/SARIF output, patch-only remediation, installer conflict handling, and shipped workflow invariants. The project does not claim field accuracy across representative repositories, live GitHub-settings coverage, compliance, or proof of authorship or intent. See [Kit assurance](docs/KIT_ASSURANCE.md) and [Threat model](docs/THREAT_MODEL.md).

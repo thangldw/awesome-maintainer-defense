@@ -6,4 +6,6 @@
 
 参加者が選んだ公開範囲の情報だけを公開し、secret、個人情報、非公開内容を除去します。プロジェクト所有者自身による dogfood は、独立評価でも代表サンプルでもないと明記します。再現性は示せますが、実環境での精度は示せません。
 
+[同意から証拠までの図](../diagrams/consent-to-evidence.html)は同じ流れを示します。権限と同意の後に、固定 checkout のオフライン監査を行い、unresolved を含む人のラベルを保持します。公開範囲の選択によって、再現可能な bundle と公開に含められるデータを制限します。
+
 リポジトリの score、ranking、コントリビューター profile は作りません。完全な契約は英語の [pilot program](../AUDITOR_PILOT_PROGRAM.md)、公開 bundle は [pilot evidence](../../pilots/README.md)を参照してください。

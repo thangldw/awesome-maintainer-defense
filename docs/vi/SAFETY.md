@@ -8,4 +8,6 @@ Không chạy mã PR không tin cậy trong job có secret, OIDC hoặc write to
 
 Auditor không thấy live ruleset, branch protection, organization policy, GitHub App, role eligibility, label, private reporting setting hoặc hành vi dịch vụ bên ngoài. Bản audit sạch không có nghĩa toàn bộ repo an toàn.
 
+[Sơ đồ ranh giới tin cậy](../diagrams/trust-boundaries.html) thể hiện cùng nguyên tắc: checkout chỉ đi qua auditor offline, finding và patch có thể review; maintainer phải phê duyệt trước khi apply; live GitHub settings nằm ngoài ranh giới kiểm tra.
+
 Security, privacy, support, terms và license bằng [English](../../SECURITY.md) là canonical.

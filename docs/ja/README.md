@@ -10,3 +10,5 @@
 | パイロットの権限と同意 | [パイロット](PILOTS.md) |
 
 完全な仕様と機械可読契約は[英語ドキュメント](../README.md)にあります。英語の [Security](../../SECURITY.md)、[Support](../../SUPPORT.md)、[Privacy](../../PRIVACY.md)、[Terms](../../TERMS.md)、[License](../../LICENSE) が正本であり、翻訳はその条件を置き換えたり拡張したりしません。
+
+英語の正本図は、[信頼境界](../diagrams/trust-boundaries.html)、[監査から対処まで](../diagrams/audit-to-action.html)、[同意から証拠まで](../diagrams/consent-to-evidence.html)です。安全性とパイロットの各ページには、日本語による同等の説明があります。
