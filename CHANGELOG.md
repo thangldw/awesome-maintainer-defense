@@ -8,6 +8,7 @@
 - Added complete write-permission modeling, direct script-injection detection, and cross-workflow artifact trust tracing.
 - Added Git-ref and JSON baselines, expiring governed suppressions, and deterministic pilot evidence bundles.
 - Added verified wheel/sdist, Homebrew, checksums, and ChatGPT/Codex skills-only release artifacts.
+- Re-verified all nine Action pins on 2026-08-23 and advanced the moved CodeQL v4 tag to its current verified commit.
 
 ### Tiếng Việt
 

@@ -63,6 +63,10 @@ Published on the OpenAI Plugin Directory: https://chatgpt.com/plugins/plugins_6a
 
 No account, token, dependency install, or network access is required. Run `python3 skills/audit-repository-workflows/scripts/run_auditor.py audit .`. The OpenAI ZIP includes the generated standalone auditor; the GitHub plugin uses the canonical repository source. The patch command writes only a requested patch file and never edits the target repository.
 
+## Release provenance
+
+The `v1.1.0` tag workflow builds every public artifact once, uploads the same wheel and sdist to PyPI through OIDC Trusted Publishing, and publishes the complete checksummed set to GitHub Releases. The expected PyPI publisher is repository `thangldw/awesome-maintainer-defense`, workflow `release.yml`, environment `pypi`; no long-lived PyPI token belongs in GitHub secrets.
+
 ## v1.1.0 update notes
 
 The update adds complete GitHub write-scope modeling, direct event-data shell-injection detection, cross-workflow artifact trust paths, baseline and Git-ref delta audits, expiring governed suppressions, and reproducible pilot evidence. The plugin remains skills-only, read-only by default, local, dependency-free, and patch-only for remediation.
