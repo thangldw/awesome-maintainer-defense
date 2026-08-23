@@ -56,7 +56,12 @@ jobs:
           name: release-assets
           path: dist
       - name: Publish GitHub release
-        run: gh release create "$GITHUB_REF_NAME" dist/* --verify-tag --generate-notes --title "Maintainer Defense Kit 1.1.0"
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" dist/* --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" dist/* --verify-tag --generate-notes --title "Maintainer Defense Kit 1.1.0"
+          fi
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -74,3 +79,5 @@ jobs:
           path: dist
       - name: Publish to PyPI with Trusted Publishing
         uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+        with:
+          skip-existing: true

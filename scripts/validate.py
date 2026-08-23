@@ -256,6 +256,8 @@ def validate_workflows(pins: set[tuple[str, str]]) -> None:
     quality = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
     if "fetch-depth: 0" not in release or "fetch-depth: 0" not in quality:
         fail("release and quality workflows must fetch pilot provenance history")
+    if "gh release upload" not in release or "--clobber" not in release or "skip-existing: true" not in release:
+        fail("release publication must be resumable after a partial GitHub or PyPI success")
 
 
 def validate_kit_safety() -> None:
