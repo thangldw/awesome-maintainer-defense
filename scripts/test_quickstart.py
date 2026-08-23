@@ -173,6 +173,14 @@ class QuickstartTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("resumable", result.stderr)
 
+    def test_github_release_job_checks_out_tag_without_credentials(self) -> None:
+        release = (ROOT / ".github/workflows/release.yml").read_text(encoding="utf-8")
+        publish_github = release.split("\n  publish-github:\n", 1)[1].split(
+            "\n  publish-pypi:\n", 1
+        )[0]
+        self.assertIn("actions/checkout@", publish_github)
+        self.assertIn("persist-credentials: false", publish_github)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
