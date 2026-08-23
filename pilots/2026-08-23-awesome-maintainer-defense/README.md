@@ -1,8 +1,8 @@
-# Pilot 2026-08-23-awesome-maintainer-defense
+# Reproducible pilot evidence: 2026-08-23-awesome-maintainer-defense
 
-> Generated from the checked-in pilot evidence bundle. Review labels are never inferred.
+> Generated from pinned metadata, reports, and reviewer labels. Edit the JSON inputs, not this page.
 
-## Evidence
+## Provenance
 
 - Pilot type: `internal-owner-directed`
 - Disclosure: `public`
@@ -12,7 +12,9 @@
 - Target: `thangldw/awesome-maintainer-defense@331c7f7b5f18e4fa3a74e9cc6522ed6b06a62c65`
 - Command: `python3 dist/maintainer-defense-kit.py audit . --format json`
 
-## Summary
+The report represents the pinned auditor and target revisions. It does not claim that a historical auditor equals the current runtime.
+
+## Review state
 
 - Raw findings: 0
 - Effective findings: 0
@@ -21,12 +23,12 @@
 - Aggregate precision: not calculated
 - Recall: not calculated; the bundle contains findings, not an independently labeled negative sample
 
-## Finding reviews
+## Finding labels
 
 | Rule | Path | Fingerprint | Emitted | Classification | Independent | Reviewer | Outcome |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 
-## Limitations
+## Evidence limitations
 
 - Owner-directed dogfood performed by the implementation agent; not an independent review.
 - One self-audit cannot establish real-world precision, recall, usefulness, or representativeness.

@@ -6,6 +6,7 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import re
 import subprocess
 import sys
 import tarfile
@@ -88,6 +89,19 @@ def normalize_report_target(report: dict, expected: dict) -> dict:
     return normalized
 
 
+def current_package_version(root: Path) -> str:
+    pyproject = (root / "pyproject.toml").read_text(encoding="utf-8")
+    project = pyproject.split("[project]", 1)[1].split("\n[", 1)[0]
+    match = re.search(r'^version = "([^"]+)"$', project, re.MULTILINE)
+    if not match:
+        raise PilotEvidenceError("cannot determine the current package version")
+    return match.group(1)
+
+
+def requires_head_runtime_match(metadata: dict, current_version: str) -> bool:
+    return metadata.get("auditor_version") == current_version
+
+
 def verify_generated_outputs(root: Path, pilot_dir: Path) -> None:
     for name in INPUT_NAMES:
         load_canonical_json(pilot_dir / name)
@@ -121,7 +135,9 @@ def verify_generated_outputs(root: Path, pilot_dir: Path) -> None:
                 raise PilotEvidenceError(f"{expected} differs from regenerated evidence")
 
 
-def verify_provenance(root: Path, pilot_dir: Path) -> None:
+def verify_provenance(
+    root: Path, pilot_dir: Path, *, current_version: str | None = None
+) -> None:
     metadata = load_canonical_json(pilot_dir / "metadata.json")
     if metadata["pilot_id"] != pilot_dir.name:
         raise PilotEvidenceError("pilot_id does not match its directory")
@@ -132,14 +148,16 @@ def verify_provenance(root: Path, pilot_dir: Path) -> None:
     for revision in (source_commit, target_commit):
         run_git(root, "cat-file", "-e", f"{revision}^{{commit}}", capture=True)
         verify_ancestor(root, revision, "HEAD")
-    diff = subprocess.run(
-        ["git", "-C", str(root), "diff", "--quiet", source_commit, "--", *RUNTIME_PATHS],
-        check=False,
-    )
-    if diff.returncode == 1:
-        raise PilotEvidenceError("auditor runtime differs from the recorded source commit")
-    if diff.returncode:
-        raise PilotEvidenceError("cannot verify runtime-source provenance")
+    release_version = current_version or current_package_version(root)
+    if requires_head_runtime_match(metadata, release_version):
+        diff = subprocess.run(
+            ["git", "-C", str(root), "diff", "--quiet", source_commit, "--", *RUNTIME_PATHS],
+            check=False,
+        )
+        if diff.returncode == 1:
+            raise PilotEvidenceError("current-version auditor runtime differs from its recorded source commit")
+        if diff.returncode:
+            raise PilotEvidenceError("cannot verify runtime-source provenance")
     raw_expected = load_canonical_json(pilot_dir / "raw-report.json")
     effective_expected = load_canonical_json(pilot_dir / "effective-report.json")
     with tempfile.TemporaryDirectory() as tmp:
@@ -180,9 +198,11 @@ def verify_provenance(root: Path, pilot_dir: Path) -> None:
                 raise PilotEvidenceError(f"{label} report differs from the pinned target audit")
 
 
-def verify_pilot(root: Path, pilot_dir: Path) -> None:
+def verify_pilot(
+    root: Path, pilot_dir: Path, *, current_version: str | None = None
+) -> None:
     verify_generated_outputs(root, pilot_dir)
-    verify_provenance(root, pilot_dir)
+    verify_provenance(root, pilot_dir, current_version=current_version)
 
 
 def main() -> None:

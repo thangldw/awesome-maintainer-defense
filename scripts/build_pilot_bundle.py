@@ -245,11 +245,11 @@ def render_markdown(bundle: dict) -> str:
     metadata = bundle["metadata"]
     summary = bundle["summary"]
     lines = [
-        f"# Pilot {metadata['pilot_id']}",
+        f"# Reproducible pilot evidence: {metadata['pilot_id']}",
         "",
-        "> Generated from the checked-in pilot evidence bundle. Review labels are never inferred.",
+        "> Generated from pinned metadata, reports, and reviewer labels. Edit the JSON inputs, not this page.",
         "",
-        "## Evidence",
+        "## Provenance",
         "",
         f"- Pilot type: `{metadata['pilot_type']}`",
         f"- Disclosure: `{metadata['disclosure']}`",
@@ -259,7 +259,9 @@ def render_markdown(bundle: dict) -> str:
         f"- Target: `{metadata['target_repository']}@{metadata['target_commit']}`",
         f"- Command: `{metadata['command']}`",
         "",
-        "## Summary",
+        "The report represents the pinned auditor and target revisions. It does not claim that a historical auditor equals the current runtime.",
+        "",
+        "## Review state",
         "",
         f"- Raw findings: {summary['raw_findings']}",
         f"- Effective findings: {summary['effective_findings']}",
@@ -274,7 +276,7 @@ def render_markdown(bundle: dict) -> str:
         [
             "- Recall: not calculated; the bundle contains findings, not an independently labeled negative sample",
             "",
-            "## Finding reviews",
+            "## Finding labels",
             "",
             "| Rule | Path | Fingerprint | Emitted | Classification | Independent | Reviewer | Outcome |",
             "| --- | --- | --- | --- | --- | --- | --- | --- |",
@@ -296,7 +298,7 @@ def render_markdown(bundle: dict) -> str:
                 )
             ) + " |"
         )
-    lines.extend(["", "## Limitations", ""])
+    lines.extend(["", "## Evidence limitations", ""])
     lines.extend(f"- {item}" for item in metadata["limitations"])
     return "\n".join(lines) + "\n"
 

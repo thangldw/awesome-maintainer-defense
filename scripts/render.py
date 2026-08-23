@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render the catalog section in README.md from catalog.json."""
+"""Render the evidence-reviewed resource catalog to docs/CATALOG.md."""
 
 from __future__ import annotations
 
@@ -7,92 +7,72 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CATALOG_PATH = ROOT / "catalog.json"
-START = "<!-- catalog:start -->"
-END = "<!-- catalog:end -->"
+OUTPUT = "docs/CATALOG.md"
 
 
-def escape_cell(value: str) -> str:
-    return value.replace("|", "\\|").replace("\n", " ")
+def inline(value: object) -> str:
+    return str(value).replace("\n", " ").strip()
 
 
-def render(data: dict, translations: dict | None = None) -> str:
-    translations = translations or {}
-    translated_categories = translations.get("categories", {})
-    translated_resources = translations.get("resources", {})
-    translated_types = translations.get("types", {})
-    table = translations.get(
-        "table",
-        {
-            "resource": "Resource",
-            "type": "Type",
-            "license": "License",
-            "why": "Why it matters",
-        },
-    )
-    resources = data["resources"]
-    sections: list[str] = []
-    for category in data["categories"]:
-        localized_category = translated_categories.get(category["id"], {})
-        category_name = localized_category.get("name", category["name"])
-        category_description = localized_category.get(
-            "description", category["description"]
-        )
-        rows = [item for item in resources if item["category"] == category["id"]]
-        sections.extend(
-            [
-                f"### {category_name}",
-                "",
-                category_description,
-                "",
-                f"| {table['resource']} | {table['type']} | {table['license']} | {table['why']} |",
-                "| --- | --- | --- | --- |",
-            ]
-        )
-        for item in rows:
-            marker = " ⭐" if item.get("featured") else ""
-            description = translated_resources.get(item["id"], item["description"])
-            resource_type = translated_types.get(item["type"], item["type"])
-            sections.append(
-                "| "
-                f"[{escape_cell(item['name'])}]({item['url']}){marker} | "
-                f"{escape_cell(resource_type)} | "
-                f"{escape_cell(item['license'])} | "
-                f"{escape_cell(description)} |"
+def link_evidence(urls: list[str]) -> str:
+    return " · ".join(f"[source {index}]({url})" for index, url in enumerate(urls, 1))
+
+
+def render_catalog(catalog: dict, audit_data: dict) -> str:
+    audits = {item["id"]: item for item in audit_data["audits"]}
+    lines = [
+        "# Evidence-reviewed catalog",
+        "",
+        "> Generated from `catalog.json` and `audits.json`. Edit the structured sources, not this file.",
+        "",
+        "## Reading the evidence",
+        "",
+        f"Official project sources were last reviewed on **{audit_data['verified_on']}**. "
+        "The snapshot is not an endorsement, certification, or promise of future maintenance.",
+        "",
+        "Impact records the maximum documented automation effect: `low` is normally read-only; "
+        "`medium` can publish, fail checks, comment, label, or modify local files; `high` can close, "
+        "lock, delete, block, limit interactions, or change settings. Configuration may reduce the actual effect.",
+        "",
+    ]
+    for category in catalog["categories"]:
+        lines.extend([f"## {category['name']}", "", category["description"], ""])
+        resources = [
+            item for item in catalog["resources"] if item["category"] == category["id"]
+        ]
+        for resource in resources:
+            audit = audits[resource["id"]]
+            snapshot = audit["repo_snapshot"]
+            featured = " · featured" if resource.get("featured") else ""
+            lines.extend(
+                [
+                    f"### [{resource['name']}]({resource['url']})",
+                    "",
+                    inline(resource["description"]),
+                    "",
+                    f"- **Classification:** `{resource['type']}` · `{resource['license']}`{featured}",
+                    f"- **Deployment/default:** {inline(audit['deployment'])}; {inline(audit['default_mode'])}",
+                    f"- **Maximum impact:** `{audit['automation_impact']}` — "
+                    + ", ".join(inline(item) for item in audit["maximum_effects"]),
+                    f"- **Data boundaries:** {', '.join(inline(item) for item in audit['data_boundaries'])}",
+                    f"- **Access:** {inline(audit['access'])}",
+                    f"- **Limitation:** {inline(audit['limitations'])}",
+                    f"- **Repository snapshot:** archived=`{str(snapshot['archived']).lower()}`, "
+                    f"last push=`{snapshot['pushed_at']}`, license detection=`{snapshot['license_detected']}`",
+                    f"- **Evidence:** {link_evidence(audit['evidence'])}",
+                    "",
+                ]
             )
-        sections.append("")
-    return "\n".join(sections).rstrip()
-
-
-def render_file(path: Path, rendered_catalog: str) -> None:
-    readme = path.read_text(encoding="utf-8")
-    if readme.count(START) != 1 or readme.count(END) != 1:
-        raise SystemExit(f"{path.name} must contain exactly one catalog marker pair")
-    before, remainder = readme.split(START, 1)
-    _, after = remainder.split(END, 1)
-    path.write_text(
-        f"{before}{START}\n\n{rendered_catalog}\n\n{END}{after}", encoding="utf-8"
-    )
-
-
-def load_translations(locale: str, data: dict) -> dict:
-    path = ROOT / "i18n" / f"{locale}.json"
-    translations = json.loads(path.read_text(encoding="utf-8"))
-    expected_categories = {item["id"] for item in data["categories"]}
-    expected_resources = {item["id"] for item in data["resources"]}
-    if set(translations.get("categories", {})) != expected_categories:
-        raise SystemExit(f"{path} category translations are incomplete")
-    if set(translations.get("resources", {})) != expected_resources:
-        raise SystemExit(f"{path} resource translations are incomplete")
-    return translations
+    return "\n".join(lines).rstrip() + "\n"
 
 
 def main() -> None:
-    data = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
-    render_file(ROOT / "README.md", render(data))
-    for locale in ("vi", "ja"):
-        translations = load_translations(locale, data)
-        render_file(ROOT / f"README.{locale}.md", render(data, translations))
+    catalog = json.loads((ROOT / "catalog.json").read_text(encoding="utf-8"))
+    audit_data = json.loads((ROOT / "audits.json").read_text(encoding="utf-8"))
+    output = ROOT / OUTPUT
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(render_catalog(catalog, audit_data), encoding="utf-8")
+    print(f"WROTE {OUTPUT}")
 
 
 if __name__ == "__main__":
