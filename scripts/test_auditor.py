@@ -96,6 +96,14 @@ def materialize(target: Path, case: dict) -> None:
 
 
 class AuditorTests(unittest.TestCase):
+    def run_cli(self, *arguments: object) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [sys.executable, str(CLI), *(str(value) for value in arguments)],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
     def audit_files(self, files: dict[str, str]) -> dict:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp)
@@ -359,6 +367,82 @@ jobs:
                 )
                 rules = {item["rule_id"] for item in report["findings"]}
                 self.assertNotIn("MD-WF-008", rules)
+
+    def test_new_only_accepts_one_baseline_source(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            materialize(target, {"id": "baseline", "remove": ["SECURITY.md"]})
+            baseline_path = target / "baseline.json"
+            baseline_path.write_text(
+                json.dumps(module.audit_repository(target)), encoding="utf-8"
+            )
+            workflow = target / ".github/workflows/ci.yml"
+            workflow.write_text(
+                workflow.read_text(encoding="utf-8").replace(f"@{PIN}", "@v4"),
+                encoding="utf-8",
+            )
+            result = self.run_cli(
+                "audit", target, "--baseline", baseline_path, "--new-only", "--format", "json"
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            report = json.loads(result.stdout)
+            self.assertEqual([item["rule_id"] for item in report["findings"]], ["MD-WF-003"])
+            self.assertEqual(report["summary"]["total"], 1)
+
+    def test_new_only_rejects_invalid_comparison_sources(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            materialize(target, {"id": "comparison-errors"})
+            malformed = target / "malformed.json"
+            malformed.write_text('{"schema_version": 2, "findings": []}', encoding="utf-8")
+            cases = (
+                ("missing", ("audit", target, "--new-only"), 2),
+                (
+                    "both",
+                    (
+                        "audit", target, "--new-only", "--baseline", malformed,
+                        "--compare-ref", "HEAD",
+                    ),
+                    2,
+                ),
+                (
+                    "malformed",
+                    ("audit", target, "--new-only", "--baseline", malformed),
+                    1,
+                ),
+                (
+                    "unknown-ref",
+                    ("audit", target, "--new-only", "--compare-ref", "not-a-ref"),
+                    1,
+                ),
+            )
+            for name, arguments, expected_code in cases:
+                with self.subTest(case=name):
+                    result = self.run_cli(*arguments)
+                    self.assertEqual(result.returncode, expected_code, result.stderr)
+
+    def test_compare_ref_reports_only_findings_added_after_commit(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            materialize(target, {"id": "git-delta"})
+            subprocess.run(["git", "init", "-q"], cwd=target, check=True)
+            subprocess.run(["git", "config", "user.name", "Test"], cwd=target, check=True)
+            subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=target, check=True)
+            subprocess.run(["git", "add", "."], cwd=target, check=True)
+            subprocess.run(["git", "commit", "-qm", "safe baseline"], cwd=target, check=True)
+            workflow = target / ".github/workflows/ci.yml"
+            workflow.write_text(
+                workflow.read_text(encoding="utf-8").replace(f"@{PIN}", "@v4"),
+                encoding="utf-8",
+            )
+            subprocess.run(["git", "add", "."], cwd=target, check=True)
+            subprocess.run(["git", "commit", "-qm", "introduce finding"], cwd=target, check=True)
+            result = self.run_cli(
+                "audit", target, "--compare-ref", "HEAD^", "--new-only", "--format", "json"
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            report = json.loads(result.stdout)
+            self.assertEqual([item["rule_id"] for item in report["findings"]], ["MD-WF-003"])
 
     def test_fail_on_threshold(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
