@@ -91,6 +91,27 @@ class PilotBundleTests(unittest.TestCase):
             with self.assertRaises(verifier.PilotEvidenceError):
                 verifier.verify_generated_outputs(ROOT, pilot_dir)
 
+    def test_pilot_revision_must_be_ancestor_of_release(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repository = Path(tmp)
+            subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repository, check=True)
+            subprocess.run(["git", "config", "user.name", "Test"], cwd=repository, check=True)
+            subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=repository, check=True)
+            repository.joinpath("evidence.txt").write_text("base\n", encoding="utf-8")
+            subprocess.run(["git", "add", "."], cwd=repository, check=True)
+            subprocess.run(["git", "commit", "-qm", "base"], cwd=repository, check=True)
+            subprocess.run(["git", "checkout", "-qb", "candidate"], cwd=repository, check=True)
+            repository.joinpath("evidence.txt").write_text("candidate\n", encoding="utf-8")
+            subprocess.run(["git", "commit", "-qam", "candidate"], cwd=repository, check=True)
+            candidate = subprocess.run(
+                ["git", "rev-parse", "HEAD"], cwd=repository, text=True, capture_output=True, check=True
+            ).stdout.strip()
+            subprocess.run(["git", "checkout", "-q", "main"], cwd=repository, check=True)
+            repository.joinpath("evidence.txt").write_text("squashed result\n", encoding="utf-8")
+            subprocess.run(["git", "commit", "-qam", "squashed result"], cwd=repository, check=True)
+            with self.assertRaises(verifier.PilotEvidenceError):
+                verifier.verify_ancestor(repository, candidate, "HEAD")
+
     def test_checked_in_minimal_fixture_builds(self) -> None:
         fixture = json.loads(
             (ROOT / "pilots/fixtures/minimal-input.json").read_text(encoding="utf-8")

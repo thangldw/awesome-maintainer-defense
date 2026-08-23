@@ -916,7 +916,7 @@ def executed_local_paths(command: str) -> frozenset[PurePosixPath]:
                     break
         elif tokens[0] in {"source", "."} and len(tokens) > 1:
             candidate = tokens[1]
-        elif tokens[0].startswith("./"):
+        elif "/" in tokens[0] and not tokens[0].startswith("/"):
             candidate = tokens[0]
         if candidate:
             path = literal_relative_path(candidate)
@@ -963,16 +963,33 @@ def index_workflows(target: Path) -> list[WorkflowRecord]:
             if destination is None or not remote_run or not authenticated:
                 continue
             _, job_end = yaml_job_bounds(lines, download_index)
-            for run_index in range(download_index + 1, job_end):
-                if not re.match(r"^\s*(?:-\s*)?run\s*:", lines[run_index]):
+            for execution_index in range(download_index + 1, job_end):
+                if re.match(r"^\s*(?:-\s*)?run\s*:", lines[execution_index]):
+                    executed_paths = executed_local_paths(
+                        run_scalar_text(lines, execution_index)
+                    )
+                else:
+                    local_action = re.search(
+                        r"uses:\s*[\"']?(\./[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*)",
+                        lines[execution_index],
+                    )
+                    executed_path = (
+                        literal_relative_path(local_action.group(1)) if local_action else None
+                    )
+                    executed_paths = (
+                        frozenset({executed_path})
+                        if executed_path is not None
+                        else frozenset()
+                    )
+                if not any(
+                    path_is_within(executed_path, destination)
+                    for executed_path in executed_paths
+                ):
                     continue
-                executed_paths = executed_local_paths(run_scalar_text(lines, run_index))
-                if not any(path_is_within(path, destination) for path in executed_paths):
-                    continue
-                job_start, _ = yaml_job_bounds(lines, run_index)
+                job_start, _ = yaml_job_bounds(lines, execution_index)
                 job_text = "\n".join(lines[job_start:job_end])
                 execution_is_privileged = bool(
-                    permission_scope(lines, run_index)
+                    permission_scope(lines, execution_index)
                     or re.search(r"\$\{\{\s*secrets\.|secrets:\s*inherit", job_text)
                 )
                 if execution_is_privileged:
