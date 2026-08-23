@@ -422,6 +422,21 @@ jobs:
         rules = {item["rule_id"] for item in report["findings"]}
         self.assertIn("MD-WF-008", rules)
 
+    def test_artifact_trust_path_ignores_commented_local_action(self) -> None:
+        consumer = PRIVILEGED_ARTIFACT_CONSUMER.replace(
+            "      - run: sh downloaded/report.sh\n",
+            "      # - uses: ./downloaded/action\n"
+            "      - run: sh scripts/trusted-release.sh\n",
+        )
+        report = self.audit_files(
+            {
+                ".github/workflows/test.yml": UNTRUSTED_ARTIFACT_PRODUCER,
+                ".github/workflows/publish.yml": consumer,
+            }
+        )
+        rules = {item["rule_id"] for item in report["findings"]}
+        self.assertNotIn("MD-WF-008", rules)
+
     def test_artifact_trust_path_requires_remote_run_and_matching_name(self) -> None:
         missing_run = PRIVILEGED_ARTIFACT_CONSUMER.replace(
             "          run-id: ${{ github.event.workflow_run.id }}\n", ""

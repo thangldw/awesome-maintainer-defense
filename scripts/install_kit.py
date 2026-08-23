@@ -969,8 +969,8 @@ def index_workflows(target: Path) -> list[WorkflowRecord]:
                         run_scalar_text(lines, execution_index)
                     )
                 else:
-                    local_action = re.search(
-                        r"uses:\s*[\"']?(\./[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*)",
+                    local_action = re.match(
+                        r"^\s*-\s*uses:\s*[\"']?(\./[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*)",
                         lines[execution_index],
                     )
                     executed_path = (
