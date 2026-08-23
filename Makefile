@@ -1,5 +1,7 @@
 .PHONY: audit audit-evaluate audit-test distribution-test kit-test links metadata package pilot-test pins quickstart-test render standalone test validate
 
+PYPROJECT_BUILD ?= python3 -m build
+
 audit:
 	python3 scripts/install_kit.py audit .
 
@@ -24,10 +26,12 @@ standalone:
 	python3 scripts/build_standalone.py
 
 package: standalone
-	python3 -m build
+	$(PYPROJECT_BUILD)
+	python3 scripts/build_plugin_bundle.py
 
 distribution-test:
 	python3 scripts/test_distribution.py
+	python3 scripts/test_plugin_bundle.py
 
 links:
 	python3 scripts/check_links.py

@@ -42,6 +42,37 @@ python3 scripts/validate.py
 python3 scripts/test_auditor.py
 ```
 
+## Verified v1.1.0 installs
+
+PyPI:
+
+```bash
+pipx install maintainer-defense-kit==1.1.0
+maintainer-defense audit .
+```
+
+Checksummed standalone on macOS/Linux:
+
+```bash
+curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1.0/maintainer-defense-kit.py
+curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1.0/maintainer-defense-kit.py.sha256
+shasum -a 256 -c maintainer-defense-kit.py.sha256
+python3 maintainer-defense-kit.py audit .
+```
+
+Checksummed standalone on PowerShell:
+
+```powershell
+Invoke-WebRequest https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1.0/maintainer-defense-kit.py -OutFile maintainer-defense-kit.py
+Invoke-WebRequest https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1.0/maintainer-defense-kit.py.sha256 -OutFile maintainer-defense-kit.py.sha256
+$Expected = ((Get-Content maintainer-defense-kit.py.sha256 -Raw).Trim() -split '\s+')[0].ToLowerInvariant()
+$Actual = (Get-FileHash maintainer-defense-kit.py -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($Actual -ne $Expected) { Write-Error "SHA-256 mismatch"; exit 1 }
+python maintainer-defense-kit.py audit .
+```
+
+`dist/awesome-maintainer-defense-openai-skills-v1.1.0.zip` is the deterministic skills-only upload bundle for the existing ChatGPT/Codex plugin listing. `dist/SHA256SUMS.txt` covers every public release asset.
+
 ## Tiếng Việt
 
 CLI Python không dependency kiểm tra policy và ranh giới tin cậy của workflow mà không cần mạng hoặc GitHub token. Lệnh `fix` chỉ tạo unified diff; không sửa repo, đổi setting, commit hoặc push. Mỗi finding chỉ là bằng chứng cần con người xem xét, không phải kết luận về tác giả, ý định hay mức độ an toàn.
@@ -52,7 +83,7 @@ CLI Python không dependency kiểm tra policy và ranh giới tin cậy của w
 
 The deployable kit keeps example `.github` directories because those files are product assets; they do not execute in this repository.
 
-The repository is also a local, skills-only plugin for ChatGPT, Codex, Claude Code and Cowork. It does not require a hosted connector. See the [directory submission package](docs/SUBMISSION.md), [privacy policy](PRIVACY.md), [terms](TERMS.md), and [support guidance](SUPPORT.md).
+The repository is also a local, skills-only plugin for ChatGPT, Codex, Claude Code and Cowork. It does not require a hosted connector. See the [published ChatGPT/Codex listing](https://chatgpt.com/plugins/plugins_6a6edab2886c81918be9c9772e4ca904), [directory submission package](docs/SUBMISSION.md), [privacy policy](PRIVACY.md), [terms](TERMS.md), and [support guidance](SUPPORT.md).
 
 ## Evidence-reviewed catalog
 

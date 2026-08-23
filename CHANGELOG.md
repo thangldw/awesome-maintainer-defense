@@ -1,5 +1,28 @@
 # Maintainer Defense changelog / Lịch sử thay đổi / 変更履歴
 
+## [1.1.0] - 2026-08-23
+
+### English
+
+- Restored the executable quickstart, repository governance assets, and least-privilege CI gates.
+- Added complete write-permission modeling, direct script-injection detection, and cross-workflow artifact trust tracing.
+- Added Git-ref and JSON baselines, expiring governed suppressions, and deterministic pilot evidence bundles.
+- Added verified wheel/sdist, Homebrew, checksums, and ChatGPT/Codex skills-only release artifacts.
+
+### Tiếng Việt
+
+- Khôi phục quickstart chạy được, asset quản trị repository và CI least-privilege.
+- Bổ sung mô hình đầy đủ quyền ghi, phát hiện script injection trực tiếp và truy vết trust qua artifact giữa workflow.
+- Bổ sung baseline Git/JSON, suppression có hạn dùng và pilot evidence bundle xác định.
+- Bổ sung wheel/sdist, Homebrew, checksum và bundle skill-only cho ChatGPT/Codex đã kiểm chứng.
+
+### 日本語
+
+- 実行可能な quickstart、repository governance asset、least-privilege CI gate を復元しました。
+- 全 write permission、直接 script injection、workflow 間 artifact trust path の検出を追加しました。
+- Git/JSON baseline、期限付き suppression、決定的 pilot evidence bundle を追加しました。
+- 検証済み wheel/sdist、Homebrew、checksum、ChatGPT/Codex skills-only artifact を追加しました。
+
 ## [1.0.1] - 2026-08-03
 
 ### English
@@ -40,5 +63,6 @@
 - 製品データとしてのサンプル workflow は残し、このリポジトリ自身で実行される workflow を削除しました。
 - パッケージとリリースメタデータを `v1.0.0` に統一しました。
 
+[1.1.0]: https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.1.0
 [1.0.1]: https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.0.1
 [1.0.0]: https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.0.0
