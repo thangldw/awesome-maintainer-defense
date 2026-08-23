@@ -169,6 +169,23 @@ class AuditorTests(unittest.TestCase):
             )
             self.assertEqual(sarif["runs"][0]["results"][0]["locations"][0]["physicalLocation"]["region"]["startLine"], finding["location"]["line"])
 
+    def test_cli_accepts_repository_path_with_spaces(self) -> None:
+        corpus = json.loads(CORPUS.read_text(encoding="utf-8"))
+        case = next(item for item in corpus["cases"] if item["id"] == "pwn-request")
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "repository with spaces"
+            materialize(target, case)
+
+            result = self.run_cli("audit", target, "--format", "json")
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            report = json.loads(result.stdout)
+            self.assertEqual(report["summary"]["total"], 3)
+            self.assertEqual(
+                {item["rule_id"] for item in report["findings"]},
+                {"MD-WF-004", "MD-WF-005", "MD-WF-006"},
+            )
+
     def test_human_output_leads_with_summary_and_guidance(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp)
