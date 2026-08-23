@@ -128,6 +128,15 @@ Mappings below are cross-references, not claims that every finding is a vulnerab
 - **Safe remediation:** set `persist-credentials: false` unless authenticated Git is required. If it is required, isolate the push into a narrow job, minimize permissions, and ensure untrusted code cannot run before credential use.
 - **Mapping:** related to OpenSSF Scorecard [`Token-Permissions`](https://github.com/ossf/scorecard/blob/main/docs/checks.md#token-permissions). No CWE is assigned without evidence that credentials are exposed.
 
+### MD-WF-007
+
+**Untrusted event data interpolated into a shell command · high**
+
+- **Evidence:** an expression derived from an attacker-influenced GitHub event context appears directly inside a `run` scalar or block.
+- **Review before accepting:** the rule identifies a direct source-to-shell boundary but does not parse shell grammar or prove the payload is exploitable on every runner. Expressions under the step's `env` mapping do not trigger this rule.
+- **Safe remediation:** assign the expression to an environment variable or pass it as a reviewed action input, then quote the shell variable for the selected shell.
+- **Mapping:** [CWE-78](https://cwe.mitre.org/data/definitions/78.html).
+
 ## Moderation rules
 
 ### MD-MOD-001

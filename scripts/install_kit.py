@@ -37,6 +37,9 @@ class KitError(Exception):
 SEVERITY_ORDER = {"critical": 4, "high": 3, "medium": 2, "low": 1, "note": 0}
 WORKFLOW_SUFFIXES = {".yml", ".yaml"}
 PRIVILEGED_EVENTS = ("pull_request_target", "workflow_run", "issue_comment")
+UNTRUSTED_EXPRESSION = re.compile(
+    r"\$\{\{\s*github\.(?:event\.(?:issue|pull_request|comment|review|head_commit)(?:[^}]*)|head_ref|ref_name)\s*\}\}"
+)
 WRITE_PERMISSION_SCOPES = frozenset(
     {
         "actions",
@@ -602,6 +605,32 @@ def permission_scope_writes(lines: list[str], evidence_index: int) -> bool:
     return bool(permission_scope(lines, evidence_index))
 
 
+def run_block_injection(lines: list[str], run_index: int) -> tuple[int, int] | None:
+    """Locate a direct untrusted expression in one run scalar or block."""
+    line = lines[run_index]
+    run_match = re.match(r"^(\s*)(?:-\s*)?run\s*:\s*(.*)$", line)
+    if not run_match:
+        return None
+    value = run_match.group(2)
+    inline = UNTRUSTED_EXPRESSION.search(value)
+    if inline:
+        value_column = line.find(value) if value else len(line)
+        return run_index + 1, value_column + inline.start() + 1
+    if value and not re.fullmatch(r"[|>][+-]?\d*", value.split("#", 1)[0].strip()):
+        return None
+    indentation = len(run_match.group(1))
+    for index in range(run_index + 1, len(lines)):
+        candidate = lines[index]
+        stripped = candidate.lstrip()
+        current = len(candidate) - len(stripped)
+        if stripped and not stripped.startswith("#") and current <= indentation:
+            break
+        match = UNTRUSTED_EXPRESSION.search(candidate)
+        if match:
+            return index + 1, match.start() + 1
+    return None
+
+
 def workflow_findings(target: Path, path: Path) -> list[dict]:
     findings: list[dict] = []
     rel = relative_path(target, path)
@@ -706,6 +735,22 @@ def workflow_findings(target: Path, path: Path) -> list[dict]:
                     "Set persist-credentials: false unless a reviewed step explicitly needs authenticated Git operations.",
                 )
             )
+
+    for run_index, run_line in enumerate(lines):
+        if not re.match(r"^\s*(?:-\s*)?run\s*:", run_line):
+            continue
+        injection = run_block_injection(lines, run_index)
+        if not injection:
+            continue
+        line, column = injection
+        findings.append(
+            make_finding(
+                "MD-WF-007", "high", "high", rel, line, column,
+                "Untrusted GitHub event data is interpolated directly into a shell command.",
+                "An attacker can craft event text that changes the generated shell program and executes unintended commands in the job.",
+                "Assign the expression to an environment variable or pass it as a reviewed action input, then quote the shell variable for the selected shell.",
+            )
+        )
 
     destructive_lines: list[int] = []
     for index, line in enumerate(lines):

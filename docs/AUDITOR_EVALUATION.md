@@ -4,9 +4,9 @@
 
 ## Result
 
-**Corpus:** 54 labeled synthetic repository fixtures.
+**Corpus:** 56 labeled synthetic repository fixtures.
 
-**Exact-case agreement:** 54/54.
+**Exact-case agreement:** 56/56.
 
 **Micro precision:** 1.000.
 
@@ -29,6 +29,7 @@
 | `MD-WF-004` | 2 | 0 | 0 | 1.000 | 1.000 |
 | `MD-WF-005` | 5 | 0 | 0 | 1.000 | 1.000 |
 | `MD-WF-006` | 3 | 0 | 0 | 1.000 | 1.000 |
+| `MD-WF-007` | 1 | 0 | 0 | 1.000 | 1.000 |
 
 ## Mutation score
 
