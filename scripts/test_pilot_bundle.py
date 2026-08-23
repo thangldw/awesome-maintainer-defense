@@ -77,9 +77,21 @@ COMPLETE_LABEL = {
 
 
 class PilotBundleTests(unittest.TestCase):
+    def test_historical_pilot_does_not_claim_current_runtime(self) -> None:
+        metadata = {"auditor_version": "1.1.0", "source_commit": "1" * 40}
+        self.assertFalse(
+            verifier.requires_head_runtime_match(metadata, current_version="1.1.1")
+        )
+
+    def test_current_pilot_requires_head_runtime_match(self) -> None:
+        metadata = {"auditor_version": "1.1.1", "source_commit": "2" * 40}
+        self.assertTrue(
+            verifier.requires_head_runtime_match(metadata, current_version="1.1.1")
+        )
+
     def test_checked_in_pilot_matches_pinned_revisions(self) -> None:
         pilot_dir = ROOT / "pilots/2026-08-23-awesome-maintainer-defense"
-        verifier.verify_pilot(ROOT, pilot_dir)
+        verifier.verify_pilot(ROOT, pilot_dir, current_version="1.1.1")
 
     def test_checked_in_pilot_rejects_modified_generated_output(self) -> None:
         source = ROOT / "pilots/2026-08-23-awesome-maintainer-defense"

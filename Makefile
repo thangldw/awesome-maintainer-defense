@@ -50,7 +50,6 @@ pins:
 
 render:
 	python3 scripts/render.py
-	python3 scripts/render_audit.py
 	python3 scripts/evaluate_auditor.py
 
 validate:

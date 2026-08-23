@@ -3,12 +3,14 @@
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import re
 import tempfile
 import unittest
 from pathlib import Path
 from urllib.parse import unquote, urlparse
+from unittest import mock
 
 from documentation_contract import (
     DocumentationContractError,
@@ -17,6 +19,11 @@ from documentation_contract import (
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = json.loads(ROOT.joinpath("documentation-manifest.json").read_text(encoding="utf-8"))
+
+render_spec = importlib.util.spec_from_file_location("documentation_render", ROOT / "scripts/render.py")
+assert render_spec and render_spec.loader
+render_module = importlib.util.module_from_spec(render_spec)
+render_spec.loader.exec_module(render_module)
 
 
 def write_manifest(
@@ -107,6 +114,29 @@ class DocumentationContractTests(unittest.TestCase):
 
 
 class RepositoryDocumentationTests(unittest.TestCase):
+    def test_catalog_generator_owns_only_catalog_page_and_is_deterministic(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            root.joinpath("docs").mkdir()
+            root.joinpath("catalog.json").write_bytes(ROOT.joinpath("catalog.json").read_bytes())
+            root.joinpath("audits.json").write_bytes(ROOT.joinpath("audits.json").read_bytes())
+            readmes = {}
+            for filename in ("README.md", "README.vi.md", "README.ja.md"):
+                path = root / filename
+                path.write_text(f"# sentinel {filename}\n", encoding="utf-8")
+                readmes[filename] = path.read_bytes()
+
+            with mock.patch.object(render_module, "ROOT", root):
+                render_module.main()
+                first = root.joinpath("docs/CATALOG.md").read_bytes()
+                render_module.main()
+                second = root.joinpath("docs/CATALOG.md").read_bytes()
+
+            self.assertEqual(first, second)
+            self.assertIn(b"Generated", first)
+            for filename, before in readmes.items():
+                self.assertEqual(root.joinpath(filename).read_bytes(), before)
+
     def test_english_product_journey_paths_exist(self) -> None:
         for relative in (
             "docs/GETTING_STARTED.md",

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Publish per-rule precision and recall on the labeled auditor corpus."""
+"""Render deterministic measurements for the labeled synthetic auditor corpus."""
 
 from __future__ import annotations
 
@@ -25,9 +25,7 @@ def ratio(numerator: int, denominator: int) -> float:
 
 def main() -> None:
     corpus = json.loads(CORPUS.read_text(encoding="utf-8"))
-    rules = sorted(
-        {rule for case in corpus["cases"] for rule in case.get("expected", [])}
-    )
+    rules = sorted({rule for case in corpus["cases"] for rule in case.get("expected", [])})
     counts = {rule: {"tp": 0, "fp": 0, "fn": 0} for rule in rules}
     exact = 0
     for case in corpus["cases"]:
@@ -52,41 +50,39 @@ def main() -> None:
     total_fp = sum(item["fp"] for item in counts.values())
     total_fn = sum(item["fn"] for item in counts.values())
     lines = [
-        "# Auditor corpus evaluation",
+        "# Synthetic auditor evaluation",
         "",
-        "> Evidence record for deterministic rule behavior. Start from the [documentation hub](README.md).",
+        "> Generated from `tests/fixtures/auditor/corpus.json`. Edit fixtures and implementation, not this page.",
         "",
-        "## Result",
+        "## Measured contract",
         "",
-        f"**Corpus:** {len(corpus['cases'])} labeled synthetic repository fixtures.",
+        f"The corpus contains **{len(corpus['cases'])}** small labeled fixtures designed to exercise known rule behavior.",
         "",
-        f"**Exact-case agreement:** {exact}/{len(corpus['cases'])}.",
+        f"- Exact fixture agreement: **{exact}/{len(corpus['cases'])}**",
+        f"- Micro precision inside this corpus: **{ratio(total_tp, total_tp + total_fp):.3f}**",
+        f"- Micro recall inside this corpus: **{ratio(total_tp, total_tp + total_fn):.3f}**",
         "",
-        f"**Micro precision:** {ratio(total_tp, total_tp + total_fp):.3f}.",
-        "",
-        f"**Micro recall:** {ratio(total_tp, total_tp + total_fn):.3f}.",
-        "",
-        "| Rule | TP | FP | FN | Precision | Recall |",
+        "| Rule | TP | FP | FN | Corpus precision | Corpus recall |",
         "| --- | ---: | ---: | ---: | ---: | ---: |",
     ]
     for rule, item in counts.items():
-        precision = ratio(item["tp"], item["tp"] + item["fp"])
-        recall = ratio(item["tp"], item["tp"] + item["fn"])
         lines.append(
-            f"| `{rule}` | {item['tp']} | {item['fp']} | {item['fn']} | {precision:.3f} | {recall:.3f} |"
+            f"| `{rule}` | {item['tp']} | {item['fp']} | {item['fn']} | "
+            f"{ratio(item['tp'], item['tp'] + item['fp']):.3f} | "
+            f"{ratio(item['tp'], item['tp'] + item['fn']):.3f} |"
         )
     lines.extend(
         [
             "",
-            "## Mutation score",
+            "## Failure-injection check",
             "",
-            "The test suite applies four explicit mutations: remove the top-level permission boundary, grant `write-all`, replace a full Action SHA with a tag, and persist a write-capable checkout token. All four mutations are detected: **4/4 (1.000)**.",
+            "The suite injects four unsafe changes: remove the workflow permission boundary, add `write-all`, replace a full Action SHA with a tag, and persist credentials in a write-capable checkout. The expected result is **4/4 detected**.",
             "",
             "## Interpretation boundary",
             "",
-            "These measurements describe only the published synthetic corpus. Cases are small, deterministic, and designed around known rule behavior; they are regression evidence, not an estimate of effectiveness on arbitrary public repositories. They do not measure YAML parser completeness, GitHub settings that are absent from a checkout, prevalence-weighted accuracy, or maintainer outcomes. A real-world benchmark requires independently labeled repositories and applicability review.",
+            "These numbers are regression measurements for intentionally constructed fixtures. They are not prevalence-weighted field accuracy and do not measure arbitrary YAML semantics, live GitHub settings, maintainer time saved, contributor impact, or novel attack paths. Field claims require authorized, independently labeled repository pilots with explicit applicability decisions and adequate negative samples.",
             "",
-            "Regenerate this document with `python3 scripts/evaluate_auditor.py`.",
+            "Regenerate with `python3 scripts/evaluate_auditor.py`.",
             "",
         ]
     )
