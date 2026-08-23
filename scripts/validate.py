@@ -20,6 +20,18 @@ ALLOWED_TYPES = {
     "tool",
     "working-group",
 }
+REQUIRED_REPOSITORY_FILES = (
+    ".github/CODEOWNERS",
+    ".github/ISSUE_TEMPLATE/add-resource.yml",
+    ".github/ISSUE_TEMPLATE/auditor-false-positive.yml",
+    ".github/ISSUE_TEMPLATE/auditor-pilot.yml",
+    ".github/ISSUE_TEMPLATE/documentation.yml",
+    ".github/ISSUE_TEMPLATE/config.yml",
+    ".github/dependabot.yml",
+    ".github/pull_request_template.md",
+    ".github/workflows/quality.yml",
+    ".github/workflows/workflow-security.yml",
+)
 
 
 def fail(message: str) -> None:
@@ -329,6 +341,30 @@ def validate_local_markdown_links() -> None:
                 )
 
 
+def validate_repository_contracts(root: Path = ROOT) -> None:
+    for relative in REQUIRED_REPOSITORY_FILES:
+        if not (root / relative).is_file():
+            fail(f"required repository contract is missing: {relative}")
+
+    audit_command = re.compile(
+        r"^python3\s+(?P<path>\S*maintainer-defense-kit\.py)\s+audit\s+\.$",
+        re.MULTILINE,
+    )
+    for filename in ("README.md", "README.vi.md", "README.ja.md"):
+        text = (root / filename).read_text(encoding="utf-8")
+        match = audit_command.search(text)
+        if not match or match.group("path") != "dist/maintainer-defense-kit.py":
+            fail(f"{filename} must run the built dist/maintainer-defense-kit.py artifact")
+
+    pilot_program = (root / "docs/AUDITOR_PILOT_PROGRAM.md").read_text(encoding="utf-8")
+    templates = re.findall(r"[?&]template=([A-Za-z0-9_.-]+)", pilot_program)
+    if not templates:
+        fail("docs/AUDITOR_PILOT_PROGRAM.md must link the public pilot issue form")
+    for template in templates:
+        if not (root / ".github/ISSUE_TEMPLATE" / template).is_file():
+            fail(f"pilot program links missing issue form: {template}")
+
+
 def validate_issue_forms() -> None:
     for path in (ROOT / ".github/ISSUE_TEMPLATE").glob("*.yml"):
         text = path.read_text(encoding="utf-8")
@@ -434,6 +470,7 @@ def main() -> None:
     audits = validate_audits(catalog)
     pins = validate_pins()
     validate_readme(catalog)
+    validate_repository_contracts()
     validate_workflows(pins)
     validate_kit_safety()
     validate_issue_forms()
