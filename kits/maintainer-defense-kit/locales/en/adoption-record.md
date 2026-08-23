@@ -1,19 +1,19 @@
-# Maintainer Defense adoption record
+# Maintainer defense adoption record
 
-> Versioned deployment asset from Awesome Maintainer Defense v1.0.0.
-
+- Repository and commit:
 - Owner:
-- Installed profile:
-- Installed date:
-- Observation period ends:
-- Review queue owner:
-- Appeal path:
-- Emergency disable owner:
+- Adoption date:
+- Profile (`observe`, `balanced`, `hardened`):
+- Signal window and sample method:
+- Findings by rule or signal:
+- False positives and unresolved cases:
+- Appeals received and outcomes:
+- Threshold decision and authorization:
+- Permissions and external data recipients:
+- Contributor-visible effects:
+- Rollback trigger and exact action:
+- Next review date:
 
-## Baseline and review
+## Decision evidence
 
-Record the weekly number of incoming PRs, flagged PRs, confirmed low-quality submissions, false positives, successful appeals, and median time to first human review. Do not enable contributor-visible automation until the observation sample is representative for this repository.
-
-## Decision log
-
-Document threshold changes, profile changes, incidents, and rollback decisions with a date and owner.
+Link sanitized reports, test runs, and owner approval. Do not include credentials, private reports, or contributor identity data that is unnecessary for the decision.

@@ -1,18 +1,16 @@
-# Auditor corpus evaluation
+# Synthetic auditor evaluation
 
-> Evidence record for deterministic rule behavior. Start from the [documentation hub](README.md).
+> Generated from `tests/fixtures/auditor/corpus.json`. Edit fixtures and implementation, not this page.
 
-## Result
+## Measured contract
 
-**Corpus:** 57 labeled synthetic repository fixtures.
+The corpus contains **57** small labeled fixtures designed to exercise known rule behavior.
 
-**Exact-case agreement:** 57/57.
+- Exact fixture agreement: **57/57**
+- Micro precision inside this corpus: **1.000**
+- Micro recall inside this corpus: **1.000**
 
-**Micro precision:** 1.000.
-
-**Micro recall:** 1.000.
-
-| Rule | TP | FP | FN | Precision | Recall |
+| Rule | TP | FP | FN | Corpus precision | Corpus recall |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | `MD-GOV-001` | 1 | 0 | 0 | 1.000 | 1.000 |
 | `MD-GOV-002` | 1 | 0 | 0 | 1.000 | 1.000 |
@@ -32,12 +30,12 @@
 | `MD-WF-007` | 1 | 0 | 0 | 1.000 | 1.000 |
 | `MD-WF-008` | 1 | 0 | 0 | 1.000 | 1.000 |
 
-## Mutation score
+## Failure-injection check
 
-The test suite applies four explicit mutations: remove the top-level permission boundary, grant `write-all`, replace a full Action SHA with a tag, and persist a write-capable checkout token. All four mutations are detected: **4/4 (1.000)**.
+The suite injects four unsafe changes: remove the workflow permission boundary, add `write-all`, replace a full Action SHA with a tag, and persist credentials in a write-capable checkout. The expected result is **4/4 detected**.
 
 ## Interpretation boundary
 
-These measurements describe only the published synthetic corpus. Cases are small, deterministic, and designed around known rule behavior; they are regression evidence, not an estimate of effectiveness on arbitrary public repositories. They do not measure YAML parser completeness, GitHub settings that are absent from a checkout, prevalence-weighted accuracy, or maintainer outcomes. A real-world benchmark requires independently labeled repositories and applicability review.
+These numbers are regression measurements for intentionally constructed fixtures. They are not prevalence-weighted field accuracy and do not measure arbitrary YAML semantics, live GitHub settings, maintainer time saved, contributor impact, or novel attack paths. Field claims require authorized, independently labeled repository pilots with explicit applicability decisions and adequate negative samples.
 
-Regenerate this document with `python3 scripts/evaluate_auditor.py`.
+Regenerate with `python3 scripts/evaluate_auditor.py`.

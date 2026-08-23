@@ -1,184 +1,113 @@
-# Auditor rule reference
+# Auditor rules
 
-> Stable IDs, evidence, review guidance, and safe remediation for every repository auditor rule. Return to the [auditor reference](AUDITOR.md).
+This page is the human review layer for `auditor-rules.json`. Rule IDs and anchors are stable. Evidence identifies a local pattern; reviewers must confirm applicability and external controls before changing a repository.
 
-Rule IDs are part of the auditor's public output contract. An ID is never reassigned to a different condition. Material semantic changes require a new ID; detection refinements and false-positive fixes retain the ID and are recorded in the changelog.
-
-## Severity model
-
-| Severity | Meaning |
-| --- | --- |
-| `critical` | Untrusted input can plausibly reach secrets or repository-changing authority. Isolate the trust boundary before relying on the workflow. |
-| `high` | The configuration creates direct write, destructive, or attacker-influenced execution risk. Review promptly. |
-| `medium` | A defense boundary is absent or weak, but exploitation depends on additional context. |
-| `low` | The gap primarily increases triage or maintenance risk. |
-| `note` | The checkout cannot prove an external setting; verify it separately. |
-
-Mappings below are cross-references, not claims that every finding is a vulnerability. OpenSSF mappings refer to the closest [Scorecard check](https://github.com/ossf/scorecard/blob/main/docs/checks.md); CWE is included only when a software-weakness category is a useful fit.
-
-## Governed suppressions
-
-An accepted exception belongs in `.maintainer-defense.json` with a rule ID, exact path or fingerprint, reason, owner, and expiry date. Expired entries no longer hide findings. Invalid, duplicate, or unmatched active entries fail closed so suppressions remain reviewable maintenance records rather than permanent ignore lists.
-
-## Governance rules
+## Governance
 
 ### MD-GOV-001
 
-**Missing repository security policy · medium**
+**Repository security policy is missing · medium**
 
-- **Evidence:** none of `SECURITY.md`, `.github/SECURITY.md`, or `docs/SECURITY.md` exists.
-- **Review before accepting:** an organization-wide policy, private vulnerability reporting setting, or external disclosure page may exist outside the checkout. Confirm that it is discoverable from the repository.
-- **Safe remediation:** add a local `SECURITY.md` with supported versions, a private reporting route, response expectations, and a warning not to disclose secrets publicly. This is a documentation-only change.
-- **Mapping:** OpenSSF Scorecard [`Security-Policy`](https://github.com/ossf/scorecard/blob/main/docs/checks.md#security-policy). No CWE mapping.
+The checkout has no supported `SECURITY.md`. Confirm that a private route is not documented elsewhere, then add supported versions, response expectations, and a private disclosure path. Mapping: [OpenSSF Security-Policy](https://github.com/ossf/scorecard/blob/main/docs/checks.md#security-policy).
 
 ### MD-GOV-002
 
-**Missing CODEOWNERS boundary · medium**
+**CODEOWNERS boundary is missing · medium**
 
-- **Evidence:** no CODEOWNERS file exists in `.github/`, the repository root, or `docs/`.
-- **Review before accepting:** small or single-maintainer repositories may not have a second eligible reviewer; rulesets may also assign review outside CODEOWNERS.
-- **Safe remediation:** add real owners for workflows, issue templates, security policy, and CODEOWNERS itself, then separately configure rulesets if owner review must be enforced. Do not add placeholder or inactive accounts.
-- **Mapping:** related to OpenSSF Scorecard [`Code-Review`](https://github.com/ossf/scorecard/blob/main/docs/checks.md#code-review) and [`Branch-Protection`](https://github.com/ossf/scorecard/blob/main/docs/checks.md#branch-protection). No CWE mapping.
+No CODEOWNERS file establishes review ownership for the repository control plane. Name real, eligible owners for workflows, issue templates, security policy, and CODEOWNERS itself; enforce review separately. Mappings: [OpenSSF Code-Review](https://github.com/ossf/scorecard/blob/main/docs/checks.md#code-review) and [Branch-Protection](https://github.com/ossf/scorecard/blob/main/docs/checks.md#branch-protection).
 
 ### MD-GOV-003
 
-**CODEOWNERS does not explicitly cover `.github/` · medium**
+**CODEOWNERS does not explicitly cover .github · medium**
 
-- **Evidence:** a CODEOWNERS file exists, but no explicit rule covers `.github/`.
-- **Review before accepting:** a broad `*` rule may already assign an owner. The finding asks for an explicit control-plane boundary because broad rules are easier to weaken unintentionally.
-- **Safe remediation:** add a specific `/.github/` rule naming the responsible team. Verify that the owner is eligible and that branch rules actually require its review before relying on it.
-- **Mapping:** related to OpenSSF Scorecard [`Code-Review`](https://github.com/ossf/scorecard/blob/main/docs/checks.md#code-review). No CWE mapping.
+Ownership exists but does not explicitly protect `.github`. Add a specific `/.github/` rule with active owners and verify the intended ruleset outside the checkout. Mapping: [OpenSSF Code-Review](https://github.com/ossf/scorecard/blob/main/docs/checks.md#code-review).
 
 ### MD-GOV-004
 
-**Missing structured issue form · low**
+**Structured issue form is missing · low**
 
-- **Evidence:** `.github/ISSUE_TEMPLATE/` has no YAML issue form other than `config.yml`.
-- **Review before accepting:** the project may intentionally use Discussions, an external tracker, or free-form issues. Those routes can be valid when their evidence requirements are clear.
-- **Safe remediation:** add a non-destructive issue form requesting reproduction steps, expected behavior, and relevant versions; direct vulnerabilities to the private security route. Avoid undeclared labels that silently fail.
-- **Mapping:** no direct OpenSSF or CWE mapping.
+No YAML issue form requires reproducible evidence. Add a non-destructive form for versions, steps, expected behavior, and actual behavior; keep vulnerability intake private. No direct framework mapping is claimed.
 
 ### MD-GOV-005
 
-**Missing machine-readable dependency update policy · low**
+**Machine-readable dependency update policy is missing · low**
 
-- **Evidence:** no supported Dependabot or Renovate configuration is found in the locations the auditor recognizes.
-- **Review before accepting:** another update service or a documented manual cadence may be in use; the offline auditor cannot observe it.
-- **Safe remediation:** configure Dependabot or Renovate for the repository's real ecosystems, including `github-actions` when applicable. Start with pull requests and human review rather than automatic merging.
-- **Mapping:** OpenSSF Scorecard [`Dependency-Update-Tool`](https://github.com/ossf/scorecard/blob/main/docs/checks.md#dependency-update-tool). No CWE mapping.
+The checkout contains neither supported Dependabot nor Renovate configuration. Configure the ecosystems actually used and retain human review for updates. Mapping: [OpenSSF Dependency-Update-Tool](https://github.com/ossf/scorecard/blob/main/docs/checks.md#dependency-update-tool).
 
 ### MD-GOV-006
 
-**Branch-protection expectations not documented locally · note**
+**Branch-protection expectations are not documented locally · note**
 
-- **Evidence:** no recognized branch-protection or ruleset expectation appears in repository Markdown or supported settings files.
-- **Review before accepting:** actual GitHub rulesets, organization policy, and inherited settings are outside an offline checkout and may already be correct.
-- **Safe remediation:** document expected reviews, checks, force-push restrictions, bypass owners, and an emergency change process. Verify actual settings separately with read-only API access; documentation alone does not enforce them.
-- **Mapping:** OpenSSF Scorecard [`Branch-Protection`](https://github.com/ossf/scorecard/blob/main/docs/checks.md#branch-protection). No CWE mapping.
+Local documentation does not state intended reviews, checks, bypass owners, force-push handling, and emergency procedure. Document the expectation, then compare it with live repository settings using separately authorized read-only access. Mapping: [OpenSSF Branch-Protection](https://github.com/ossf/scorecard/blob/main/docs/checks.md#branch-protection).
 
-## Workflow rules
+## Workflows
 
 ### MD-WF-001
 
-**Missing top-level token boundary · medium**
+**Workflow has no top-level token boundary · medium**
 
-- **Evidence:** a workflow has no top-level `permissions` declaration.
-- **Review before accepting:** every current job may already declare least privilege. The residual risk is that a future job inherits repository defaults.
-- **Safe remediation:** add `permissions: {}` at workflow level, then grant only required permissions per job. The generated patch is review-required because an omitted permission can break CI.
-- **Mapping:** OpenSSF Scorecard [`Token-Permissions`](https://github.com/ossf/scorecard/blob/main/docs/checks.md#token-permissions); [CWE-269](https://cwe.mitre.org/data/definitions/269.html) as a broad privilege-management cross-reference.
+A workflow omits a top-level `permissions` boundary, so a future job may inherit repository defaults. Set `permissions: {}` and grant only the scopes each job needs. Mappings: [OpenSSF Token-Permissions](https://github.com/ossf/scorecard/blob/main/docs/checks.md#token-permissions) and [CWE-269](https://cwe.mitre.org/data/definitions/269.html).
 
 ### MD-WF-002
 
-**Workflow grants `write-all` · high**
+**Workflow grants write-all token permissions · high**
 
-- **Evidence:** a workflow or job explicitly declares `permissions: write-all`.
-- **Review before accepting:** no normal workflow needs every available token permission. A release job may need several writes, but they should still be enumerated.
-- **Safe remediation:** replace `write-all` with an empty default and explicitly grant the minimum job-level writes. Review and test the resulting patch before adoption.
-- **Mapping:** OpenSSF Scorecard [`Token-Permissions`](https://github.com/ossf/scorecard/blob/main/docs/checks.md#token-permissions); [CWE-269](https://cwe.mitre.org/data/definitions/269.html).
+The workflow requests `write-all`, creating authority unrelated to most jobs. Replace it with an empty workflow default and explicit job-level grants. Mappings: [OpenSSF Token-Permissions](https://github.com/ossf/scorecard/blob/main/docs/checks.md#token-permissions) and [CWE-269](https://cwe.mitre.org/data/definitions/269.html).
 
 ### MD-WF-003
 
 **GitHub Action is not pinned to a full commit SHA · medium**
 
-- **Evidence:** `uses:` references an external Action or reusable workflow by a tag, branch, or other mutable ref instead of 40 hexadecimal characters.
-- **Review before accepting:** local actions and Docker references are outside this rule's intended scope. A mutable tag may be an accepted update policy, but it still permits code to change without a workflow diff.
-- **Safe remediation:** resolve the reviewed release to its full commit SHA, keep the human-readable tag in a comment, verify upstream provenance, and automate reviewed pin updates. The auditor does not guess a SHA.
-- **Mapping:** OpenSSF Scorecard [`Pinned-Dependencies`](https://github.com/ossf/scorecard/blob/main/docs/checks.md#pinned-dependencies); [CWE-829](https://cwe.mitre.org/data/definitions/829.html).
+An Action reference uses a mutable tag or branch. Resolve the reviewed release to a full commit SHA, keep the human-readable tag in a comment, verify provenance, and automate reviewed pin updates. Mappings: [OpenSSF Pinned-Dependencies](https://github.com/ossf/scorecard/blob/main/docs/checks.md#pinned-dependencies) and [CWE-829](https://cwe.mitre.org/data/definitions/829.html).
 
 ### MD-WF-004
 
 **Privileged event checks out attacker-influenced code · high**
 
-- **Evidence:** `pull_request_target`, `workflow_run`, or `issue_comment` is combined with `actions/checkout` and an attacker-influenced pull-request ref.
-- **Review before accepting:** a privileged event that checks out only the trusted base revision should not trigger. Inspect data flow when expressions or helper scripts obscure which revision is fetched.
-- **Safe remediation:** separate metadata handling from code execution. Run contributor code only under `pull_request` with read-only permissions, no secrets, and no persisted credentials; never execute a fork head in the privileged job.
-- **Mapping:** OpenSSF Scorecard [`Dangerous-Workflow`](https://github.com/ossf/scorecard/blob/main/docs/checks.md#dangerous-workflow); [CWE-829](https://cwe.mitre.org/data/definitions/829.html).
+A privileged event can fetch a pull-request-controlled revision. Separate privileged metadata handling from contributor-code execution; run untrusted code only under a read-only `pull_request` path without secrets. Mappings: [OpenSSF Dangerous-Workflow](https://github.com/ossf/scorecard/blob/main/docs/checks.md#dangerous-workflow) and [CWE-829](https://cwe.mitre.org/data/definitions/829.html).
 
 ### MD-WF-005
 
-**Untrusted input reaches secrets or write authority · critical**
+**Untrusted input can reach secrets or write authority · critical**
 
-- **Evidence:** one job in a privileged-event workflow references attacker-influenced pull-request content while that same job has secrets, inherited secrets, a write-capable GitHub permission, or `id-token: write` credential-minting authority.
-- **Review before accepting:** authority is evaluated per job so an untrusted job does not borrow a separate job's write scope. The rule is intentionally conservative and does not prove that every referenced value is executed; trace the value into commands, reusable workflows, and actions before declaring exploitability.
-- **Safe remediation:** remove secrets and writes from the untrusted path, isolate contributor-code execution in a read-only `pull_request` workflow, and pass only validated artifacts or metadata into any later privileged stage.
-- **Mapping:** OpenSSF Scorecard [`Dangerous-Workflow`](https://github.com/ossf/scorecard/blob/main/docs/checks.md#dangerous-workflow); [CWE-829](https://cwe.mitre.org/data/definitions/829.html). A more specific CWE requires source-to-sink validation.
+Attacker-controlled event data appears in a job with secrets, OIDC, or repository write authority. Trace the value to its sink, remove privilege from the untrusted path, and pass only validated data into a separate privileged stage. Mappings: [OpenSSF Dangerous-Workflow](https://github.com/ossf/scorecard/blob/main/docs/checks.md#dangerous-workflow) and [CWE-829](https://cwe.mitre.org/data/definitions/829.html).
 
 ### MD-WF-006
 
 **Checkout may persist a write-capable token · medium**
 
-- **Evidence:** an `actions/checkout` step is in a job with any GitHub write-capable permission or `id-token: write`, and its own step block does not set `persist-credentials: false`.
-- **Review before accepting:** authenticated Git operations may be an intentional, reviewed part of a release job. The finding does not prove that a later step can be influenced by an attacker.
-- **Safe remediation:** set `persist-credentials: false` unless authenticated Git is required. If it is required, isolate the push into a narrow job, minimize permissions, and ensure untrusted code cannot run before credential use.
-- **Mapping:** related to OpenSSF Scorecard [`Token-Permissions`](https://github.com/ossf/scorecard/blob/main/docs/checks.md#token-permissions). No CWE is assigned without evidence that credentials are exposed.
+`actions/checkout` may persist credentials in a write-capable job. Set `persist-credentials: false` unless authenticated Git is required; isolate any required push in a narrow trusted job. Mapping: [OpenSSF Token-Permissions](https://github.com/ossf/scorecard/blob/main/docs/checks.md#token-permissions).
 
 ### MD-WF-007
 
-**Untrusted event data interpolated into a shell command · high**
+**Untrusted event data is interpolated into a shell command · high**
 
-- **Evidence:** an expression derived from an attacker-influenced GitHub event context appears directly inside a `run` scalar or block.
-- **Review before accepting:** the rule identifies a direct source-to-shell boundary but does not parse shell grammar or prove the payload is exploitable on every runner. Expressions under the step's `env` mapping do not trigger this rule.
-- **Safe remediation:** assign the expression to an environment variable or pass it as a reviewed action input, then quote the shell variable for the selected shell.
-- **Mapping:** [CWE-78](https://cwe.mitre.org/data/definitions/78.html).
+An attacker-influenced expression is embedded directly in `run`. Move the expression to an environment variable or reviewed action input, then quote it for the selected shell. Mapping: [CWE-78](https://cwe.mitre.org/data/definitions/78.html).
 
 ### MD-WF-008
 
 **Privileged workflow executes a pull-request artifact · critical**
 
-- **Evidence:** a local `pull_request` workflow uploads a literal artifact name; a named `workflow_run` consumer downloads that artifact from `github.event.workflow_run.id`, executes or sources a literal path under the configured download destination in the same job, and that job has secrets, OIDC, or a GitHub write permission.
-- **Review before accepting:** the scanner requires matching producer/consumer names, an authenticated remote-run download, and a destination-to-command path edge. It does not interpret dynamically generated paths or prove the payload succeeds on the selected runner.
-- **Safe remediation:** treat the artifact as untrusted data. Verify an immutable digest and parse it without execution, or rebuild it from trusted source inside the privileged workflow.
-- **Mapping:** OpenSSF Scorecard [`Dangerous-Workflow`](https://github.com/ossf/scorecard/blob/main/docs/checks.md#dangerous-workflow); [CWE-829](https://cwe.mitre.org/data/definitions/829.html).
+A privileged `workflow_run` consumer executes an artifact produced by pull-request code. Treat the artifact as untrusted data: verify and parse it without execution, or rebuild from trusted source. Mappings: [OpenSSF Dangerous-Workflow](https://github.com/ossf/scorecard/blob/main/docs/checks.md#dangerous-workflow) and [CWE-829](https://cwe.mitre.org/data/definitions/829.html).
 
-## Moderation rules
+## Moderation
 
 ### MD-MOD-001
 
-**Destructive moderation enabled · high**
+**Destructive moderation is enabled · high**
 
-- **Evidence:** recognized configuration enables automatic closing, locking, or deletion.
-- **Review before accepting:** deliberate incident lockdowns may justify a temporary destructive control when an owner, expiry, rollback, and appeal route are explicit.
-- **Safe remediation:** switch to report-only mode, require human review, measure false positives, and publish an appeal path before enabling enforcement. The generated patch disables the recognized destructive option and is marked safe.
-- **Mapping:** no direct OpenSSF or CWE mapping; this is an operational safety rule.
+Recognized automation can close, lock, or delete contributor work. Use report-only mode first, require human review, measure false positives, and define appeal and rollback before enforcement. No direct framework mapping is claimed.
 
 ### MD-MOD-002
 
-**Identity or history proxy used for contributor risk · medium**
+**Identity or history proxy is used for contributor risk · medium**
 
-- **Evidence:** recognized automation enables username, account-age, fork-activity, public-profile, profile-completeness, global-history, or commit-author identity heuristics.
-- **Review before accepting:** a signal may be useful for rate limiting during a measured abuse incident, but it is not evidence that a contribution is unsafe or low quality.
-- **Safe remediation:** disable the proxy and evaluate reproducibility, scope, tests, policy compliance, and contributor responsiveness. The generated patch changes only the recognized option and is marked safe.
-- **Mapping:** no direct OpenSSF or CWE mapping; this is a fairness and moderation-safety rule.
+Automation uses identity, account age, profile, fork, or contribution-history characteristics as a risk proxy. Disable it and assess the submitted work through reproducibility, scope, tests, policy compliance, and responsiveness. No direct framework mapping is claimed.
 
 ### MD-MOD-003
 
-**No discoverable appeal path for destructive moderation · medium**
+**Destructive moderation has no discoverable appeal path · medium**
 
-- **Evidence:** destructive moderation is enabled and repository policy text contains no recognized appeal or reopening language.
-- **Review before accepting:** an appeal channel may exist in a website, organization policy, or support system not present in the checkout. Confirm that affected contributors can actually discover it.
-- **Safe remediation:** document the appeal channel, human owner, response expectation, reopening process, and emergency disable path before enabling destructive behavior.
-- **Mapping:** no direct OpenSSF or CWE mapping; this is an operational recovery rule.
+Destructive automation is present but the checkout contains no discoverable reconsideration route. Document a human owner, channel, response expectation, reopening process, and emergency disable path. No direct framework mapping is claimed.
 
-## Reporting a false positive
-
-Include the rule ID, minimal workflow or policy excerpt, expected result, actual result, and why the documented review guidance does not cover the case. Remove secrets and personal data before using the dedicated [auditor false-positive form](https://github.com/thangldw/awesome-maintainer-defense/issues/new?template=auditor-false-positive.yml).
+Report a minimal, sanitized false-positive case through the [auditor false-positive form](https://github.com/thangldw/awesome-maintainer-defense/issues/new?template=auditor-false-positive.yml).

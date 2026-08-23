@@ -1,23 +1,17 @@
-# Balanced maintainer-defense starter kit
+# Balanced profile
 
-> Deployable asset. Start from the [documentation hub](../../docs/README.md).
+The balanced profile turns deterministic pull-request quality signals into one read-only status check. It does not check out pull-request code, comment, label, close, lock, merge, or change settings.
 
-This is the read-only status-gate component used by the balanced Maintainer Defense Kit profile. Prefer the [installer](../maintainer-defense-kit) so conflicts, provenance, verification, and rollback are recorded.
+## Security boundary
 
-## Behavior
+The workflow runs on `pull_request`, grants read-only access, pins the third-party Action to a reviewed full commit SHA, and disables identity/history proxies. A controlled failed result becomes the `PR quality gate` check so contributors can recover by updating the pull request.
 
-- Pull requests are checked against deterministic submission-quality signals. The baseline explicitly disables username, account-age, profile-completeness, global-history, emoji, and similar proxy heuristics.
-- A pull request with several quality-risk signals receives a failed `PR quality gate` check; it is **not** commented on, labeled, closed, or locked.
-- New commits and edited descriptions are rechecked, allowing a contributor to clear the gate with better evidence.
-- The workflow never checks out or executes code from the pull request.
-- Bug reports must include a version, environment, reproduction steps, and expected behavior.
+## Adoption gate
 
-## Before enabling
+1. Install `observe` first and collect representative flagged and unflagged samples.
+2. Record the signal window, false positives, appeals, threshold decision, owner, and rollback trigger.
+3. Review the pinned Action source and license.
+4. Test failure and recovery in a non-critical repository.
+5. Enable `balanced`; make the check required in a native ruleset only after measured owner approval.
 
-1. Read the pinned Action's documentation and license.
-2. Test on a non-critical repository or fork.
-3. Adjust thresholds using real submissions and record false positives.
-4. Publish an appeal path and contribution policy.
-5. Only after observation, optionally make `PR quality gate` a required check in a native GitHub ruleset.
-
-Automated scores are triage hints, not proof that a contributor used AI or acted maliciously.
+The status check is a triage input, not proof of AI use, intent, or contribution quality. Use the [installer](../maintainer-defense-kit/README.md) for conflict-safe preview, verification, and uninstall.

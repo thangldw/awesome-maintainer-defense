@@ -1,79 +1,31 @@
-# Maintainer-defense playbook
+# Maintainer defense playbook
 
-> Operating guide for baseline, observation, review-first enforcement, incidents, and recovery. Return to the [documentation hub](README.md).
+## 1. Triage
 
-## Level 0 — Baseline
+Preserve the original URL, revision, workflow run, timestamp, and sanitized evidence. Separate security-sensitive reports from public intake. Classify the immediate risk: attention flood, unsafe workflow path, credential exposure, destructive automation, or governance gap. Do not infer authorship or intent from style, identity, or account history.
 
-Use this before there is an incident.
+## 2. Review
 
-- Publish contribution, AI-assistance, unsolicited-PR, code-of-conduct, and security-report policies.
-- Require structured bug evidence: version, environment, minimal reproduction, actual result, expected result.
-- Protect `.github/`, release workflows, package manifests, and ownership files with CODEOWNERS and required review. GitHub recommends protecting the CODEOWNERS file itself; see [About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners).
-- Use branch rulesets for required reviews, status checks, deletion protection, and force-push protection. See [available rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets).
-- Set explicit `GITHUB_TOKEN` permissions per job and pin third-party Actions to reviewed commit SHAs.
-- Enable private vulnerability reporting and document what evidence a security report must contain.
-- Decide who can activate incident controls and where the decision is logged.
+Confirm the finding against the active file and repository context. Check whether external rulesets, organization policy, or service configuration changes applicability. For automation, trace untrusted input to its execution or authority sink. Record false positives and unresolved context explicitly.
 
-## Level 1 — Observe
+## 3. Authorize
 
-Use when review volume is rising but the queue is still manageable.
+Assign a named owner. Document the proposed control, required permissions, data recipients, contributor-visible effects, exception criteria, appeal route, review date, and exact rollback. High-impact controls require repository-owner approval; an auditor recommendation is not authorization.
 
-- Measure submissions, time to first response, close reasons, reopened items, and reviewer hours.
-- Run new moderation or trust tools in dry-run/report-only mode for at least two representative review cycles.
-- Sample both flagged and unflagged submissions; otherwise false negatives remain invisible.
-- Record false positives by contributor type, language, repository area, and reason.
-- Do not call a person malicious or claim AI use based only on a score.
+## 4. Roll out
 
-Exit criteria: the team can state what problem exists, its weekly cost, which signals help, and the tolerated false-positive rate.
+Start with local audit and the `observe` profile. Run representative tests and sample both flagged and unflagged contributions. Prefer neutral routing and required status checks over public accusations. Enable close, lock, block, deletion, or broad interaction limits only for a measured need, with human review and an expiry.
 
-## Level 2 — Review-first enforcement
+## 5. Respond to an incident
 
-Use when measured signals are useful enough to route work.
+Assign an incident owner and pause uncertain release or moderation automation. Preserve evidence without copying credentials or private reports into public logs. Isolate untrusted execution, revoke exposed credentials, invalidate suspect artifacts, and apply time-bounded platform controls. Communicate status without amplifying harassment or disclosing exploit details.
 
-- Apply a private or neutral label such as `needs-human-review`.
-- Keep automatic closing, locking, blocking, and public accusations disabled.
-- Exempt maintainers, approved bots, known contributors, security reporters, and time-sensitive release automation only where the exemption is justified.
-- Require a human decision for every high-impact action.
-- Publish a short appeal path based on new evidence, not debate about authorship.
+## 6. Roll back and recover
 
-The [balanced starter kit](../kits/balanced) implements this level for PR quality triage.
+Disable the workflow or remove the required check using the recorded rollback. The installer may uninstall only unmodified files it owns; modified files require manual review. Reopen legitimate work, notify affected contributors when appropriate, remove temporary restrictions on schedule, and verify that credentials and release paths are restored safely.
 
-## Level 3 — Incident mode
+## 7. Keep an adoption record
 
-Use for a live flood, coordinated harassment, or credible compromise—not as a permanent default.
+Record the repository and commit, control owner, measured problem, selected profile, permissions, data boundary, high-impact effects, evaluation window, false-positive budget, appeal path, review date, and rollback command. Keep aggregate evidence where possible; do not publish contributor identities or raw private content.
 
-1. Assign an incident owner and start a timestamped decision log.
-2. Preserve URLs, screenshots, webhook delivery IDs, workflow run IDs, and relevant audit logs. Do not copy secrets into the log.
-3. Pause risky automation and releases if integrity is uncertain.
-4. Temporarily limit interactions to existing users, contributors, or collaborators. GitHub interaction limits expire after a chosen duration; see [limiting repository interactions](https://docs.github.com/en/communities/moderating-comments-and-conversations/limiting-interactions-in-your-repository).
-5. Close or lock only the clearly affected submission classes. Prefer temporary controls with an explicit expiry.
-6. Block accounts or report abuse when behavior violates platform rules; do not use technical disagreement alone as grounds for abuse reporting. See [reporting abuse or spam](https://docs.github.com/en/communities/maintaining-your-safety-on-github/reporting-abuse-or-spam).
-7. Rotate exposed credentials, invalidate artifacts, and review workflow history when compromise is possible.
-8. Communicate a brief status without amplifying harassment or publishing sensitive evidence.
-
-## Level 4 — Recovery
-
-- Remove temporary interaction limits and lockdown workflows on schedule.
-- Reopen legitimate items caught by broad controls.
-- Notify affected contributors when a false positive caused a visible action.
-- Compare reviewer load, missed valid reports, false positives, and time to recovery against the baseline.
-- Convert only proven incident controls into long-term policy.
-- Write a blameless retrospective that separates attacker behavior, platform limits, configuration mistakes, and maintainer capacity.
-
-## Adoption record
-
-For every automated defense, record:
-
-| Field | Example |
-| --- | --- |
-| Owner | `@maintainer-team` |
-| Problem | `40 unsolicited PRs/week, 6 reviewer-hours` |
-| Mode | `dry-run`, `review-first`, or `enforcing` |
-| Permissions | `contents: read`, `pull-requests: write` |
-| Data boundary | GitHub API, GitHub Models, vendor service, local only |
-| High-impact actions | close, lock, block, delete, settings changes |
-| False-positive budget | `< 2% of sampled legitimate PRs` |
-| Review date | ISO date, no more than 90 days away |
-| Rollback | exact workflow/config change that disables enforcement |
-
-Controls without an owner, review date, and rollback path should not remain in enforcement mode.
+Controls without an active owner, current review date, and tested rollback should return to observation mode.

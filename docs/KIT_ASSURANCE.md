@@ -1,60 +1,30 @@
-# Maintainer Defense Kit assurance case
+# Kit assurance
 
-> Acceptance contract separating tested engineering guarantees from unproven field effectiveness. Return to the [documentation hub](README.md).
+Status: engineering-verified baseline. The kit is not security-certified, and representative field accuracy is not established.
 
-**Status:** engineering-verified baseline; not security-certified and not yet field-validated across representative public repositories.
+| Claim | Mechanism | Evidence | Limitation |
+| --- | --- | --- | --- |
+| Offline, read-only audit | Local parser; no network client; no repository-code execution | CLI and corpus tests | Live GitHub settings and external services are invisible |
+| Patch-only remediation | `fix` renders a unified diff | Mutation and CLI tests | Patch correctness still depends on repository context |
+| Safe install preview | Preview by default; explicit `--apply` | Installer mode tests | A maintainer must approve and review adoption |
+| Conflict-safe ownership | Destination preflight, manifest hashes, symlink/path rejection | Installer conflict, verify, and uninstall tests | Manual edits to installed files intentionally block automatic removal |
+| Least-privilege shipped workflows | Read-only PR event, explicit permissions, no checkout in triage profiles | Static invariants and workflow analysis | Native required-check settings remain external |
+| Immutable Action references | Full commit SHA plus `pins.json` provenance records | Repository validation | Verified commits are not full source audits |
+| Deterministic machine output | Schema-v1 JSON and SARIF; stable IDs and fingerprints | Contract and corpus tests | Dynamic workflow semantics may be outside parser coverage |
+| Three-language deployment structure | English, Vietnamese, and Japanese assets installed by matrix | Profile × language tests | Native security/legal review is not claimed |
+| Reproducible pilot bundle | Pinned source/target commits, artifact digest, raw/effective reports, labels | Pilot schema and provenance verification | Owner-directed dogfood is not independent or representative |
 
-This document defines exactly what the kit currently guarantees, how those claims are tested, and what remains unproven. “Defense” means reducing review cost and unsafe automation paths—not identifying whether a human or AI authored a contribution.
+The current [1.1.1 owner-directed pilot](../pilots/2026-08-24-awesome-maintainer-defense/README.md) reproduced a zero-finding self-audit at its pinned release-candidate commit. This verifies artifact and evidence reproducibility only; it adds no independent field-accuracy evidence.
 
-## Assurance claims
+## Acceptance gate
 
-| Claim | Mechanism | Verification |
-| --- | --- | --- |
-| Safe adoption default | `observe` uses `pull_request`, read-only token permissions, no checkout, and disables comments, labels, close, and lock | Installer matrix test plus workflow validation |
-| Reversible installation | Dry-run by default; conflict preflight; no overwrite; file hashes and ownership in a manifest; uninstall refuses modified owned files | Conflict, modified-file, pre-existing-file, verify, and uninstall tests |
-| Repository boundary | Fixed relative destinations, manifest path validation, symlink rejection, and atomic manifest replacement | Malicious manifest and symlink tests |
-| Limited contributor-visible effect | `balanced` and `hardened` can fail only a named status check; they do not comment, label, close, lock, merge, or execute PR code | Static workflow inspection and profile tests |
-| Reduced proxy bias | Baseline explicitly disables username, account-age, fork-rate, public-profile, profile-completeness, global-merge-history, emoji, code-reference, and commit-author identity heuristics | Static workflow inspection |
-| Immutable dependencies | Every Action reference is a full commit SHA with a matching `pins.json` record | Repository validator |
-| Upstream provenance is monitored | Each documented tag resolved to the recorded SHA and each commit was reported verified by GitHub on 2026-07-15 | `scripts/verify_pins.py`, run on the weekly evidence workflow |
-| Deployable translations | Every profile installs structurally complete English, Vietnamese, or Japanese intake templates, policies, playbook, and adoption record; independent native review of Vietnamese and Japanese wording remains pending | 3 profiles × 3 languages end-to-end matrix |
-| Workflow regression detection | Workflow safety invariants, zizmor, and install tests run in CI | Quality and Workflow security workflows |
-| Runtime support | The installer supports Python 3.10+ and is tested on Linux with Python 3.10, 3.12, and 3.14 and on macOS with Python 3.12 | Quality workflow matrix |
-| Release-candidate provenance | Pilot metadata pins the source commit, target commit, standalone SHA-256, raw report, effective report, labels, and stated limitations | [`pilots/2026-08-23-awesome-maintainer-defense`](../pilots/2026-08-23-awesome-maintainer-defense/README.md) |
+Before production enforcement, a repository owner should:
 
-## Corrected findings from the second audit
+1. Verify live GitHub rules, permissions, installed Apps, secrets, and private reporting separately.
+2. Run the `observe` profile through representative contribution cycles.
+3. Record an owner, problem baseline, data boundary, review SLA, appeal path, expiry, and rollback.
+4. Sample flagged and unflagged work; test both status failure and recovery.
+5. Require human approval for contributor-visible or destructive action.
+6. Re-run installation verification, repository CI, and workflow security analysis after every change.
 
-The earlier balanced workflow was not strong enough to support an assurance claim:
-
-1. It ran on `edited` and `synchronize` and configured a failure comment. The upstream Action calls `createComment` for each failed run, so normal PR updates could repeatedly notify contributors.
-2. It assumed `needs-human-review` already existed. The upstream Action catches the failure-actions exception and logs a warning, meaning the intended queue could silently disappear. [Pinned upstream implementation](https://github.com/peakoss/anti-slop/blob/57858eead489d08b255fab2af45a506c2ca6eab2/src/actions.ts#L71-L113)
-3. The first installer design needed explicit defenses against a malicious manifest and symlink traversal.
-4. The issue form requested default labels that might not exist; GitHub documents that missing labels are simply not applied.
-5. [Upstream defaults](https://github.com/peakoss/anti-slop/blob/57858eead489d08b255fab2af45a506c2ca6eab2/action.yaml) included identity, history, and style proxies that were not justified by this project's quality-first principles; the shipped profiles now explicitly disable them.
-6. The first label-only correction still used `pull_request_target`. Zizmor correctly rejected that privileged trigger as fundamentally dangerous, so the final design uses a read-only `pull_request` status gate instead of suppressing the finding.
-
-All shipped PR-quality workflows now use read-only permissions and avoid public comments and labels. `balanced` converts the pinned Action's controlled `result` output into a failing status check; enforcement remains an explicit native-ruleset decision. The default profile only writes a job summary.
-
-## What is not guaranteed
-
-- No detector can reliably prove AI authorship, intent, or contributor quality. Signals are triage inputs only.
-- The repository does not yet contain a representative, privacy-reviewed field dataset measuring precision, recall, false-positive rate, maintainer time saved, or contributor drop-off.
-- A verified upstream commit is not a full audit of third-party Action code. Maintainers must still review licenses, source, network behavior, and updates.
-- GitHub settings, branch rules, label existence, private vulnerability reporting, and organizational policy are outside the local installer's control.
-- Vietnamese and Japanese text has automated structural coverage but has not been independently reviewed by native-speaking security or legal professionals.
-- The kit is not a compliance control, legal opinion, SLA, warranty, or incident-response service.
-
-## Production acceptance gate
-
-Treat the kit as production-ready for a specific repository only after all of the following are true:
-
-1. Native GitHub controls in [`NATIVE_CONTROLS.md`](NATIVE_CONTROLS.md) are reviewed first.
-2. `observe` runs for a documented period with no contributor-visible action.
-3. The adoption record contains an owner, review SLA, appeal path, emergency disable owner, and baseline metrics.
-4. Test PRs prove the status gate can both fail and recover; only then consider making it required in a native ruleset.
-5. False positives and review time are reviewed by a human before thresholds or profiles change.
-6. Installation verification, repository CI, and workflow security analysis pass.
-
-Until field evidence exists, the honest answer is: the kit's **installation, permissions, reversibility, pinning, and localization are tested**; its real-world moderation effectiveness is **not yet guaranteed**.
-
-The exact checks, thresholds, disabled proxies, and profile effects are recorded in [`PROFILE_SIGNALS.md`](PROFILE_SIGNALS.md). Maintainers may contribute privacy-sanitized aggregate results through the [field-report issue form](https://github.com/thangldw/awesome-maintainer-defense/issues/new?template=field-report.yml); raw PR data and contributor identities are neither requested nor needed.
+The defensible claim is limited: installation, permissions, reversibility, pinning, schemas, and deterministic regression behavior are tested. Precision, recall, maintainer time saved, contributor drop-off, and cross-project effectiveness remain unproven until independently labeled pilots provide adequate evidence.

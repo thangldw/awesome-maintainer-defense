@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audit to action — Awesome Maintainer Defense</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap">
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root { --paper:#f5f5f5; --ink:#2d3142; --muted:#4f5d75; --soft:#7a8399; --accent:#eb6c36; --accent-tint:rgba(235,108,54,.08); --rule:rgba(45,49,66,.12); }
+    body { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:48px 32px; background:var(--paper); color:var(--ink); font-family:'Geist',system-ui,sans-serif; }
+    .frame { width:100%; max-width:1280px; }
+    .eyebrow { margin-bottom:8px; color:var(--muted); font:500 12px/1 'Geist Mono',ui-monospace,monospace; letter-spacing:.18em; text-transform:uppercase; }
+    h1 { margin-bottom:24px; color:var(--ink); font:400 clamp(28px,3vw,40px)/1.08 'Instrument Serif',serif; letter-spacing:-.02em; }
+    svg { width:100%; min-width:900px; display:block; }
+    .stage > rect.stage-shell { fill:#fff; stroke:rgba(45,49,66,.28); stroke-width:1; }
+    .stage--accent > rect.stage-shell { fill:var(--accent-tint); stroke:var(--accent); stroke-width:1.5; }
+    .stage-number { fill:rgba(45,49,66,.12); }
+    .stage--accent .stage-number { fill:rgba(235,108,54,.20); }
+    .stage-index { fill:var(--ink); font:600 8px 'Geist Mono',ui-monospace,monospace; text-anchor:middle; }
+    .stage--accent .stage-index { fill:var(--accent); }
+    .stage-name { fill:var(--ink); font:600 16px 'Geist',system-ui,sans-serif; text-anchor:middle; }
+    .slot { fill:rgba(45,49,66,.025); stroke:var(--rule); stroke-width:1; }
+    .slot-label,.legend-label { fill:var(--muted); font:500 8px 'Geist Mono',ui-monospace,monospace; letter-spacing:.12em; }
+    .slot-value { fill:var(--ink); font:500 12px 'Geist',system-ui,sans-serif; text-anchor:middle; }
+    .slot-sub { fill:var(--soft); font:400 8px 'Geist Mono',ui-monospace,monospace; text-anchor:middle; }
+    .connector { fill:none; stroke:var(--muted); stroke-width:1.2; }
+    .connector--accent { stroke:var(--accent); stroke-width:1.2; }
+    .legend-text { fill:var(--ink); font:500 12px 'Geist',system-ui,sans-serif; }
+  </style>
+</head>
+<body>
+  <main class="frame">
+    <p class="eyebrow">Stage framework · Process · doc-wide</p>
+    <h1>Evidence becomes a change only after a named owner authorizes it</h1>
+    <svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="audit-to-action-title audit-to-action-desc">
+      <title id="audit-to-action-title">Audit-to-action governance process</title>
+      <desc id="audit-to-action-desc">Six comparable stages show their input, governance decision, and output, with human patch authorization as the focal stage.</desc>
+      <defs>
+        <marker id="audit-to-action-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#4f5d75"/></marker>
+        <marker id="audit-to-action-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#eb6c36"/></marker>
+      </defs>
+      <rect width="1280" height="720" fill="#f5f5f5"/>
+
+      <path class="connector" d="M216 204 H244" marker-end="url(#audit-to-action-arrow)"/>
+      <path class="connector" d="M420 204 H448" marker-end="url(#audit-to-action-arrow)"/>
+      <path class="connector" d="M624 204 H652" marker-end="url(#audit-to-action-arrow)"/>
+      <path class="connector connector--accent" d="M828 204 H856" marker-end="url(#audit-to-action-arrow-accent)"/>
+      <path class="connector connector--accent" d="M1032 204 H1060" marker-end="url(#audit-to-action-arrow-accent)"/>
+
+      <g class="stage" data-node="scope">
+        <rect class="stage-shell" x="40" y="156" width="176" height="404" rx="8"/>
+        <rect class="stage-number" x="52" y="172" width="32" height="20" rx="10"/>
+        <text class="stage-index" x="68" y="188">01</text>
+        <text class="stage-name" x="128" y="208">Scope</text>
+        <rect class="slot" x="56" y="232" width="144" height="84" rx="6"/>
+        <text class="slot-label" x="68" y="252">INPUT</text>
+        <text class="slot-value" x="128" y="276">Repository path</text>
+        <text class="slot-sub" x="128" y="296">requested boundary</text>
+        <rect class="slot" x="56" y="328" width="144" height="96" rx="6"/>
+        <text class="slot-label" x="68" y="348">GOVERNANCE</text>
+        <text class="slot-value" x="128" y="376">Authority?</text>
+        <text class="slot-sub" x="128" y="396">exact target only</text>
+        <rect class="slot" x="56" y="436" width="144" height="104" rx="6"/>
+        <text class="slot-label" x="68" y="456">OUTPUT</text>
+        <text class="slot-value" x="128" y="488">Bounded target</text>
+        <text class="slot-sub" x="128" y="508">or stop</text>
+      </g>
+
+      <g class="stage" data-node="inspect">
+        <rect class="stage-shell" x="244" y="156" width="176" height="404" rx="8"/>
+        <rect class="stage-number" x="256" y="172" width="32" height="20" rx="10"/>
+        <text class="stage-index" x="272" y="188">02</text>
+        <text class="stage-name" x="332" y="208">Inspect</text>
+        <rect class="slot" x="260" y="232" width="144" height="84" rx="6"/>
+        <text class="slot-label" x="272" y="252">INPUT</text>
+        <text class="slot-value" x="332" y="276">Local files</text>
+        <text class="slot-sub" x="332" y="296">policy · workflow · Git</text>
+        <rect class="slot" x="260" y="328" width="144" height="96" rx="6"/>
+        <text class="slot-label" x="272" y="348">GOVERNANCE</text>
+        <text class="slot-value" x="332" y="376">Read only</text>
+        <text class="slot-sub" x="332" y="396">offline · no execution</text>
+        <rect class="slot" x="260" y="436" width="144" height="104" rx="6"/>
+        <text class="slot-label" x="272" y="456">OUTPUT</text>
+        <text class="slot-value" x="332" y="488">Raw evidence</text>
+        <text class="slot-sub" x="332" y="508">locations · rule IDs</text>
+      </g>
+
+      <g class="stage" data-node="assess">
+        <rect class="stage-shell" x="448" y="156" width="176" height="404" rx="8"/>
+        <rect class="stage-number" x="460" y="172" width="32" height="20" rx="10"/>
+        <text class="stage-index" x="476" y="188">03</text>
+        <text class="stage-name" x="536" y="208">Assess</text>
+        <rect class="slot" x="464" y="232" width="144" height="84" rx="6"/>
+        <text class="slot-label" x="476" y="252">INPUT</text>
+        <text class="slot-value" x="536" y="276">Findings</text>
+        <text class="slot-sub" x="536" y="296">severity · evidence</text>
+        <rect class="slot" x="464" y="328" width="144" height="96" rx="6"/>
+        <text class="slot-label" x="476" y="348">GOVERNANCE</text>
+        <text class="slot-value" x="536" y="376">Applicable?</text>
+        <text class="slot-sub" x="536" y="396">external controls?</text>
+        <rect class="slot" x="464" y="436" width="144" height="104" rx="6"/>
+        <text class="slot-label" x="476" y="456">OUTPUT</text>
+        <text class="slot-value" x="536" y="488">Reviewed finding</text>
+        <text class="slot-sub" x="536" y="508">accepted · unresolved</text>
+      </g>
+
+      <g class="stage" data-node="propose">
+        <rect class="stage-shell" x="652" y="156" width="176" height="404" rx="8"/>
+        <rect class="stage-number" x="664" y="172" width="32" height="20" rx="10"/>
+        <text class="stage-index" x="680" y="188">04</text>
+        <text class="stage-name" x="740" y="208">Propose</text>
+        <rect class="slot" x="668" y="232" width="144" height="84" rx="6"/>
+        <text class="slot-label" x="680" y="252">INPUT</text>
+        <text class="slot-value" x="740" y="276">Accepted finding</text>
+        <text class="slot-sub" x="740" y="296">repository context</text>
+        <rect class="slot" x="668" y="328" width="144" height="96" rx="6"/>
+        <text class="slot-label" x="680" y="348">GOVERNANCE</text>
+        <text class="slot-value" x="740" y="376">Patch only</text>
+        <text class="slot-sub" x="740" y="396">no target mutation</text>
+        <rect class="slot" x="668" y="436" width="144" height="104" rx="6"/>
+        <text class="slot-label" x="680" y="456">OUTPUT</text>
+        <text class="slot-value" x="740" y="488">Unified diff</text>
+        <text class="slot-sub" x="740" y="508">plus test plan</text>
+      </g>
+
+      <g class="stage stage--accent node--accent" data-node="authorize">
+        <rect class="stage-shell" x="856" y="156" width="176" height="404" rx="8"/>
+        <rect class="stage-number" x="868" y="172" width="32" height="20" rx="10"/>
+        <text class="stage-index" x="884" y="188">05</text>
+        <text class="stage-name" x="944" y="208">Authorize</text>
+        <rect class="slot" x="872" y="232" width="144" height="84" rx="6"/>
+        <text class="slot-label" x="884" y="252">INPUT</text>
+        <text class="slot-value" x="944" y="276">Diff + evidence</text>
+        <text class="slot-sub" x="944" y="296">tests · permissions</text>
+        <rect class="slot" x="872" y="328" width="144" height="96" rx="6"/>
+        <text class="slot-label" x="884" y="348">GOVERNANCE</text>
+        <text class="slot-value" x="944" y="372">Human owner</text>
+        <text class="slot-value" x="944" y="388">decides</text>
+        <text class="slot-sub" x="944" y="408">approve · reject</text>
+        <rect class="slot" x="872" y="436" width="144" height="104" rx="6"/>
+        <text class="slot-label" x="884" y="456">OUTPUT</text>
+        <text class="slot-value" x="944" y="488">Decision record</text>
+        <text class="slot-sub" x="944" y="508">authorized patch or stop</text>
+      </g>
+
+      <g class="stage" data-node="apply-record">
+        <rect class="stage-shell" x="1060" y="156" width="176" height="404" rx="8"/>
+        <rect class="stage-number" x="1072" y="172" width="32" height="20" rx="10"/>
+        <text class="stage-index" x="1088" y="188">06</text>
+        <text class="stage-name" x="1148" y="204">Apply &amp;</text>
+        <text class="stage-name" x="1148" y="220">record</text>
+        <rect class="slot" x="1076" y="232" width="144" height="84" rx="6"/>
+        <text class="slot-label" x="1088" y="252">INPUT</text>
+        <text class="slot-value" x="1148" y="276">Authorization</text>
+        <text class="slot-sub" x="1148" y="296">approved patch</text>
+        <rect class="slot" x="1076" y="328" width="144" height="96" rx="6"/>
+        <text class="slot-label" x="1088" y="348">GOVERNANCE</text>
+        <text class="slot-value" x="1148" y="376">Normal repo flow</text>
+        <text class="slot-sub" x="1148" y="396">CI · rollback owner</text>
+        <rect class="slot" x="1076" y="436" width="144" height="104" rx="6"/>
+        <text class="slot-label" x="1088" y="456">OUTPUT</text>
+        <text class="slot-value" x="1148" y="484">Tested change</text>
+        <text class="slot-sub" x="1148" y="504">adoption record</text>
+      </g>
+
+      <g id="audit-to-action-legend" data-legend-position="bottom" data-legend-y="652">
+        <path d="M40 628 H1240" stroke="rgba(45,49,66,.12)" stroke-width="1"/>
+        <text class="legend-label" x="48" y="660">SLOTS</text>
+        <text class="legend-text" x="120" y="660">same order in every stage: input → governance → output</text>
+        <rect x="720" y="644" width="20" height="20" rx="5" fill="rgba(235,108,54,.08)" stroke="#eb6c36"/>
+        <text class="legend-text" x="752" y="660">focal owner decision</text>
+      </g>
+    </svg>
+  </main>
+</body>
+</html>

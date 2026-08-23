@@ -1,28 +1,29 @@
 ---
 name: audit-repository-workflows
-description: Audit a local repository for governance gaps, GitHub Actions trust-boundary risks, and unsafe moderation automation. Use for repository security reviews, pull-request workflow audits, pull_request_target or workflow_run analysis, token-permission checks, policy coverage, and requests for a reviewable remediation patch.
+description: Use when reviewing a local repository for governance gaps, GitHub Actions trust-boundary risks, unsafe moderation, or a requested remediation patch.
 ---
 
 # Audit repository workflows
 
-Use the bundled dependency-free auditor. Lead with evidence and distinguish a finding from proof of authorship, intent, compromise, or exploitability.
+Use the bundled auditor for deterministic local evidence. A finding is a review lead, not proof of exploitability, compromise, authorship, intent, or contributor quality.
 
-## Workflow
+## Scope
 
-1. Resolve the exact repository directory. Do not scan outside the user's stated scope.
-2. Read `references/commands.md` and run the read-only audit first.
-3. Summarize critical and high findings, the workflow/event path that triggers each finding, and the documented safe remediation.
-4. Generate a patch only when the user requests a fix or patch. The `fix` command emits unified diff text and never edits the target repository.
-5. Review every proposed patch before recommending application. Call out changes that need repository-owner judgment.
+Resolve the exact repository directory and stay within it. The auditor reads local policy, workflow, and Git evidence without executing repository code or contacting GitHub. Live rulesets, organization policy, installed Apps, secrets, and external services remain outside the result.
 
-## Guardrails
+## Operation
 
-- Never install a defense profile, edit repository settings, commit, push, merge, close issues, or change permissions without a separate explicit request.
-- Do not label a contributor, account, pull request, or commit as malicious based on heuristic findings.
-- Treat exit code `2` from `--fail-on` as a policy threshold result, not an auditor crash.
-- Keep SARIF or JSON output private when it contains sensitive workflow paths or security details.
-- If the target is not a Git repository, explain the reduced provenance context rather than inventing repository identity.
+1. Read [references/commands.md](references/commands.md) and run `audit` first.
+2. Prioritize critical and high findings. For each, report the rule ID, evidence location, triggering trust path, safe remediation, and missing external context.
+3. If the user requested a fix or patch, run `fix`; otherwise stop after the report. `fix` writes only the requested unified-diff file and does not edit the target.
+4. Review patch proposals in repository context and identify every change requiring owner authorization.
 
-## Output
+## Authority boundary
 
-Return: audit scope, finding counts, prioritized findings, evidence locations, remediation options, limitations, and whether a patch was generated.
+Audit and patch generation do not authorize installation, patch application, repository edits, settings changes, commits, pushes, pull requests, merges, or moderation actions. Obtain explicit authority for the specific mutation immediately before performing it.
+
+Treat exit code 2 from `--fail-on` as a matched policy threshold. Keep JSON and SARIF private when paths or workflow details are sensitive. If local Git provenance is unavailable, state that limitation rather than inferring identity.
+
+## Result
+
+Return scope, finding counts, prioritized evidence, remediation options, external-state limitations, and whether a patch file was generated. Never score a contributor or infer AI use.

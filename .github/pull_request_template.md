@@ -1,24 +1,21 @@
-## Resource or change
+## Contract changed
 
-<!-- What maintainer problem does this solve? -->
+Describe the bounded problem and the product, security, privacy, documentation, or catalog contract affected.
 
-## Evidence reviewed
+## Evidence
 
-- Canonical documentation:
-- Required permissions and external services:
-- License:
-- Maintenance activity:
-- Default behavior and maximum effects:
-- Official evidence links:
+Provide a regression fixture, command output, source link, or other reproducible evidence. State what remains unverified.
 
-## Relationship disclosure
+## Risk and rollback
 
-<!-- No affiliation / contributor / maintainer / employee -->
+List permission, data-boundary, contributor-impact, compatibility, and release risks. Give the exact rollback path.
 
-## Checklist
+## Verification
 
-- [ ] I edited canonical sources rather than generated tables.
-- [ ] I ran `make test`, `make validate`, and the focused checks for this change.
-- [ ] The description is factual and does not contain promotional claims.
-- [ ] I documented destructive actions, data sharing, and false-positive controls where relevant.
-- [ ] Vietnamese and Japanese deployment wording preserves the same limitations as English.
+- [ ] Scope is limited to the stated contract.
+- [ ] New behavior has a focused test or reproducible check.
+- [ ] `make test`, `make validate`, and `make standalone` pass where applicable.
+- [ ] Generated files are current and local links resolve.
+- [ ] Actions are pinned; workflow permissions are least-privileged.
+- [ ] Documentation and localized essentials match the changed behavior.
+- [ ] Relationships, generated assistance, and unresolved limitations are disclosed.

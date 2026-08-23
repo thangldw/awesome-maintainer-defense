@@ -1,19 +1,19 @@
-# Hồ sơ triển khai Maintainer Defense
+# Hồ sơ triển khai maintainer defense
 
-> Asset triển khai có phiên bản từ Awesome Maintainer Defense v1.0.0.
+- Repository và commit:
+- Owner:
+- Ngày triển khai:
+- Profile (`observe`, `balanced`, `hardened`):
+- Signal window và cách lấy mẫu:
+- Findings theo rule hoặc signal:
+- False positives và trường hợp chưa giải quyết:
+- Appeals đã nhận và kết quả:
+- Quyết định threshold và người phê duyệt:
+- Permissions và nơi nhận dữ liệu bên ngoài:
+- Tác động nhìn thấy bởi contributor:
+- Rollback trigger và thao tác chính xác:
+- Ngày review tiếp theo:
 
-- Người chịu trách nhiệm:
-- Profile đã cài:
-- Ngày cài:
-- Ngày kết thúc giai đoạn quan sát:
-- Người phụ trách hàng đợi review:
-- Kênh khiếu nại:
-- Người có quyền tắt khẩn cấp:
+## Bằng chứng quyết định
 
-## Đường cơ sở và đánh giá
-
-Hàng tuần ghi lại số PR mới, PR bị đánh dấu, submission chất lượng thấp đã xác nhận, false positive, khiếu nại thành công và thời gian trung vị đến review đầu tiên của con người. Không bật tự động hóa hiển thị với contributor cho đến khi mẫu quan sát đại diện cho repository này.
-
-## Nhật ký quyết định
-
-Ghi lại thay đổi ngưỡng, đổi profile, sự cố và quyết định rollback kèm ngày và người chịu trách nhiệm.
+Liên kết report đã loại dữ liệu nhạy cảm, test run và phê duyệt của owner. Không ghi credential, private report hoặc dữ liệu định danh contributor không cần thiết.

@@ -14,7 +14,7 @@ from pathlib import Path
 
 CLASSIFICATIONS = {"true-positive", "false-positive", "not-applicable", "unresolved"}
 PILOT_TYPES = {"internal-owner-directed", "external-maintainer-reviewed"}
-DISCLOSURES = {"public", "sanitized", "private"}
+DISCLOSURES = {"public", "sanitized", "private", "repository-and-sanitized-results"}
 SAFETY_VALUES = {"safe", "unsafe", "not-reviewed"}
 PRACTICALITY_VALUES = {"practical", "impractical", "not-reviewed"}
 OUTCOMES = {"fixed", "accepted", "rejected", "not-attempted", "not-reviewed"}
@@ -39,7 +39,12 @@ def validate_metadata(metadata: dict) -> None:
         "allow_aggregate_metrics",
         "limitations",
     }
-    if not isinstance(metadata, dict) or set(metadata) != required:
+    optional = {"reviewer_role"}
+    if (
+        not isinstance(metadata, dict)
+        or not required <= set(metadata)
+        or set(metadata) - required - optional
+    ):
         raise PilotError("pilot metadata has missing or unknown fields")
     for field in ("pilot_id", "auditor_version", "command"):
         if not isinstance(metadata[field], str) or not metadata[field].strip():
@@ -50,6 +55,10 @@ def validate_metadata(metadata: dict) -> None:
         raise PilotError("unsupported disclosure level")
     if metadata["pilot_type"] not in PILOT_TYPES:
         raise PilotError("unsupported pilot_type")
+    if "reviewer_role" in metadata and (
+        not isinstance(metadata["reviewer_role"], str) or not metadata["reviewer_role"].strip()
+    ):
+        raise PilotError("metadata reviewer_role must be a non-empty string")
     try:
         parsed_run_at = datetime.fromisoformat(metadata["run_at"].replace("Z", "+00:00"))
     except (AttributeError, ValueError) as exc:
@@ -245,11 +254,11 @@ def render_markdown(bundle: dict) -> str:
     metadata = bundle["metadata"]
     summary = bundle["summary"]
     lines = [
-        f"# Pilot {metadata['pilot_id']}",
+        f"# Reproducible pilot evidence: {metadata['pilot_id']}",
         "",
-        "> Generated from the checked-in pilot evidence bundle. Review labels are never inferred.",
+        "> Generated from pinned metadata, reports, and reviewer labels. Edit the JSON inputs, not this page.",
         "",
-        "## Evidence",
+        "## Provenance",
         "",
         f"- Pilot type: `{metadata['pilot_type']}`",
         f"- Disclosure: `{metadata['disclosure']}`",
@@ -259,13 +268,17 @@ def render_markdown(bundle: dict) -> str:
         f"- Target: `{metadata['target_repository']}@{metadata['target_commit']}`",
         f"- Command: `{metadata['command']}`",
         "",
-        "## Summary",
+        "The report represents the pinned auditor and target revisions. It does not claim that a historical auditor equals the current runtime.",
+        "",
+        "## Review state",
         "",
         f"- Raw findings: {summary['raw_findings']}",
         f"- Effective findings: {summary['effective_findings']}",
         f"- Suppressed findings: {summary['suppressed_findings']}",
         f"- Independently labeled: {summary['independently_labeled']}",
     ]
+    if "reviewer_role" in metadata:
+        lines.insert(8, f"- Reviewer role: `{metadata['reviewer_role']}`")
     if "precision" in summary:
         lines.append(f"- Precision over independently reviewed applicable findings: {summary['precision']:.6f}")
     else:
@@ -274,7 +287,7 @@ def render_markdown(bundle: dict) -> str:
         [
             "- Recall: not calculated; the bundle contains findings, not an independently labeled negative sample",
             "",
-            "## Finding reviews",
+            "## Finding labels",
             "",
             "| Rule | Path | Fingerprint | Emitted | Classification | Independent | Reviewer | Outcome |",
             "| --- | --- | --- | --- | --- | --- | --- | --- |",
@@ -296,7 +309,7 @@ def render_markdown(bundle: dict) -> str:
                 )
             ) + " |"
         )
-    lines.extend(["", "## Limitations", ""])
+    lines.extend(["", "## Evidence limitations", ""])
     lines.extend(f"- {item}" for item in metadata["limitations"])
     return "\n".join(lines) + "\n"
 
