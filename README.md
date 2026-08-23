@@ -36,8 +36,8 @@ MEDIUM   MD-WF-006  Checkout may persist a write-capable token in the workspace.
 
 ```bash
 python3 scripts/build_standalone.py
-python3 generated/maintainer-defense-kit.py audit .
-python3 generated/maintainer-defense-kit.py fix . --output recommended.patch
+python3 dist/maintainer-defense-kit.py audit .
+python3 dist/maintainer-defense-kit.py fix . --output recommended.patch
 python3 scripts/validate.py
 python3 scripts/test_auditor.py
 ```

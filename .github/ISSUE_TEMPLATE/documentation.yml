@@ -1,0 +1,40 @@
+name: Documentation correction
+description: Report unclear, stale, or incorrect documentation.
+title: "[Documentation]: "
+body:
+  - type: input
+    id: page
+    attributes:
+      label: Page or file
+      description: Give the repository-relative path or public URL.
+      placeholder: docs/AUDITOR.md
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: Current wording or behavior
+      description: Quote only the smallest passage needed to locate the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed correction
+      description: Explain the corrected wording or expected documentation behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Supporting evidence
+      description: For factual changes, link an authoritative source or provide a reproducible command and output.
+    validations:
+      required: false
+  - type: checkboxes
+    id: security
+    attributes:
+      label: Security routing
+      options:
+        - label: This report contains no undisclosed vulnerability or secret. Security reports use the private advisory link instead.
+          required: true
