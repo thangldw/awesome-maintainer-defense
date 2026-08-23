@@ -37,6 +37,25 @@ class KitError(Exception):
 SEVERITY_ORDER = {"critical": 4, "high": 3, "medium": 2, "low": 1, "note": 0}
 WORKFLOW_SUFFIXES = {".yml", ".yaml"}
 PRIVILEGED_EVENTS = ("pull_request_target", "workflow_run", "issue_comment")
+WRITE_PERMISSION_SCOPES = frozenset(
+    {
+        "actions",
+        "artifact-metadata",
+        "attestations",
+        "checks",
+        "code-quality",
+        "contents",
+        "deployments",
+        "discussions",
+        "id-token",
+        "issues",
+        "packages",
+        "pages",
+        "pull-requests",
+        "security-events",
+        "statuses",
+    }
+)
 IDENTITY_PROXIES = {
     "detect-spam-usernames": "username pattern",
     "min-account-age": "account age",
@@ -545,21 +564,42 @@ def yaml_block(lines: list[str], index: int, indentation: int) -> str:
     return "\n".join(lines[start:end])
 
 
-def permission_scope_writes(lines: list[str], checkout_index: int) -> bool:
-    text = "\n".join(lines)
-    top_write = bool(re.search(r"(?m)^permissions\s*:\s*write-all\b", text))
-    top_match = re.search(r"(?m)^permissions\s*:\s*$", text)
-    if top_match:
-        tail = text[top_match.end():]
-        boundary = re.search(r"(?m)^\S", tail)
-        top_block = tail[:boundary.start()] if boundary else tail
-        top_write = top_write or bool(re.search(r"(?m)^\s{2}\S[^:]*:\s*write\b", top_block))
-    job_block = yaml_block(lines, checkout_index, 2)
-    job_write = bool(
-        re.search(r"permissions\s*:\s*write-all\b", job_block)
-        or re.search(r"(?m)^\s+(?:contents|issues|pull-requests|actions|packages|id-token)\s*:\s*write\b", job_block)
-    )
-    return top_write or job_write
+def declared_write_scopes(lines: list[str], indentation: int) -> tuple[bool, set[str]]:
+    prefix = " " * indentation
+    for index, line in enumerate(lines):
+        match = re.match(rf"^{re.escape(prefix)}permissions\s*:\s*(.*?)\s*$", line)
+        if not match:
+            continue
+        value = match.group(1).split("#", 1)[0].strip()
+        if value == "write-all":
+            return True, set(WRITE_PERMISSION_SCOPES)
+        if value in {"{}", "read-all"}:
+            return True, set()
+        scopes: set[str] = set()
+        for candidate in lines[index + 1 :]:
+            stripped = candidate.lstrip()
+            current = len(candidate) - len(stripped)
+            if stripped and not stripped.startswith("#") and current <= indentation:
+                break
+            permission = re.match(r"\s*([a-z-]+)\s*:\s*write\b", candidate)
+            if permission and permission.group(1) in WRITE_PERMISSION_SCOPES:
+                scopes.add(permission.group(1))
+        return True, scopes
+    return False, set()
+
+
+def permission_scope(lines: list[str], evidence_index: int) -> set[str]:
+    """Return effective write or credential-minting scopes for one job."""
+    job_block = yaml_block(lines, evidence_index, 2).splitlines()
+    job_declared, job_scopes = declared_write_scopes(job_block, 4)
+    if job_declared:
+        return job_scopes
+    _, top_scopes = declared_write_scopes(lines, 0)
+    return top_scopes
+
+
+def permission_scope_writes(lines: list[str], evidence_index: int) -> bool:
+    return bool(permission_scope(lines, evidence_index))
 
 
 def workflow_findings(target: Path, path: Path) -> list[dict]:
@@ -616,8 +656,6 @@ def workflow_findings(target: Path, path: Path) -> list[dict]:
     ]
     checkout = bool(checkout_indexes)
     untrusted_ref = bool(re.search(r"github\.(?:event\.pull_request\.(?:head\.(?:sha|ref)|head)|head_ref)|refs/pull/", text))
-    secrets = bool(re.search(r"\$\{\{\s*secrets\.|secrets:\s*inherit", text))
-    writes = bool(re.search(r"permissions\s*:\s*write-all|\b(?:contents|issues|pull-requests|actions|packages|id-token)\s*:\s*write", text))
     if privileged and checkout and untrusted_ref:
         needle = privileged[0]
         line, column = line_column(text, needle)
@@ -629,17 +667,31 @@ def workflow_findings(target: Path, path: Path) -> list[dict]:
                 "Split metadata handling from untrusted-code execution; use pull_request with read-only permissions for code execution and never check out a fork head in the privileged job.",
             )
         )
-    if privileged and untrusted_ref and (secrets or writes):
-        needle = next((value for value in ("secrets.", "secrets: inherit", "write") if value in text), privileged[0])
-        line, column = line_column(text, needle)
-        findings.append(
-            make_finding(
-                "MD-WF-005", "critical", "high", rel, line, column,
-                "Untrusted pull-request input can reach a privileged workflow with secrets or write authority.",
-                "An attacker can modify fork code or metadata so a privileged job executes attacker-controlled commands and exfiltrates credentials or changes the repository.",
-                "Remove the untrusted checkout/execution path from the privileged event and move it to an isolated pull_request workflow with no secrets and read-only permissions.",
-            )
+    if privileged:
+        untrusted_pattern = re.compile(
+            r"github\.(?:event\.pull_request\.(?:head\.(?:sha|ref)|head)|head_ref)|refs/pull/"
         )
+        for evidence_index, evidence_line in enumerate(lines):
+            if not untrusted_pattern.search(evidence_line):
+                continue
+            job_block = yaml_block(lines, evidence_index, 2)
+            job_has_secrets = bool(
+                re.search(r"\$\{\{\s*secrets\.|secrets:\s*inherit", job_block)
+            )
+            scopes = permission_scope(lines, evidence_index)
+            if not job_has_secrets and not scopes:
+                continue
+            needle = "secrets." if "secrets." in job_block else evidence_line.strip()
+            line, column = line_column(text, needle)
+            findings.append(
+                make_finding(
+                    "MD-WF-005", "critical", "high", rel, line, column,
+                    "Untrusted pull-request input can reach a privileged workflow with secrets or write authority.",
+                    "An attacker can modify fork code or metadata so a privileged job executes attacker-controlled commands and exfiltrates credentials or changes the repository.",
+                    "Remove the untrusted checkout/execution path from the privileged event and move it to an isolated pull_request workflow with no secrets and read-only permissions.",
+                )
+            )
+            break
     for checkout_index in checkout_indexes:
         checkout_line = lines[checkout_index]
         indentation = len(checkout_line) - len(checkout_line.lstrip())
