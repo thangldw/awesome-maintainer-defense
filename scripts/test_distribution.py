@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 import re
@@ -49,6 +50,13 @@ class DistributionTests(unittest.TestCase):
             digest = hashlib.sha256(artifact.read_bytes()).hexdigest()
             self.assertEqual(checksum_path.read_text(encoding="ascii"), f"{digest}  {name}\n")
         standalone = DIST / "maintainer-defense-kit.py"
+        embedded_payloads = re.findall(
+            r"^    '[^']+': '([^']+)',?$",
+            standalone.read_text(encoding="utf-8"),
+            re.MULTILINE,
+        )
+        self.assertTrue(embedded_payloads)
+        self.assertTrue(all(base64.b64decode(payload)[9] == 255 for payload in embedded_payloads))
         digest = hashlib.sha256(standalone.read_bytes()).hexdigest()
         formula = (ROOT / "Formula/maintainer-defense-kit.rb").read_text(encoding="utf-8")
         self.assertIn(f"/v{EXPECTED_VERSION}/maintainer-defense-kit.py\"", formula)

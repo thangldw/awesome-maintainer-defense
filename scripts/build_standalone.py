@@ -54,7 +54,8 @@ def encoded_assets() -> str:
         path = ROOT / relative
         if not path.is_file():
             raise SystemExit(f"missing release asset: {relative}")
-        packed = gzip.compress(path.read_bytes(), compresslevel=9, mtime=0)
+        packed = bytearray(gzip.compress(path.read_bytes(), compresslevel=9, mtime=0))
+        packed[9] = 255  # RFC 1952 unknown OS; normalize Python/zlib platform drift.
         rows.append(f"    {relative!r}: {base64.b64encode(packed).decode('ascii')!r},")
     return "EMBEDDED_FILES: dict[str, str] = {\n" + "\n".join(rows) + "\n}"
 
