@@ -87,4 +87,4 @@ Bảo vệ CI, dependency, secret và đường merge khỏi contribution độc
 
 <!-- catalog:end -->
 
-Phát hành chuẩn: `v1.0.0`. Giấy phép [MIT](LICENSE).
+Phát hành chuẩn: `v1.1.0`. Giấy phép [MIT](LICENSE).

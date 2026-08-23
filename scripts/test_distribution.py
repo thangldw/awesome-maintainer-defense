@@ -1,56 +1,123 @@
 #!/usr/bin/env python3
-"""Verify release artifacts, wheel metadata, entry points, and Homebrew checksum."""
+"""Verify release versions, artifacts, metadata, and clean installation."""
 
 from __future__ import annotations
 
 import hashlib
+import json
 import re
+import subprocess
+import sys
+import tarfile
+import tempfile
+import unittest
 import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / "dist"
-VERSION = "1.0.1"
-PACKAGE_VERSION = "1.0.1"
+EXPECTED_VERSION = "1.1.0"
 
 
-def main() -> None:
-    standalone = DIST / "maintainer-defense-kit.py"
-    checksum_path = standalone.with_suffix(".py.sha256")
-    if not standalone.is_file() or not checksum_path.is_file():
-        raise SystemExit("standalone release artifacts are missing; run make standalone")
-    digest = hashlib.sha256(standalone.read_bytes()).hexdigest()
-    if checksum_path.read_text(encoding="ascii") != f"{digest}  {standalone.name}\n":
-        raise SystemExit("standalone checksum does not match the release artifact")
-
-    wheels = list(DIST.glob(f"maintainer_defense_kit-{PACKAGE_VERSION}-py3-none-any.whl"))
-    if len(wheels) != 1:
-        raise SystemExit("expected exactly one v1.0.1 universal wheel in dist/")
-    with zipfile.ZipFile(wheels[0]) as archive:
-        names = set(archive.namelist())
-        module = "maintainer_defense_kit.py"
-        entry_points = (
-            f"maintainer_defense_kit-{PACKAGE_VERSION}.dist-info/entry_points.txt"
+class DistributionTests(unittest.TestCase):
+    def test_all_public_versions_match(self) -> None:
+        pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+        project = pyproject.split("[project]", 1)[1].split("\n[", 1)[0]
+        version = re.search(r'^version = "([^"]+)"$', project, re.MULTILINE)
+        self.assertIsNotNone(version)
+        self.assertEqual(version.group(1), EXPECTED_VERSION)
+        source = (ROOT / "scripts/install_kit.py").read_text(encoding="utf-8")
+        self.assertEqual(
+            set(re.findall(r'^(?:KIT|AUDITOR)_VERSION = "([^"]+)"', source, re.MULTILINE)),
+            {EXPECTED_VERSION},
         )
-        metadata = f"maintainer_defense_kit-{PACKAGE_VERSION}.dist-info/METADATA"
-        if {module, entry_points, metadata} - names:
-            raise SystemExit("wheel is missing its module, metadata, or console entry points")
-        entries = archive.read(entry_points).decode("utf-8")
-        if "maintainer-defense = maintainer_defense_kit:main" not in entries:
-            raise SystemExit("wheel is missing the maintainer-defense entry point")
-        if f"Version: {PACKAGE_VERSION}" not in archive.read(metadata).decode("utf-8"):
-            raise SystemExit("wheel metadata version is incorrect")
+        plugin_versions = {
+            json.loads(path.read_text(encoding="utf-8"))["version"]
+            for path in (
+                ROOT / ".codex-plugin/plugin.json",
+                ROOT / ".claude-plugin/plugin.json",
+                ROOT / ".kimi-plugin/plugin.json",
+            )
+        }
+        self.assertEqual(plugin_versions, {EXPECTED_VERSION})
 
-    formula = (ROOT / "Formula/maintainer-defense-kit.rb").read_text(encoding="utf-8")
-    if f'/v{VERSION}/maintainer-defense-kit.py"' not in formula:
-        raise SystemExit("Homebrew formula does not use the v1.0.1 release asset")
-    match = re.search(r'^  sha256 "([0-9a-f]{64})"$', formula, re.MULTILINE)
-    if not match or match.group(1) != digest:
-        raise SystemExit("Homebrew formula checksum does not match the standalone artifact")
-    print(f"OK standalone SHA256 {digest}")
-    print(f"OK wheel {wheels[0].name}")
-    print("OK Homebrew formula release URL and checksum")
+    def test_standalone_assets_and_formula(self) -> None:
+        for name in ("maintainer-defense-kit.py", "maintainer-defense.py"):
+            artifact = DIST / name
+            checksum_path = DIST / f"{name}.sha256"
+            self.assertTrue(artifact.is_file(), f"missing {artifact}; run make package")
+            digest = hashlib.sha256(artifact.read_bytes()).hexdigest()
+            self.assertEqual(checksum_path.read_text(encoding="ascii"), f"{digest}  {name}\n")
+        standalone = DIST / "maintainer-defense-kit.py"
+        digest = hashlib.sha256(standalone.read_bytes()).hexdigest()
+        formula = (ROOT / "Formula/maintainer-defense-kit.rb").read_text(encoding="utf-8")
+        self.assertIn(f"/v{EXPECTED_VERSION}/maintainer-defense-kit.py\"", formula)
+        self.assertIn(f'  sha256 "{digest}"', formula)
+        self.assertIn(f"auditor {EXPECTED_VERSION}; kit {EXPECTED_VERSION}", formula)
+
+    def test_wheel_and_sdist_contracts(self) -> None:
+        wheel_name = f"maintainer_defense_kit-{EXPECTED_VERSION}-py3-none-any.whl"
+        sdist_name = f"maintainer_defense_kit-{EXPECTED_VERSION}.tar.gz"
+        wheel = DIST / wheel_name
+        sdist = DIST / sdist_name
+        self.assertTrue(wheel.is_file(), f"missing {wheel_name}; run make package")
+        self.assertTrue(sdist.is_file(), f"missing {sdist_name}; run make package")
+        with zipfile.ZipFile(wheel) as archive:
+            names = set(archive.namelist())
+            dist_info = f"maintainer_defense_kit-{EXPECTED_VERSION}.dist-info"
+            required = {
+                "maintainer_defense_kit.py",
+                f"{dist_info}/entry_points.txt",
+                f"{dist_info}/METADATA",
+            }
+            self.assertFalse(required - names)
+            entries = archive.read(f"{dist_info}/entry_points.txt").decode("utf-8")
+            self.assertIn("maintainer-defense = maintainer_defense_kit:main", entries)
+            metadata = archive.read(f"{dist_info}/METADATA").decode("utf-8")
+            self.assertIn(f"Version: {EXPECTED_VERSION}", metadata)
+        with tarfile.open(sdist, "r:gz") as archive:
+            prefix = f"maintainer_defense_kit-{EXPECTED_VERSION}/"
+            names = set(archive.getnames())
+            required = {
+                f"{prefix}pyproject.toml",
+                f"{prefix}build_backend.py",
+                f"{prefix}generated/maintainer_defense_kit.py",
+                f"{prefix}maintainer-defense-config.schema.json",
+            }
+            self.assertFalse(required - names)
+
+    def test_clean_wheel_install_smoke(self) -> None:
+        wheel = DIST / f"maintainer_defense_kit-{EXPECTED_VERSION}-py3-none-any.whl"
+        self.assertTrue(wheel.is_file(), f"missing {wheel}; run make package")
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            environment = root / "venv"
+            subprocess.run([sys.executable, "-m", "venv", str(environment)], check=True)
+            python = environment / "bin/python"
+            executable = environment / "bin/maintainer-defense"
+            subprocess.run(
+                [str(python), "-m", "pip", "install", "--no-index", "--no-deps", str(wheel)],
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+            version = subprocess.run(
+                [str(executable), "--version"], text=True, capture_output=True, check=True
+            )
+            self.assertEqual(
+                version.stdout.strip(),
+                f"maintainer-defense auditor {EXPECTED_VERSION}; kit {EXPECTED_VERSION}",
+            )
+            target = root / "repository"
+            target.mkdir()
+            audit = subprocess.run(
+                [str(executable), "audit", str(target), "--format", "json"],
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+            self.assertEqual(json.loads(audit.stdout)["schema_version"], 1)
 
 
 if __name__ == "__main__":
-    main()
+    unittest.main(verbosity=2)

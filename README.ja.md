@@ -87,4 +87,4 @@ CI、依存関係、シークレット、マージ経路を悪意ある、また
 
 <!-- catalog:end -->
 
-正規リリース: `v1.0.0`。[MIT License](LICENSE)。
+正規リリース: `v1.1.0`。[MIT License](LICENSE)。

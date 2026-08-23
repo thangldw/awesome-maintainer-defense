@@ -30,7 +30,7 @@ python3 maintainer-defense.py --target . --profile observe
 python3 maintainer-defense.py install --target . --profile observe
 ```
 
-The v1.0.1 release provides the verified standalone artifact, a wheel for `pipx`, and a Homebrew formula. Distribution commands and checksums are documented in the repository README.
+The v1.1.0 release provides the verified standalone artifact, a wheel for `pipx`, a Homebrew formula, and a deterministic skills-only ChatGPT/Codex plugin bundle. It adds complete GitHub write-scope modeling, direct shell-injection detection, cross-workflow artifact trust paths, baseline/Git-ref deltas, governed suppressions, and reproducible pilot evidence. Distribution commands and checksums are documented in the repository README.
 
 `fix` never edits the target, changes GitHub settings, commits, pushes, or opens a pull request. It emits a unified diff for human review. `--dry-run` is accepted for clarity but is redundant because patch-only behavior is unconditional.
 
