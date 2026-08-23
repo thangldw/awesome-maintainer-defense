@@ -390,6 +390,7 @@ jobs:
             ("source", "source ./downloaded/env.sh", "downloaded", True),
             ("dot-source", ". downloaded/env.sh", "downloaded", True),
             ("direct", "./downloaded/tool", "downloaded", True),
+            ("relative-direct", "downloaded/tool", "downloaded", True),
             ("top-level-python", "python downloaded.py", ".", True),
             ("unrelated-script", "sh scripts/trusted-release.sh", "downloaded", False),
         )
@@ -406,6 +407,20 @@ jobs:
                 )
                 rules = {item["rule_id"] for item in report["findings"]}
                 self.assertEqual("MD-WF-008" in rules, expected)
+
+    def test_artifact_trust_path_detects_downloaded_local_action(self) -> None:
+        consumer = PRIVILEGED_ARTIFACT_CONSUMER.replace(
+            "      - run: sh downloaded/report.sh\n",
+            "      - uses: ./downloaded/action\n",
+        )
+        report = self.audit_files(
+            {
+                ".github/workflows/test.yml": UNTRUSTED_ARTIFACT_PRODUCER,
+                ".github/workflows/publish.yml": consumer,
+            }
+        )
+        rules = {item["rule_id"] for item in report["findings"]}
+        self.assertIn("MD-WF-008", rules)
 
     def test_artifact_trust_path_requires_remote_run_and_matching_name(self) -> None:
         missing_run = PRIVILEGED_ARTIFACT_CONSUMER.replace(

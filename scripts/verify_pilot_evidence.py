@@ -69,6 +69,19 @@ def extract_commit(root: Path, revision: str, destination: Path) -> None:
         bundle.extractall(destination)
 
 
+def verify_ancestor(root: Path, revision: str, release_revision: str) -> None:
+    result = subprocess.run(
+        ["git", "-C", str(root), "merge-base", "--is-ancestor", revision, release_revision],
+        check=False,
+    )
+    if result.returncode == 1:
+        raise PilotEvidenceError(
+            f"recorded revision {revision} is not an ancestor of {release_revision}"
+        )
+    if result.returncode:
+        raise PilotEvidenceError(f"cannot verify ancestry for recorded revision {revision}")
+
+
 def normalize_report_target(report: dict, expected: dict) -> dict:
     normalized = dict(report)
     normalized["target"] = expected["target"]
@@ -118,6 +131,7 @@ def verify_provenance(root: Path, pilot_dir: Path) -> None:
     target_commit = metadata["target_commit"]
     for revision in (source_commit, target_commit):
         run_git(root, "cat-file", "-e", f"{revision}^{{commit}}", capture=True)
+        verify_ancestor(root, revision, "HEAD")
     diff = subprocess.run(
         ["git", "-C", str(root), "diff", "--quiet", source_commit, "--", *RUNTIME_PATHS],
         check=False,
@@ -137,7 +151,7 @@ def verify_provenance(root: Path, pilot_dir: Path) -> None:
         extract_commit(root, source_commit, source)
         extract_commit(root, target_commit, target)
         build = subprocess.run(
-            [sys.executable, str(source / "scripts/build_standalone.py")],
+            [sys.executable, "-I", str(source / "scripts/build_standalone.py")],
             cwd=source,
             text=True,
             capture_output=True,
@@ -150,7 +164,7 @@ def verify_provenance(root: Path, pilot_dir: Path) -> None:
         if standalone_digest != metadata["standalone_sha256"]:
             raise PilotEvidenceError("pinned standalone digest differs from pilot metadata")
         audit = subprocess.run(
-            [sys.executable, str(standalone), "audit", str(target), "--format", "json"],
+            [sys.executable, "-I", str(standalone), "audit", str(target), "--format", "json"],
             text=True,
             capture_output=True,
             check=False,
