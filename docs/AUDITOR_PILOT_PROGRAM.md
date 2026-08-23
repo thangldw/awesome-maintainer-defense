@@ -24,3 +24,19 @@ The synthetic corpus measures deterministic regression behavior, and the first p
 - reviewer role and explicit publication consent.
 
 Precision and recall will not be aggregated until the sample has independent labels, explicit applicability decisions, and enough positive and negative cases per rule to avoid presenting a misleading rate.
+
+## Reproducible bundle
+
+Capture the pinned metadata, raw schema-v1 report, effective post-suppression report, and optional maintainer labels, then run:
+
+```bash
+python3 scripts/build_pilot_bundle.py \
+  --metadata metadata.json \
+  --raw-report raw-report.json \
+  --effective-report effective-report.json \
+  --labels labels.json \
+  --json-output pilot.json \
+  --markdown-output README.md
+```
+
+The [`pilot.schema.json`](../pilot.schema.json) contract preserves unresolved labels and raw/effective evidence separately. The [pilot evidence directory](../pilots/README.md) defines the publication layout. Owner-directed dogfood must remain labeled non-independent and non-representative.

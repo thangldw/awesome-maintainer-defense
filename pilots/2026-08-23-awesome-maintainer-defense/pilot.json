@@ -1,0 +1,74 @@
+{
+  "metadata": {
+    "allow_aggregate_metrics": false,
+    "auditor_version": "1.1.0",
+    "command": "python3 dist/maintainer-defense-kit.py audit . --format json",
+    "disclosure": "public",
+    "limitations": [
+      "Owner-directed dogfood performed by the implementation agent; not an independent review.",
+      "One self-audit cannot establish real-world precision, recall, usefulness, or representativeness.",
+      "The offline auditor cannot observe GitHub-hosted rulesets, branch protection, organization policy, or other external settings."
+    ],
+    "pilot_id": "2026-08-23-awesome-maintainer-defense",
+    "pilot_type": "internal-owner-directed",
+    "run_at": "2026-08-23T07:20:09Z",
+    "source_commit": "331c7f7b5f18e4fa3a74e9cc6522ed6b06a62c65",
+    "standalone_sha256": "f0c6783076e8c96e19fb6220acb6b6810821c48f3850e21e9c99ee5067c8d2ab",
+    "target_commit": "331c7f7b5f18e4fa3a74e9cc6522ed6b06a62c65",
+    "target_repository": "thangldw/awesome-maintainer-defense"
+  },
+  "reports": {
+    "effective": {
+      "findings": [],
+      "schema_version": 1,
+      "summary": {
+        "by_severity": {
+          "critical": 0,
+          "high": 0,
+          "low": 0,
+          "medium": 0,
+          "note": 0
+        },
+        "total": 0
+      },
+      "target": "/private/tmp/amd-v1.1.0-pilot.gB03GF",
+      "tool": {
+        "name": "maintainer-defense",
+        "version": "1.1.0"
+      }
+    },
+    "raw": {
+      "findings": [],
+      "schema_version": 1,
+      "summary": {
+        "by_severity": {
+          "critical": 0,
+          "high": 0,
+          "low": 0,
+          "medium": 0,
+          "note": 0
+        },
+        "total": 0
+      },
+      "target": "/private/tmp/amd-v1.1.0-pilot.gB03GF",
+      "tool": {
+        "name": "maintainer-defense",
+        "version": "1.1.0"
+      }
+    }
+  },
+  "reviews": [],
+  "schema_version": 1,
+  "summary": {
+    "classification_counts": {
+      "false-positive": 0,
+      "not-applicable": 0,
+      "true-positive": 0,
+      "unresolved": 0
+    },
+    "effective_findings": 0,
+    "independently_labeled": 0,
+    "raw_findings": 0,
+    "suppressed_findings": 0
+  }
+}

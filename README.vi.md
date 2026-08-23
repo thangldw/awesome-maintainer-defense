@@ -6,8 +6,8 @@ Maintainer Defense Kit là CLI Python chạy offline để kiểm tra policy và
 
 ```bash
 python3 scripts/build_standalone.py
-python3 generated/maintainer-defense-kit.py audit .
-python3 generated/maintainer-defense-kit.py fix . --output recommended.patch
+python3 dist/maintainer-defense-kit.py audit .
+python3 dist/maintainer-defense-kit.py fix . --output recommended.patch
 ```
 
 Finding là bằng chứng cần con người review, không phải kết luận về tác giả, ý định hoặc độ an toàn. Các workflow nằm bên trong `kits/**/.github/` là asset mẫu của sản phẩm và không chạy trong repo này.
@@ -87,4 +87,4 @@ Bảo vệ CI, dependency, secret và đường merge khỏi contribution độc
 
 <!-- catalog:end -->
 
-Phát hành chuẩn: `v1.0.0`. Giấy phép [MIT](LICENSE).
+Phát hành chuẩn: `v1.1.0`. Giấy phép [MIT](LICENSE).

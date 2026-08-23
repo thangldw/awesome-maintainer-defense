@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/thangldw/awesome-maintainer-defense/pilot.schema.json",
+  "title": "Maintainer Defense pilot evidence bundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "metadata", "reports", "reviews", "summary"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "metadata": {"$ref": "#/$defs/metadata"},
+    "reports": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["raw", "effective"],
+      "properties": {
+        "raw": {"$ref": "#/$defs/report"},
+        "effective": {"$ref": "#/$defs/report"}
+      }
+    },
+    "reviews": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/review"}
+    },
+    "summary": {"$ref": "#/$defs/summary"}
+  },
+  "$defs": {
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pilot_id", "disclosure", "pilot_type", "run_at", "auditor_version",
+        "source_commit", "standalone_sha256", "command", "target_repository",
+        "target_commit", "allow_aggregate_metrics", "limitations"
+      ],
+      "properties": {
+        "pilot_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"},
+        "disclosure": {"enum": ["public", "sanitized", "private"]},
+        "pilot_type": {"enum": ["internal-owner-directed", "external-maintainer-reviewed"]},
+        "run_at": {"type": "string", "format": "date-time"},
+        "auditor_version": {"type": "string", "minLength": 1},
+        "source_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "standalone_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "command": {"type": "string", "minLength": 1},
+        "target_repository": {"type": "string", "pattern": "^[^/\\s]+/[^/\\s]+$"},
+        "target_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "allow_aggregate_metrics": {"type": "boolean"},
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "report": {
+      "type": "object",
+      "required": ["schema_version", "tool", "target", "summary", "findings"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "tool": {"type": "object"},
+        "target": {"type": "string", "minLength": 1},
+        "summary": {"type": "object"},
+        "findings": {"type": "array"}
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fingerprint", "rule_id", "path", "emitted", "classification", "independent",
+        "reviewer_role", "consent_statement", "recommendation_safety",
+        "recommendation_practicality", "review_effort_minutes", "remediation_outcome", "notes"
+      ],
+      "properties": {
+        "fingerprint": {"type": "string", "pattern": "^[0-9a-f]{24}$"},
+        "rule_id": {"type": "string", "pattern": "^MD-(GOV|WF|MOD)-[0-9]{3}$"},
+        "path": {"type": "string", "minLength": 1},
+        "emitted": {"type": "boolean"},
+        "classification": {"enum": ["true-positive", "false-positive", "not-applicable", "unresolved"]},
+        "independent": {"type": "boolean"},
+        "reviewer_role": {"type": ["string", "null"]},
+        "consent_statement": {"type": ["string", "null"]},
+        "recommendation_safety": {"enum": ["safe", "unsafe", "not-reviewed"]},
+        "recommendation_practicality": {"enum": ["practical", "impractical", "not-reviewed"]},
+        "review_effort_minutes": {"type": ["integer", "null"], "minimum": 0},
+        "remediation_outcome": {"enum": ["fixed", "accepted", "rejected", "not-attempted", "not-reviewed"]},
+        "notes": {"type": "string"}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "raw_findings", "effective_findings", "suppressed_findings",
+        "classification_counts", "independently_labeled"
+      ],
+      "properties": {
+        "raw_findings": {"type": "integer", "minimum": 0},
+        "effective_findings": {"type": "integer", "minimum": 0},
+        "suppressed_findings": {"type": "integer", "minimum": 0},
+        "independently_labeled": {"type": "integer", "minimum": 0},
+        "precision": {"type": "number", "minimum": 0, "maximum": 1},
+        "classification_counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["true-positive", "false-positive", "not-applicable", "unresolved"],
+          "properties": {
+            "true-positive": {"type": "integer", "minimum": 0},
+            "false-positive": {"type": "integer", "minimum": 0},
+            "not-applicable": {"type": "integer", "minimum": 0},
+            "unresolved": {"type": "integer", "minimum": 0}
+          }
+        }
+      }
+    }
+  }
+}

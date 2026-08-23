@@ -20,6 +20,20 @@ ALLOWED_TYPES = {
     "tool",
     "working-group",
 }
+REQUIRED_REPOSITORY_FILES = (
+    ".github/CODEOWNERS",
+    ".github/ISSUE_TEMPLATE/add-resource.yml",
+    ".github/ISSUE_TEMPLATE/auditor-false-positive.yml",
+    ".github/ISSUE_TEMPLATE/auditor-pilot.yml",
+    ".github/ISSUE_TEMPLATE/documentation.yml",
+    ".github/ISSUE_TEMPLATE/field-report.yml",
+    ".github/ISSUE_TEMPLATE/config.yml",
+    ".github/dependabot.yml",
+    ".github/pull_request_template.md",
+    ".github/workflows/quality.yml",
+    ".github/workflows/release.yml",
+    ".github/workflows/workflow-security.yml",
+)
 
 
 def fail(message: str) -> None:
@@ -232,6 +246,18 @@ def validate_workflows(pins: set[tuple[str, str]]) -> None:
                     f"{path.relative_to(ROOT)} uses {repository}@{action_ref} "
                     "without matching provenance in pins.json"
                 )
+    release = (ROOT / ".github/workflows/release.yml").read_text(encoding="utf-8")
+    if 'tags: ["v*"]' not in release or "gh release create" not in release or "--verify-tag" not in release:
+        fail("release.yml must publish only a verified pushed version tag")
+    if "environment: pypi" not in release or "id-token: write" not in release:
+        fail("release.yml must use PyPI Trusted Publishing through the pypi environment")
+    if "make pilot-verify" not in release:
+        fail("release.yml must verify committed pilot evidence before publishing")
+    quality = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
+    if "fetch-depth: 0" not in release or "fetch-depth: 0" not in quality:
+        fail("release and quality workflows must fetch pilot provenance history")
+    if "gh release upload" not in release or "--clobber" not in release or "skip-existing: true" not in release:
+        fail("release publication must be resumable after a partial GitHub or PyPI success")
 
 
 def validate_kit_safety() -> None:
@@ -329,6 +355,30 @@ def validate_local_markdown_links() -> None:
                 )
 
 
+def validate_repository_contracts(root: Path = ROOT) -> None:
+    for relative in REQUIRED_REPOSITORY_FILES:
+        if not (root / relative).is_file():
+            fail(f"required repository contract is missing: {relative}")
+
+    audit_command = re.compile(
+        r"^python3\s+(?P<path>\S*maintainer-defense-kit\.py)\s+audit\s+\.$",
+        re.MULTILINE,
+    )
+    for filename in ("README.md", "README.vi.md", "README.ja.md"):
+        text = (root / filename).read_text(encoding="utf-8")
+        match = audit_command.search(text)
+        if not match or match.group("path") != "dist/maintainer-defense-kit.py":
+            fail(f"{filename} must run the built dist/maintainer-defense-kit.py artifact")
+
+    pilot_program = (root / "docs/AUDITOR_PILOT_PROGRAM.md").read_text(encoding="utf-8")
+    templates = re.findall(r"[?&]template=([A-Za-z0-9_.-]+)", pilot_program)
+    if not templates:
+        fail("docs/AUDITOR_PILOT_PROGRAM.md must link the public pilot issue form")
+    for template in templates:
+        if not (root / ".github/ISSUE_TEMPLATE" / template).is_file():
+            fail(f"pilot program links missing issue form: {template}")
+
+
 def validate_issue_forms() -> None:
     for path in (ROOT / ".github/ISSUE_TEMPLATE").glob("*.yml"):
         text = path.read_text(encoding="utf-8")
@@ -359,7 +409,9 @@ def validate_generated_files() -> None:
 
 def validate_auditor_assets() -> None:
     for relative in (
-        "auditor.schema.json", "auditor-rules.json", "tests/fixtures/auditor/corpus.json"
+        "auditor.schema.json", "auditor-rules.json", "maintainer-defense-config.schema.json",
+        "pilot.schema.json", "pilots/fixtures/minimal-input.json",
+        "tests/fixtures/auditor/corpus.json",
     ):
         path = ROOT / relative
         try:
@@ -434,6 +486,7 @@ def main() -> None:
     audits = validate_audits(catalog)
     pins = validate_pins()
     validate_readme(catalog)
+    validate_repository_contracts()
     validate_workflows(pins)
     validate_kit_safety()
     validate_issue_forms()

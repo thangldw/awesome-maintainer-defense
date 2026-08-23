@@ -8,17 +8,22 @@ import base64
 import difflib
 import gzip
 import hashlib
+import io
 import json
 import os
 import re
+import shlex
 import subprocess
 import sys
-from datetime import datetime, timezone
-from pathlib import Path
+import tarfile
+import tempfile
+from dataclasses import dataclass
+from datetime import date, datetime, timezone
+from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[1]
-KIT_VERSION = "1.0.1"
-AUDITOR_VERSION = "1.0.1"
+KIT_VERSION = "1.1.0"
+AUDITOR_VERSION = "1.1.0"
 RULE_HELP_BASE = (
     "https://github.com/thangldw/awesome-maintainer-defense/"
     f"blob/v{AUDITOR_VERSION}/docs/AUDITOR_RULES.md"
@@ -34,9 +39,37 @@ class KitError(Exception):
     pass
 
 
+class UsageArgumentParser(argparse.ArgumentParser):
+    def error(self, message: str) -> None:
+        self.print_usage(sys.stderr)
+        self.exit(1, f"{self.prog}: error: {message}\n")
+
+
 SEVERITY_ORDER = {"critical": 4, "high": 3, "medium": 2, "low": 1, "note": 0}
 WORKFLOW_SUFFIXES = {".yml", ".yaml"}
 PRIVILEGED_EVENTS = ("pull_request_target", "workflow_run", "issue_comment")
+UNTRUSTED_EXPRESSION = re.compile(
+    r"\$\{\{\s*github\.(?:event\.(?:issue|pull_request|comment|review|head_commit)(?:[^}]*)|head_ref|ref_name)\s*\}\}"
+)
+WRITE_PERMISSION_SCOPES = frozenset(
+    {
+        "actions",
+        "artifact-metadata",
+        "attestations",
+        "checks",
+        "code-quality",
+        "contents",
+        "deployments",
+        "discussions",
+        "id-token",
+        "issues",
+        "packages",
+        "pages",
+        "pull-requests",
+        "security-events",
+        "statuses",
+    }
+)
 IDENTITY_PROXIES = {
     "detect-spam-usernames": "username pattern",
     "min-account-age": "account age",
@@ -545,21 +578,480 @@ def yaml_block(lines: list[str], index: int, indentation: int) -> str:
     return "\n".join(lines[start:end])
 
 
-def permission_scope_writes(lines: list[str], checkout_index: int) -> bool:
-    text = "\n".join(lines)
-    top_write = bool(re.search(r"(?m)^permissions\s*:\s*write-all\b", text))
-    top_match = re.search(r"(?m)^permissions\s*:\s*$", text)
-    if top_match:
-        tail = text[top_match.end():]
-        boundary = re.search(r"(?m)^\S", tail)
-        top_block = tail[:boundary.start()] if boundary else tail
-        top_write = top_write or bool(re.search(r"(?m)^\s{2}\S[^:]*:\s*write\b", top_block))
-    job_block = yaml_block(lines, checkout_index, 2)
-    job_write = bool(
-        re.search(r"permissions\s*:\s*write-all\b", job_block)
-        or re.search(r"(?m)^\s+(?:contents|issues|pull-requests|actions|packages|id-token)\s*:\s*write\b", job_block)
+def declared_write_scopes(lines: list[str], indentation: int) -> tuple[bool, set[str]]:
+    prefix = " " * indentation
+    for index, line in enumerate(lines):
+        match = re.match(rf"^{re.escape(prefix)}permissions\s*:\s*(.*?)\s*$", line)
+        if not match:
+            continue
+        value = match.group(1).split("#", 1)[0].strip()
+        if value == "write-all":
+            return True, set(WRITE_PERMISSION_SCOPES)
+        if value in {"{}", "read-all"}:
+            return True, set()
+        scopes: set[str] = set()
+        for candidate in lines[index + 1 :]:
+            stripped = candidate.lstrip()
+            current = len(candidate) - len(stripped)
+            if stripped and not stripped.startswith("#") and current <= indentation:
+                break
+            permission = re.match(r"\s*([a-z-]+)\s*:\s*write\b", candidate)
+            if permission and permission.group(1) in WRITE_PERMISSION_SCOPES:
+                scopes.add(permission.group(1))
+        return True, scopes
+    return False, set()
+
+
+def permission_scope(lines: list[str], evidence_index: int) -> set[str]:
+    """Return effective write or credential-minting scopes for one job."""
+    job_block = yaml_block(lines, evidence_index, 2).splitlines()
+    job_declared, job_scopes = declared_write_scopes(job_block, 4)
+    if job_declared:
+        return job_scopes
+    _, top_scopes = declared_write_scopes(lines, 0)
+    return top_scopes
+
+
+def permission_scope_writes(lines: list[str], evidence_index: int) -> bool:
+    return bool(permission_scope(lines, evidence_index))
+
+
+def run_block_injection(lines: list[str], run_index: int) -> tuple[int, int] | None:
+    """Locate a direct untrusted expression in one run scalar or block."""
+    line = lines[run_index]
+    run_match = re.match(r"^(\s*)(?:-\s*)?run\s*:\s*(.*)$", line)
+    if not run_match:
+        return None
+    value = run_match.group(2)
+    inline = UNTRUSTED_EXPRESSION.search(value)
+    if inline:
+        value_column = line.find(value) if value else len(line)
+        return run_index + 1, value_column + inline.start() + 1
+    if value and not re.fullmatch(r"[|>][+-]?\d*", value.split("#", 1)[0].strip()):
+        return None
+    indentation = len(run_match.group(1))
+    for index in range(run_index + 1, len(lines)):
+        candidate = lines[index]
+        stripped = candidate.lstrip()
+        current = len(candidate) - len(stripped)
+        if stripped and not stripped.startswith("#") and current <= indentation:
+            break
+        match = UNTRUSTED_EXPRESSION.search(candidate)
+        if match:
+            return index + 1, match.start() + 1
+    return None
+
+
+@dataclass(frozen=True)
+class WorkflowRecord:
+    path: Path
+    name: str
+    triggers: frozenset[str]
+    workflow_run_names: frozenset[str]
+    uploads_artifact: bool
+    uploaded_artifact_names: frozenset[str]
+    downloads_artifact: bool
+    executes_downloaded_content: bool
+    executed_artifact_names: frozenset[str]
+    has_privileged_authority: bool
+
+
+@dataclass(frozen=True)
+class Suppression:
+    rule_id: str
+    reason: str
+    owner: str
+    expires_on: date
+    fingerprint: str | None = None
+    path: str | None = None
+    expired: bool = False
+
+
+def load_suppressions(path: Path, today: date) -> list[Suppression]:
+    try:
+        data = json.loads(path.expanduser().read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise KitError(f"invalid suppression JSON {path}: {exc}") from exc
+    if not isinstance(data, dict) or set(data) != {"schema_version", "suppressions"}:
+        raise KitError("suppression config must contain only schema_version and suppressions")
+    if data["schema_version"] != 1 or not isinstance(data["suppressions"], list):
+        raise KitError("suppression config must use schema_version 1 and a suppressions array")
+    required = {"rule_id", "reason", "owner", "expires_on"}
+    allowed = required | {"fingerprint", "path"}
+    entries: list[Suppression] = []
+    selectors: set[tuple[str, str | None, str | None]] = set()
+    for index, item in enumerate(data["suppressions"]):
+        label = f"suppression #{index + 1}"
+        if not isinstance(item, dict) or not required <= set(item) or not set(item) <= allowed:
+            raise KitError(f"{label} has missing or unknown fields")
+        rule_id = item["rule_id"]
+        if not isinstance(rule_id, str) or rule_id not in rule_catalog():
+            raise KitError(f"{label} uses unknown rule_id: {rule_id!r}")
+        reason = item["reason"]
+        owner = item["owner"]
+        if not isinstance(reason, str) or not reason.strip():
+            raise KitError(f"{label} requires a non-empty reason")
+        if not isinstance(owner, str) or not owner.strip():
+            raise KitError(f"{label} requires a non-empty owner")
+        raw_expiry = item["expires_on"]
+        if not isinstance(raw_expiry, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", raw_expiry):
+            raise KitError(f"{label} expires_on must use YYYY-MM-DD")
+        try:
+            expires_on = date.fromisoformat(raw_expiry)
+        except ValueError as exc:
+            raise KitError(f"{label} has invalid expires_on date: {raw_expiry}") from exc
+        fingerprint = item.get("fingerprint")
+        relative = item.get("path")
+        if fingerprint is None and relative is None:
+            raise KitError(f"{label} requires fingerprint or path")
+        if fingerprint is not None and (
+            not isinstance(fingerprint, str) or not re.fullmatch(r"[0-9a-f]{24}", fingerprint)
+        ):
+            raise KitError(f"{label} fingerprint must be 24 lowercase hexadecimal characters")
+        if relative is not None:
+            if not isinstance(relative, str) or not relative or "\\" in relative:
+                raise KitError(f"{label} path must be a non-empty repository-relative POSIX path")
+            normalized = PurePosixPath(relative)
+            if normalized.is_absolute() or ".." in normalized.parts or str(normalized) != relative:
+                raise KitError(f"{label} path must be a normalized repository-relative POSIX path")
+        selector = (rule_id, fingerprint, relative)
+        if selector in selectors:
+            raise KitError(f"duplicate suppression selector for {rule_id}")
+        selectors.add(selector)
+        entries.append(
+            Suppression(
+                rule_id=rule_id,
+                reason=reason.strip(),
+                owner=owner.strip(),
+                expires_on=expires_on,
+                fingerprint=fingerprint,
+                path=relative,
+                expired=expires_on < today,
+            )
+        )
+    return entries
+
+
+def apply_suppressions(
+    report: dict, entries: list[Suppression]
+) -> tuple[dict, int, list[str]]:
+    active = [(index, entry) for index, entry in enumerate(entries) if not entry.expired]
+    warnings = [
+        f"Suppression {entry.rule_id} owned by {entry.owner} expired on {entry.expires_on.isoformat()}"
+        for entry in entries
+        if entry.expired
+    ]
+    matched: set[int] = set()
+    emitted: list[dict] = []
+    suppressed = 0
+    for finding in report["findings"]:
+        matching = []
+        for index, entry in active:
+            if entry.rule_id != finding["rule_id"]:
+                continue
+            if entry.fingerprint is not None and entry.fingerprint != finding["fingerprint"]:
+                continue
+            if entry.path is not None and entry.path != finding["location"]["path"]:
+                continue
+            matching.append(index)
+        if matching:
+            matched.update(matching)
+            suppressed += 1
+        else:
+            emitted.append(finding)
+    unmatched = [entry for index, entry in active if index not in matched]
+    if unmatched:
+        entry = unmatched[0]
+        selector = entry.fingerprint or entry.path
+        raise KitError(
+            f"active suppression {entry.rule_id} selector {selector!r} matches no finding"
+        )
+    return report_with_findings(report, emitted), suppressed, warnings
+
+
+def inline_yaml_values(value: str) -> frozenset[str]:
+    value = value.split("#", 1)[0].strip()
+    if value.startswith("[") and value.endswith("]"):
+        value = value[1:-1]
+    return frozenset(
+        item.strip().strip("\"'")
+        for item in value.split(",")
+        if item.strip().strip("\"'")
     )
-    return top_write or job_write
+
+
+def workflow_triggers(lines: list[str]) -> frozenset[str]:
+    for index, line in enumerate(lines):
+        match = re.match(r"^on\s*:\s*(.*?)\s*$", line)
+        if not match:
+            continue
+        value = match.group(1)
+        if value:
+            return inline_yaml_values(value)
+        triggers: set[str] = set()
+        for candidate in lines[index + 1 :]:
+            stripped = candidate.lstrip()
+            indentation = len(candidate) - len(stripped)
+            if stripped and not stripped.startswith("#") and indentation == 0:
+                break
+            event = re.match(r"^  ([A-Za-z_][A-Za-z0-9_-]*)\s*:", candidate)
+            if event:
+                triggers.add(event.group(1))
+        return frozenset(triggers)
+    return frozenset()
+
+
+def workflow_run_sources(lines: list[str]) -> frozenset[str]:
+    for index, line in enumerate(lines):
+        if not re.match(r"^  workflow_run\s*:\s*$", line):
+            continue
+        for source_index in range(index + 1, len(lines)):
+            candidate = lines[source_index]
+            stripped = candidate.lstrip()
+            indentation = len(candidate) - len(stripped)
+            if stripped and not stripped.startswith("#") and indentation <= 2:
+                break
+            match = re.match(r"^    workflows\s*:\s*(.*?)\s*$", candidate)
+            if not match:
+                continue
+            value = match.group(1)
+            if value:
+                return inline_yaml_values(value)
+            names: set[str] = set()
+            for item in lines[source_index + 1 :]:
+                item_stripped = item.lstrip()
+                item_indentation = len(item) - len(item_stripped)
+                if item_stripped and not item_stripped.startswith("#") and item_indentation <= 4:
+                    break
+                item_match = re.match(r"^\s+-\s*(.*?)\s*$", item)
+                if item_match:
+                    names.update(inline_yaml_values(item_match.group(1)))
+            return frozenset(names)
+    return frozenset()
+
+
+def yaml_job_bounds(lines: list[str], evidence_index: int) -> tuple[int, int]:
+    start = evidence_index
+    while start >= 0 and not re.match(r"^  [A-Za-z0-9_.-]+\s*:\s*$", lines[start]):
+        start -= 1
+    if start < 0:
+        return evidence_index, evidence_index + 1
+    end = start + 1
+    while end < len(lines):
+        stripped = lines[end].lstrip()
+        indentation = len(lines[end]) - len(stripped)
+        if stripped and not stripped.startswith("#") and indentation <= 2:
+            break
+        end += 1
+    return start, end
+
+
+def run_scalar_text(lines: list[str], run_index: int) -> str:
+    match = re.match(r"^(\s*)(?:-\s*)?run\s*:\s*(.*)$", lines[run_index])
+    if not match:
+        return ""
+    chunks = [match.group(2)]
+    indentation = len(match.group(1))
+    for candidate in lines[run_index + 1 :]:
+        stripped = candidate.lstrip()
+        current = len(candidate) - len(stripped)
+        if stripped and not stripped.startswith("#") and current <= indentation:
+            break
+        chunks.append(stripped)
+    return "\n".join(chunks)
+
+
+def action_inputs(lines: list[str], action_index: int) -> dict[str, str]:
+    action_indent = len(lines[action_index]) - len(lines[action_index].lstrip())
+    with_indent: int | None = None
+    inputs: dict[str, str] = {}
+    for candidate in lines[action_index + 1 :]:
+        stripped = candidate.lstrip()
+        indentation = len(candidate) - len(stripped)
+        if stripped and indentation <= action_indent:
+            break
+        if re.match(r"^with\s*:\s*$", stripped):
+            with_indent = indentation
+            continue
+        if with_indent is None:
+            continue
+        if stripped and indentation <= with_indent:
+            break
+        match = re.match(r"^([A-Za-z0-9_-]+)\s*:\s*(.*?)\s*$", stripped)
+        if match:
+            inputs[match.group(1)] = match.group(2).split(" #", 1)[0].strip().strip("\"'")
+    return inputs
+
+
+def literal_relative_path(value: str) -> PurePosixPath | None:
+    if not value or "${{" in value or any(character in value for character in "`$<>\\"):
+        return None
+    path = PurePosixPath(value.removeprefix("./"))
+    if path.is_absolute() or ".." in path.parts:
+        return None
+    return path
+
+
+def executed_local_paths(command: str) -> frozenset[PurePosixPath]:
+    paths: set[PurePosixPath] = set()
+    interpreters = {"bash", "sh", "python", "python3", "node", "ruby", "perl"}
+    for segment in re.split(r"(?:&&|\|\||[;|\n])", command):
+        try:
+            tokens = shlex.split(segment, comments=True, posix=True)
+        except ValueError:
+            continue
+        while tokens and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*=.*", tokens[0]):
+            tokens.pop(0)
+        if not tokens:
+            continue
+        candidate: str | None = None
+        executable = PurePosixPath(tokens[0]).name
+        if executable in interpreters:
+            for token in tokens[1:]:
+                if token in {"-c", "-m"}:
+                    candidate = None
+                    break
+                if not token.startswith("-"):
+                    candidate = token
+                    break
+        elif tokens[0] in {"source", "."} and len(tokens) > 1:
+            candidate = tokens[1]
+        elif "/" in tokens[0] and not tokens[0].startswith("/"):
+            candidate = tokens[0]
+        if candidate:
+            path = literal_relative_path(candidate)
+            if path is not None:
+                paths.add(path)
+    return frozenset(paths)
+
+
+def path_is_within(path: PurePosixPath, destination: PurePosixPath) -> bool:
+    return destination == PurePosixPath(".") or path == destination or destination in path.parents
+
+
+def index_workflows(target: Path) -> list[WorkflowRecord]:
+    records: list[WorkflowRecord] = []
+    workflow_dir = target / ".github/workflows"
+    if not workflow_dir.is_dir():
+        return records
+    for path in sorted(workflow_dir.rglob("*")):
+        if not path.is_file() or path.suffix not in WORKFLOW_SUFFIXES:
+            continue
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+        name_match = next((re.match(r"^name\s*:\s*(.*?)\s*$", line) for line in lines if re.match(r"^name\s*:", line)), None)
+        name = name_match.group(1).strip("\"'") if name_match else path.stem
+        upload_indexes = [
+            index for index, line in enumerate(lines)
+            if re.search(r"uses:\s*[\"']?actions/upload-artifact@", line)
+        ]
+        uploaded_names: set[str] = set()
+        for upload_index in upload_indexes:
+            upload_name = action_inputs(lines, upload_index).get("name", "artifact")
+            if upload_name and "${{" not in upload_name:
+                uploaded_names.add(upload_name)
+        download_indexes = [
+            index for index, line in enumerate(lines)
+            if re.search(r"uses:\s*[\"']?actions/download-artifact@", line)
+        ]
+        executed_names: set[str] = set()
+        privileged = False
+        for download_index in download_indexes:
+            inputs = action_inputs(lines, download_index)
+            destination = literal_relative_path(inputs.get("path", "."))
+            remote_run = "github.event.workflow_run.id" in inputs.get("run-id", "")
+            authenticated = bool(inputs.get("github-token"))
+            if destination is None or not remote_run or not authenticated:
+                continue
+            _, job_end = yaml_job_bounds(lines, download_index)
+            for execution_index in range(download_index + 1, job_end):
+                if re.match(r"^\s*(?:-\s*)?run\s*:", lines[execution_index]):
+                    executed_paths = executed_local_paths(
+                        run_scalar_text(lines, execution_index)
+                    )
+                else:
+                    local_action = re.match(
+                        r"^\s*-\s*uses:\s*[\"']?(\./[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*)",
+                        lines[execution_index],
+                    )
+                    executed_path = (
+                        literal_relative_path(local_action.group(1)) if local_action else None
+                    )
+                    executed_paths = (
+                        frozenset({executed_path})
+                        if executed_path is not None
+                        else frozenset()
+                    )
+                if not any(
+                    path_is_within(executed_path, destination)
+                    for executed_path in executed_paths
+                ):
+                    continue
+                job_start, _ = yaml_job_bounds(lines, execution_index)
+                job_text = "\n".join(lines[job_start:job_end])
+                execution_is_privileged = bool(
+                    permission_scope(lines, execution_index)
+                    or re.search(r"\$\{\{\s*secrets\.|secrets:\s*inherit", job_text)
+                )
+                if execution_is_privileged:
+                    name = inputs.get("name")
+                    if name and "${{" not in name:
+                        executed_names.add(name)
+                    elif not name:
+                        executed_names.add("*")
+                    privileged = True
+                break
+        records.append(
+            WorkflowRecord(
+                path=path,
+                name=name,
+                triggers=workflow_triggers(lines),
+                workflow_run_names=workflow_run_sources(lines),
+                uploads_artifact=bool(upload_indexes),
+                uploaded_artifact_names=frozenset(uploaded_names),
+                downloads_artifact=bool(download_indexes),
+                executes_downloaded_content=bool(executed_names),
+                executed_artifact_names=frozenset(executed_names),
+                has_privileged_authority=privileged,
+            )
+        )
+    return records
+
+
+def artifact_trust_findings(target: Path, records: list[WorkflowRecord]) -> list[dict]:
+    producers = [
+        record for record in records
+        if record.uploads_artifact and "pull_request" in record.triggers
+    ]
+    findings: list[dict] = []
+    for consumer in records:
+        if not (
+            "workflow_run" in consumer.triggers
+            and consumer.downloads_artifact
+            and consumer.executes_downloaded_content
+            and consumer.has_privileged_authority
+        ):
+            continue
+        for producer in producers:
+            if producer.name not in consumer.workflow_run_names:
+                continue
+            if not (
+                "*" in consumer.executed_artifact_names
+                or producer.uploaded_artifact_names & consumer.executed_artifact_names
+            ):
+                continue
+            producer_rel = relative_path(target, producer.path)
+            consumer_rel = relative_path(target, consumer.path)
+            text = consumer.path.read_text(encoding="utf-8", errors="replace")
+            line, column = line_column(text, "actions/download-artifact@")
+            findings.append(
+                make_finding(
+                    "MD-WF-008", "critical", "high", consumer_rel, line, column,
+                    f"Privileged workflow executes an artifact from pull-request workflow {producer_rel}.",
+                    f"Untrusted pull-request code in {producer_rel} can alter an uploaded artifact that {consumer_rel} downloads and executes with secrets, OIDC, or repository write authority.",
+                    "Treat the artifact as untrusted data: verify an immutable digest and parse it without execution, or rebuild it from trusted source in the privileged workflow.",
+                )
+            )
+    return findings
 
 
 def workflow_findings(target: Path, path: Path) -> list[dict]:
@@ -616,8 +1108,6 @@ def workflow_findings(target: Path, path: Path) -> list[dict]:
     ]
     checkout = bool(checkout_indexes)
     untrusted_ref = bool(re.search(r"github\.(?:event\.pull_request\.(?:head\.(?:sha|ref)|head)|head_ref)|refs/pull/", text))
-    secrets = bool(re.search(r"\$\{\{\s*secrets\.|secrets:\s*inherit", text))
-    writes = bool(re.search(r"permissions\s*:\s*write-all|\b(?:contents|issues|pull-requests|actions|packages|id-token)\s*:\s*write", text))
     if privileged and checkout and untrusted_ref:
         needle = privileged[0]
         line, column = line_column(text, needle)
@@ -629,17 +1119,31 @@ def workflow_findings(target: Path, path: Path) -> list[dict]:
                 "Split metadata handling from untrusted-code execution; use pull_request with read-only permissions for code execution and never check out a fork head in the privileged job.",
             )
         )
-    if privileged and untrusted_ref and (secrets or writes):
-        needle = next((value for value in ("secrets.", "secrets: inherit", "write") if value in text), privileged[0])
-        line, column = line_column(text, needle)
-        findings.append(
-            make_finding(
-                "MD-WF-005", "critical", "high", rel, line, column,
-                "Untrusted pull-request input can reach a privileged workflow with secrets or write authority.",
-                "An attacker can modify fork code or metadata so a privileged job executes attacker-controlled commands and exfiltrates credentials or changes the repository.",
-                "Remove the untrusted checkout/execution path from the privileged event and move it to an isolated pull_request workflow with no secrets and read-only permissions.",
-            )
+    if privileged:
+        untrusted_pattern = re.compile(
+            r"github\.(?:event\.pull_request\.(?:head\.(?:sha|ref)|head)|head_ref)|refs/pull/"
         )
+        for evidence_index, evidence_line in enumerate(lines):
+            if not untrusted_pattern.search(evidence_line):
+                continue
+            job_block = yaml_block(lines, evidence_index, 2)
+            job_has_secrets = bool(
+                re.search(r"\$\{\{\s*secrets\.|secrets:\s*inherit", job_block)
+            )
+            scopes = permission_scope(lines, evidence_index)
+            if not job_has_secrets and not scopes:
+                continue
+            needle = "secrets." if "secrets." in job_block else evidence_line.strip()
+            line, column = line_column(text, needle)
+            findings.append(
+                make_finding(
+                    "MD-WF-005", "critical", "high", rel, line, column,
+                    "Untrusted pull-request input can reach a privileged workflow with secrets or write authority.",
+                    "An attacker can modify fork code or metadata so a privileged job executes attacker-controlled commands and exfiltrates credentials or changes the repository.",
+                    "Remove the untrusted checkout/execution path from the privileged event and move it to an isolated pull_request workflow with no secrets and read-only permissions.",
+                )
+            )
+            break
     for checkout_index in checkout_indexes:
         checkout_line = lines[checkout_index]
         indentation = len(checkout_line) - len(checkout_line.lstrip())
@@ -654,6 +1158,22 @@ def workflow_findings(target: Path, path: Path) -> list[dict]:
                     "Set persist-credentials: false unless a reviewed step explicitly needs authenticated Git operations.",
                 )
             )
+
+    for run_index, run_line in enumerate(lines):
+        if not re.match(r"^\s*(?:-\s*)?run\s*:", run_line):
+            continue
+        injection = run_block_injection(lines, run_index)
+        if not injection:
+            continue
+        line, column = injection
+        findings.append(
+            make_finding(
+                "MD-WF-007", "high", "high", rel, line, column,
+                "Untrusted GitHub event data is interpolated directly into a shell command.",
+                "An attacker can craft event text that changes the generated shell program and executes unintended commands in the job.",
+                "Assign the expression to an environment variable or pass it as a reviewed action input, then quote the shell variable for the selected shell.",
+            )
+        )
 
     destructive_lines: list[int] = []
     for index, line in enumerate(lines):
@@ -707,11 +1227,10 @@ def workflow_findings(target: Path, path: Path) -> list[dict]:
 
 def audit_repository(target: Path) -> dict:
     findings = governance_findings(target)
-    workflow_dir = target / ".github/workflows"
-    if workflow_dir.is_dir():
-        for path in sorted(workflow_dir.rglob("*")):
-            if path.is_file() and path.suffix in WORKFLOW_SUFFIXES:
-                findings.extend(workflow_findings(target, path))
+    records = index_workflows(target)
+    for record in records:
+        findings.extend(workflow_findings(target, record.path))
+    findings.extend(artifact_trust_findings(target, records))
     findings.sort(
         key=lambda item: (
             -SEVERITY_ORDER[item["severity"]],
@@ -730,6 +1249,80 @@ def audit_repository(target: Path) -> dict:
         "summary": {"total": len(findings), "by_severity": counts},
         "findings": findings,
     }
+
+
+def report_with_findings(report: dict, findings: list[dict]) -> dict:
+    counts = {severity: 0 for severity in SEVERITY_ORDER}
+    for finding in findings:
+        counts[finding["severity"]] += 1
+    updated = dict(report)
+    updated["findings"] = findings
+    updated["summary"] = {"total": len(findings), "by_severity": counts}
+    return updated
+
+
+def load_baseline(path: Path) -> set[str]:
+    try:
+        data = json.loads(path.expanduser().read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise KitError(f"invalid baseline JSON {path}: {exc}") from exc
+    if not isinstance(data, dict) or data.get("schema_version") != 1:
+        raise KitError("baseline must be a schema-v1 maintainer-defense JSON report")
+    findings = data.get("findings")
+    if not isinstance(findings, list):
+        raise KitError("baseline report must contain a findings array")
+    fingerprints: set[str] = set()
+    for finding in findings:
+        fingerprint = finding.get("fingerprint") if isinstance(finding, dict) else None
+        if not isinstance(fingerprint, str) or not fingerprint:
+            raise KitError("every baseline finding must contain a non-empty fingerprint")
+        fingerprints.add(fingerprint)
+    return fingerprints
+
+
+def filter_new(report: dict, baseline_fingerprints: set[str]) -> dict:
+    findings = [
+        finding for finding in report["findings"]
+        if finding["fingerprint"] not in baseline_fingerprints
+    ]
+    return report_with_findings(report, findings)
+
+
+def audit_git_ref(target: Path, ref: str) -> dict:
+    """Archive and audit one local commit without executing repository code."""
+    verify = subprocess.run(
+        ["git", "-C", str(target), "rev-parse", "--verify", "--end-of-options", f"{ref}^{{commit}}"],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if verify.returncode != 0:
+        raise KitError(f"unknown or non-commit Git ref: {ref}")
+    commit = verify.stdout.strip()
+    archived = subprocess.run(
+        ["git", "-C", str(target), "archive", "--format=tar", commit],
+        capture_output=True,
+        check=False,
+    )
+    if archived.returncode != 0:
+        detail = archived.stderr.decode(errors="replace").strip()
+        raise KitError(f"cannot archive Git ref {ref}: {detail}")
+    with tempfile.TemporaryDirectory(prefix="maintainer-defense-ref-") as tmp:
+        snapshot = Path(tmp)
+        with tarfile.open(fileobj=io.BytesIO(archived.stdout), mode="r:") as archive:
+            for member in archive.getmembers():
+                parts = Path(member.name).parts
+                if member.name.startswith("/") or ".." in parts:
+                    raise KitError(f"unsafe path in Git archive: {member.name}")
+                if not member.isfile():
+                    continue
+                source = archive.extractfile(member)
+                if source is None:
+                    continue
+                destination = snapshot.joinpath(*parts)
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_bytes(source.read())
+        return audit_repository(snapshot)
 
 
 def summary_headline(report: dict) -> str:
@@ -874,7 +1467,7 @@ def combined_patch(report: dict, safe_only: bool) -> str:
 
 
 def parse_install_args(arguments: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = UsageArgumentParser(description=__doc__)
     parser.add_argument("--target", required=True, type=Path, help="target repository")
     parser.add_argument("--profile", choices=PROFILES, default="observe")
     parser.add_argument("--language", choices=LANGUAGES, default="en")
@@ -887,7 +1480,7 @@ def parse_install_args(arguments: list[str] | None = None) -> argparse.Namespace
 
 
 def parse_audit_args(command: str, arguments: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(prog=f"maintainer-defense {command}")
+    parser = UsageArgumentParser(prog=f"maintainer-defense {command}")
     parser.add_argument("target", nargs="?", default=".", type=Path, help="repository checkout")
     if command == "audit":
         parser.add_argument(
@@ -898,6 +1491,17 @@ def parse_audit_args(command: str, arguments: list[str]) -> argparse.Namespace:
             "--fail-on", choices=("critical", "high", "medium", "low", "note"),
             help="exit 2 when a finding at or above this severity is present",
         )
+        comparison = parser.add_mutually_exclusive_group()
+        comparison.add_argument("--baseline", type=Path, help="schema-v1 JSON report")
+        comparison.add_argument("--compare-ref", help="local Git commit to audit as baseline")
+        parser.add_argument(
+            "--config", type=Path,
+            help="suppression config (default: TARGET/.maintainer-defense.json when present)",
+        )
+        parser.add_argument(
+            "--new-only", action="store_true",
+            help="emit only fingerprints absent from exactly one comparison source",
+        )
     else:
         parser.add_argument("--output", type=Path, help="write unified diff to a file")
         parser.add_argument("--safe-only", action="store_true", help="exclude review-required patches")
@@ -905,7 +1509,14 @@ def parse_audit_args(command: str, arguments: list[str]) -> argparse.Namespace:
             "--dry-run", action="store_true",
             help="compatibility flag; fix always emits a patch and never edits files",
         )
-    return parser.parse_args(arguments)
+    args = parser.parse_args(arguments)
+    if command == "audit":
+        has_comparison = bool(args.baseline or args.compare_ref)
+        if args.new_only and not has_comparison:
+            parser.error("--new-only requires exactly one of --baseline or --compare-ref")
+        if has_comparison and not args.new_only:
+            parser.error("--baseline and --compare-ref require --new-only")
+    return args
 
 
 def emit_output(content: str, output: Path | None) -> None:
@@ -913,7 +1524,19 @@ def emit_output(content: str, output: Path | None) -> None:
         sys.stdout.write(content)
         return
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(content, encoding="utf-8")
+    descriptor, temporary = tempfile.mkstemp(prefix=f".{output.name}.", dir=output.parent)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, output)
+    except BaseException:
+        try:
+            os.unlink(temporary)
+        except FileNotFoundError:
+            pass
+        raise
     print(f"WROTE {output}", file=sys.stderr)
 
 
@@ -927,6 +1550,22 @@ def run_auditor(command: str, arguments: list[str]) -> None:
         patch = combined_patch(report, args.safe_only)
         emit_output(patch, args.output)
         return
+    config_path = args.config.expanduser() if args.config else target / ".maintainer-defense.json"
+    if args.config or config_path.is_file():
+        entries = load_suppressions(config_path, date.today())
+        report, suppressed, warnings = apply_suppressions(report, entries)
+        for warning in warnings:
+            print(f"WARNING: {warning}", file=sys.stderr)
+        if suppressed:
+            noun = "finding" if suppressed == 1 else "findings"
+            print(f"Suppressed {suppressed} {noun} via {config_path}", file=sys.stderr)
+    if args.new_only:
+        if args.baseline:
+            fingerprints = load_baseline(args.baseline)
+        else:
+            baseline_report = audit_git_ref(target, args.compare_ref)
+            fingerprints = {item["fingerprint"] for item in baseline_report["findings"]}
+        report = filter_new(report, fingerprints)
     if args.format == "human":
         content = render_human(report)
     elif args.format == "summary":
