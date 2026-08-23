@@ -20,6 +20,7 @@ This document defines exactly what the kit currently guarantees, how those claim
 | Deployable translations | Every profile installs structurally complete English, Vietnamese, or Japanese intake templates, policies, playbook, and adoption record; independent native review of Vietnamese and Japanese wording remains pending | 3 profiles × 3 languages end-to-end matrix |
 | Workflow regression detection | Workflow safety invariants, zizmor, and install tests run in CI | Quality and Workflow security workflows |
 | Runtime support | The installer supports Python 3.10+ and is tested on Linux with Python 3.10, 3.12, and 3.14 and on macOS with Python 3.12 | Quality workflow matrix |
+| Release-candidate provenance | Pilot metadata pins the source commit, target commit, standalone SHA-256, raw report, effective report, labels, and stated limitations | [`pilots/2026-08-23-awesome-maintainer-defense`](../pilots/2026-08-23-awesome-maintainer-defense/README.md) |
 
 ## Corrected findings from the second audit
 
