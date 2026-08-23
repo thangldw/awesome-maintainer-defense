@@ -31,7 +31,6 @@
 - Create: `documentation-manifest.json`
 - Create: `scripts/documentation_contract.py`
 - Create: `scripts/test_documentation.py`
-- Modify: `scripts/validate.py`
 - Modify: `Makefile`
 
 **Interfaces:**
@@ -180,7 +179,7 @@ documentation-test:
 test: documentation-test audit-test kit-test quickstart-test pilot-test
 ```
 
-Call `validate_documentation_contract(ROOT)` from `scripts/validate.py` before generated-file validation.
+Keep `scripts/validate.py` integration for Task 7, after every final manifest path—including the current-version pilot report—exists. Enabling the final manifest earlier would mask the existing validator mutation tests with expected migration gaps.
 
 - [ ] **Step 6: Run focused tests**
 
@@ -552,6 +551,7 @@ git commit -m "release: prepare Maintainer Defense Kit 1.1.1"
 - Create: `pilots/2026-08-24-awesome-maintainer-defense/pilot.json`
 - Create: `pilots/2026-08-24-awesome-maintainer-defense/README.md`
 - Modify: `pilots/README.md`, `docs/KIT_ASSURANCE.md`, `docs/AUDITOR_EVALUATION.md` generator inputs only if a current-version evidence link is required.
+- Modify: `scripts/validate.py`
 
 **Interfaces:**
 - Consumes: the exact release-candidate commit after Tasks 1–6 and its 1.1.1 standalone artifact.
@@ -590,10 +590,14 @@ Run: `python3 scripts/test_pilot_bundle.py && make pilot-verify`
 
 Expected: both dated pilots reproduce at their own pinned commits; only the 1.1.1 pilot is required to match current runtime paths.
 
-- [ ] **Step 6: Commit evidence without changing runtime files**
+- [ ] **Step 6: Enable the final documentation manifest gate**
+
+Import `DocumentationContractError` and `validate_documentation_contract` in `scripts/validate.py`. Call the contract before catalog validation and route errors through `fail(str(exc))`. Run the existing quickstart validator-mutation tests to prove the complete manifest no longer masks their targeted failures.
+
+- [ ] **Step 7: Commit evidence without changing runtime files**
 
 ```bash
-git add pilots/2026-08-24-awesome-maintainer-defense pilots/README.md docs/KIT_ASSURANCE.md docs/AUDITOR_EVALUATION.md
+git add pilots/2026-08-24-awesome-maintainer-defense pilots/README.md docs/KIT_ASSURANCE.md docs/AUDITOR_EVALUATION.md scripts/validate.py
 git commit -m "docs: publish pinned 1.1.1 dogfood evidence"
 ```
 

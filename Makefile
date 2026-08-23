@@ -1,4 +1,4 @@
-.PHONY: audit audit-evaluate audit-test distribution-test kit-test links metadata package pilot-test pilot-verify pins quickstart-test render standalone test validate
+.PHONY: audit audit-evaluate audit-test distribution-test documentation-test kit-test links metadata package pilot-test pilot-verify pins quickstart-test render standalone test validate
 
 PYPROJECT_BUILD ?= python3 -m build
 
@@ -7,6 +7,9 @@ audit:
 
 audit-test:
 	python3 scripts/test_auditor.py
+
+documentation-test:
+	python3 scripts/test_documentation.py
 
 audit-evaluate:
 	python3 scripts/evaluate_auditor.py
@@ -23,7 +26,7 @@ pilot-test:
 pilot-verify:
 	python3 scripts/verify_pilot_evidence.py
 
-test: audit-test kit-test quickstart-test pilot-test
+test: documentation-test audit-test kit-test quickstart-test pilot-test
 
 standalone:
 	python3 scripts/build_standalone.py
