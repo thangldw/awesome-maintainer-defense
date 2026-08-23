@@ -41,6 +41,7 @@ The defended system is an open-source repository that accepts public issues, pul
 | Low-effort automated contributions | Review cost exceeds contribution value | Prior approval for large work, evidence requirements, review-first triage |
 | Harassment or coordinated pressure | Burnout, unsafe discussions, reputation attacks | Preserve evidence, moderate consistently, limit interactions, report abuse |
 | Pwn request | Untrusted PR code steals a write token or secret | Never execute PR code in a privileged event; isolate workflows and minimize permissions |
+| Poisoned workflow artifact | A privileged `workflow_run` job executes files produced by untrusted PR code | Treat artifacts as untrusted data; verify and parse without execution, or rebuild from trusted source |
 | Malicious dependency or Action | Build or release compromise | Dependency review, immutable Action pins, secret scanning, runtime egress monitoring |
 | Configuration takeover | Branch protections or admin access are weakened | CODEOWNERS for `.github/`, required independent review, versioned settings, small blast radius |
 | Classifier false positive | Legitimate contributor is publicly penalized | Dry-run, reversible labels, private review, appeal path, bias monitoring |

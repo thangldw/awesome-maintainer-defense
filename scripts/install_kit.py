@@ -13,6 +13,7 @@ import os
 import re
 import subprocess
 import sys
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -631,6 +632,202 @@ def run_block_injection(lines: list[str], run_index: int) -> tuple[int, int] | N
     return None
 
 
+@dataclass(frozen=True)
+class WorkflowRecord:
+    path: Path
+    name: str
+    triggers: frozenset[str]
+    workflow_run_names: frozenset[str]
+    uploads_artifact: bool
+    downloads_artifact: bool
+    executes_downloaded_content: bool
+    has_privileged_authority: bool
+
+
+def inline_yaml_values(value: str) -> frozenset[str]:
+    value = value.split("#", 1)[0].strip()
+    if value.startswith("[") and value.endswith("]"):
+        value = value[1:-1]
+    return frozenset(
+        item.strip().strip("\"'")
+        for item in value.split(",")
+        if item.strip().strip("\"'")
+    )
+
+
+def workflow_triggers(lines: list[str]) -> frozenset[str]:
+    for index, line in enumerate(lines):
+        match = re.match(r"^on\s*:\s*(.*?)\s*$", line)
+        if not match:
+            continue
+        value = match.group(1)
+        if value:
+            return inline_yaml_values(value)
+        triggers: set[str] = set()
+        for candidate in lines[index + 1 :]:
+            stripped = candidate.lstrip()
+            indentation = len(candidate) - len(stripped)
+            if stripped and not stripped.startswith("#") and indentation == 0:
+                break
+            event = re.match(r"^  ([A-Za-z_][A-Za-z0-9_-]*)\s*:", candidate)
+            if event:
+                triggers.add(event.group(1))
+        return frozenset(triggers)
+    return frozenset()
+
+
+def workflow_run_sources(lines: list[str]) -> frozenset[str]:
+    for index, line in enumerate(lines):
+        if not re.match(r"^  workflow_run\s*:\s*$", line):
+            continue
+        for source_index in range(index + 1, len(lines)):
+            candidate = lines[source_index]
+            stripped = candidate.lstrip()
+            indentation = len(candidate) - len(stripped)
+            if stripped and not stripped.startswith("#") and indentation <= 2:
+                break
+            match = re.match(r"^    workflows\s*:\s*(.*?)\s*$", candidate)
+            if not match:
+                continue
+            value = match.group(1)
+            if value:
+                return inline_yaml_values(value)
+            names: set[str] = set()
+            for item in lines[source_index + 1 :]:
+                item_stripped = item.lstrip()
+                item_indentation = len(item) - len(item_stripped)
+                if item_stripped and not item_stripped.startswith("#") and item_indentation <= 4:
+                    break
+                item_match = re.match(r"^\s+-\s*(.*?)\s*$", item)
+                if item_match:
+                    names.update(inline_yaml_values(item_match.group(1)))
+            return frozenset(names)
+    return frozenset()
+
+
+def yaml_job_bounds(lines: list[str], evidence_index: int) -> tuple[int, int]:
+    start = evidence_index
+    while start >= 0 and not re.match(r"^  [A-Za-z0-9_.-]+\s*:\s*$", lines[start]):
+        start -= 1
+    if start < 0:
+        return evidence_index, evidence_index + 1
+    end = start + 1
+    while end < len(lines):
+        stripped = lines[end].lstrip()
+        indentation = len(lines[end]) - len(stripped)
+        if stripped and not stripped.startswith("#") and indentation <= 2:
+            break
+        end += 1
+    return start, end
+
+
+def run_scalar_text(lines: list[str], run_index: int) -> str:
+    match = re.match(r"^(\s*)(?:-\s*)?run\s*:\s*(.*)$", lines[run_index])
+    if not match:
+        return ""
+    chunks = [match.group(2)]
+    indentation = len(match.group(1))
+    for candidate in lines[run_index + 1 :]:
+        stripped = candidate.lstrip()
+        current = len(candidate) - len(stripped)
+        if stripped and not stripped.startswith("#") and current <= indentation:
+            break
+        chunks.append(stripped)
+    return "\n".join(chunks)
+
+
+def executes_local_file(command: str) -> bool:
+    interpreter = re.search(
+        r"(?:^|[;&|]\s*|\n\s*)(?:bash|sh|python(?:3)?|node|ruby|perl)\s+"
+        r"(?:['\"])?(?:\./)?[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)+",
+        command,
+    )
+    direct = re.search(r"(?:^|[;&|]\s*|\n\s*)\./[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*", command)
+    return bool(interpreter or direct)
+
+
+def index_workflows(target: Path) -> list[WorkflowRecord]:
+    records: list[WorkflowRecord] = []
+    workflow_dir = target / ".github/workflows"
+    if not workflow_dir.is_dir():
+        return records
+    for path in sorted(workflow_dir.rglob("*")):
+        if not path.is_file() or path.suffix not in WORKFLOW_SUFFIXES:
+            continue
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+        name_match = next((re.match(r"^name\s*:\s*(.*?)\s*$", line) for line in lines if re.match(r"^name\s*:", line)), None)
+        name = name_match.group(1).strip("\"'") if name_match else path.stem
+        uploads = any(re.search(r"uses:\s*[\"']?actions/upload-artifact@", line) for line in lines)
+        download_indexes = [
+            index for index, line in enumerate(lines)
+            if re.search(r"uses:\s*[\"']?actions/download-artifact@", line)
+        ]
+        executes_download = False
+        privileged = False
+        for download_index in download_indexes:
+            _, job_end = yaml_job_bounds(lines, download_index)
+            for run_index in range(download_index + 1, job_end):
+                if not re.match(r"^\s*(?:-\s*)?run\s*:", lines[run_index]):
+                    continue
+                if not executes_local_file(run_scalar_text(lines, run_index)):
+                    continue
+                executes_download = True
+                job_start, _ = yaml_job_bounds(lines, run_index)
+                job_text = "\n".join(lines[job_start:job_end])
+                privileged = bool(
+                    permission_scope(lines, run_index)
+                    or re.search(r"\$\{\{\s*secrets\.|secrets:\s*inherit", job_text)
+                )
+                break
+            if executes_download:
+                break
+        records.append(
+            WorkflowRecord(
+                path=path,
+                name=name,
+                triggers=workflow_triggers(lines),
+                workflow_run_names=workflow_run_sources(lines),
+                uploads_artifact=uploads,
+                downloads_artifact=bool(download_indexes),
+                executes_downloaded_content=executes_download,
+                has_privileged_authority=privileged,
+            )
+        )
+    return records
+
+
+def artifact_trust_findings(target: Path, records: list[WorkflowRecord]) -> list[dict]:
+    producers = [
+        record for record in records
+        if record.uploads_artifact and "pull_request" in record.triggers
+    ]
+    findings: list[dict] = []
+    for consumer in records:
+        if not (
+            "workflow_run" in consumer.triggers
+            and consumer.downloads_artifact
+            and consumer.executes_downloaded_content
+            and consumer.has_privileged_authority
+        ):
+            continue
+        for producer in producers:
+            if producer.name not in consumer.workflow_run_names:
+                continue
+            producer_rel = relative_path(target, producer.path)
+            consumer_rel = relative_path(target, consumer.path)
+            text = consumer.path.read_text(encoding="utf-8", errors="replace")
+            line, column = line_column(text, "actions/download-artifact@")
+            findings.append(
+                make_finding(
+                    "MD-WF-008", "critical", "high", consumer_rel, line, column,
+                    f"Privileged workflow executes an artifact from pull-request workflow {producer_rel}.",
+                    f"Untrusted pull-request code in {producer_rel} can alter an uploaded artifact that {consumer_rel} downloads and executes with secrets, OIDC, or repository write authority.",
+                    "Treat the artifact as untrusted data: verify an immutable digest and parse it without execution, or rebuild it from trusted source in the privileged workflow.",
+                )
+            )
+    return findings
+
+
 def workflow_findings(target: Path, path: Path) -> list[dict]:
     findings: list[dict] = []
     rel = relative_path(target, path)
@@ -804,11 +1001,10 @@ def workflow_findings(target: Path, path: Path) -> list[dict]:
 
 def audit_repository(target: Path) -> dict:
     findings = governance_findings(target)
-    workflow_dir = target / ".github/workflows"
-    if workflow_dir.is_dir():
-        for path in sorted(workflow_dir.rglob("*")):
-            if path.is_file() and path.suffix in WORKFLOW_SUFFIXES:
-                findings.extend(workflow_findings(target, path))
+    records = index_workflows(target)
+    for record in records:
+        findings.extend(workflow_findings(target, record.path))
+    findings.extend(artifact_trust_findings(target, records))
     findings.sort(
         key=lambda item: (
             -SEVERITY_ORDER[item["severity"]],
