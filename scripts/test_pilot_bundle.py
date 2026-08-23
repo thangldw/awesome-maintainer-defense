@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -13,12 +14,19 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 BUILDER = ROOT / "scripts/build_pilot_bundle.py"
+VERIFIER = ROOT / "scripts/verify_pilot_evidence.py"
 
 spec = importlib.util.spec_from_file_location("pilot_bundle", BUILDER)
 assert spec and spec.loader
 module = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = module
 spec.loader.exec_module(module)
+
+verifier_spec = importlib.util.spec_from_file_location("pilot_verifier", VERIFIER)
+assert verifier_spec and verifier_spec.loader
+verifier = importlib.util.module_from_spec(verifier_spec)
+sys.modules[verifier_spec.name] = verifier
+verifier_spec.loader.exec_module(verifier)
 
 FINDING = {
     "rule_id": "MD-WF-003",
@@ -69,6 +77,20 @@ COMPLETE_LABEL = {
 
 
 class PilotBundleTests(unittest.TestCase):
+    def test_checked_in_pilot_matches_pinned_revisions(self) -> None:
+        pilot_dir = ROOT / "pilots/2026-08-23-awesome-maintainer-defense"
+        verifier.verify_pilot(ROOT, pilot_dir)
+
+    def test_checked_in_pilot_rejects_modified_generated_output(self) -> None:
+        source = ROOT / "pilots/2026-08-23-awesome-maintainer-defense"
+        with tempfile.TemporaryDirectory() as tmp:
+            pilot_dir = Path(tmp) / source.name
+            shutil.copytree(source, pilot_dir)
+            with pilot_dir.joinpath("README.md").open("a", encoding="utf-8") as handle:
+                handle.write("stale\n")
+            with self.assertRaises(verifier.PilotEvidenceError):
+                verifier.verify_generated_outputs(ROOT, pilot_dir)
+
     def test_checked_in_minimal_fixture_builds(self) -> None:
         fixture = json.loads(
             (ROOT / "pilots/fixtures/minimal-input.json").read_text(encoding="utf-8")
