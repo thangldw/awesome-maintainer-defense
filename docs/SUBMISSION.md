@@ -65,7 +65,7 @@ No account, token, dependency install, or network access is required. Run `pytho
 
 ## Release provenance
 
-The `v1.1.0` tag workflow builds every public artifact once, uploads the same wheel and sdist to PyPI through OIDC Trusted Publishing, and publishes the complete checksummed set to GitHub Releases. The expected PyPI publisher is repository `thangldw/awesome-maintainer-defense`, workflow `release.yml`, environment `pypi`; no long-lived PyPI token belongs in GitHub secrets.
+The `v1.1.0` tag workflow builds every public artifact once, uploads the same wheel and sdist to PyPI through OIDC Trusted Publishing, and publishes the complete checksummed set to GitHub Releases. Reruns replace the same GitHub assets and skip already-published immutable PyPI files, so a partial publication can resume. The expected PyPI publisher is repository `thangldw/awesome-maintainer-defense`, workflow `release.yml`, environment `pypi`; no long-lived PyPI token belongs in GitHub secrets.
 
 ## v1.1.0 update notes
 
