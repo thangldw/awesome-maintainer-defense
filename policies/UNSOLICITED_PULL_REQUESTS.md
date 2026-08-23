@@ -1,24 +1,9 @@
-# Unsolicited pull-request policy
+# Unsolicited pull requests
 
-> Deployable policy or response. Review the [documentation hub](../docs/README.md) before adoption.
+Ask before implementing a substantial change that has no approved issue or maintainer request. A short proposal should state the problem, intended scope, likely files, security or compatibility effects, and verification approach.
 
-We welcome focused fixes and thoughtful improvements, but reviewing a pull request is real project work. Before starting a large change, open or join an issue and wait for maintainer agreement on the problem and approach.
+Automated agents must not author or submit unsolicited repository changes without an accountable human reviewer and explicit maintainer authorization. Generating a patch locally does not authorize opening a pull request, pushing a branch, or changing repository settings.
 
-## Usually welcome without prior approval
+Small typo corrections may be accepted directly when they are isolated and verifiable. Security reports belong in the private vulnerability channel. Maintainers may close duplicate, off-scope, generated-volume, policy-violating, or unmaintainable submissions without detailed review.
 
-- a small fix for a clearly reproducible bug;
-- a focused documentation correction;
-- a test that reproduces an accepted defect;
-- a dependency or security update that follows the project's security process.
-
-## Discuss first
-
-- new features or public APIs;
-- broad refactors, rewrites, generated files, or mass formatting;
-- dependency, build-system, CI, or architecture changes;
-- speculative performance work without measurements;
-- changes spanning multiple unrelated concerns.
-
-Maintainers may close unsolicited work when the direction was not agreed, the scope is too large to review, or the long-term maintenance cost exceeds the benefit. Closure is not a judgment of the contributor; it protects the project's roadmap and review capacity.
-
-When proposing a change, explain the user problem, provide evidence, identify the smallest viable scope, and say who will maintain the result.
+Accepted scope is not permission for adjacent refactoring. If implementation reveals a materially different change, stop and request a new decision.

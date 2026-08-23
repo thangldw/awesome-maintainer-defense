@@ -1,13 +1,5 @@
-<!-- Deployable maintainer response. Customize the requested evidence and review the documentation hub before use. -->
+Thanks for the report. We need a minimal, sanitized reproduction before we can classify or change behavior.
 
-Thanks for the report. We cannot investigate it yet because the reproduction evidence is incomplete.
+Please provide the affected version or commit, environment, smallest input, exact command, actual result, expected result, and whether the issue reproduces from a clean checkout. Remove credentials, personal data, and private repository content.
 
-Please provide:
-
-1. the exact affected version or commit;
-2. operating system, runtime, and relevant dependency versions;
-3. the smallest ordered steps or repository that reproduces the behavior;
-4. complete error output or logs with secrets removed;
-5. expected behavior and what happened instead.
-
-We will close this after **[time period]** if the missing information is not added. It can be reopened when a maintainer can reproduce the problem.
+For an auditor finding, include the rule ID, source location, and why the documented applicability guidance does not fit. For a suspected vulnerability, stop here and use the private security-reporting route instead of posting exploit details publicly.

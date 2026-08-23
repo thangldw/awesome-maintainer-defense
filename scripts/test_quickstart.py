@@ -24,6 +24,15 @@ SOURCE_QUICKSTART = re.compile(
 
 
 class QuickstartTests(unittest.TestCase):
+    def test_root_locale_audit_commands_use_the_same_artifact(self) -> None:
+        paths = {}
+        for filename in READMES:
+            text = (ROOT / filename).read_text(encoding="utf-8")
+            match = AUDIT_COMMAND.search(text)
+            self.assertIsNotNone(match, f"{filename} has no source-checkout audit command")
+            paths[filename] = match.group("path")
+        self.assertEqual(set(paths.values()), {"dist/maintainer-defense-kit.py"})
+
     def test_documented_built_artifact_exists_and_runs(self) -> None:
         root_readme = (ROOT / "README.md").read_text(encoding="utf-8")
         source_quickstart = SOURCE_QUICKSTART.search(root_readme)

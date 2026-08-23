@@ -1,5 +1,12 @@
-<!-- Deployable maintainer response. Customize the concrete reason and review the documentation hub before use. -->
+Thanks for the contribution. I cannot review it in its current form because the scope and verification evidence are not bounded enough to establish the change's behavior.
 
-Thanks for the contribution. We are closing this pull request because it does not currently meet the project's review bar: **[state the concrete reason—unapproved scope, missing reproduction, failing tests, unrelated changes, or no demonstrated user need]**.
+Please return with:
 
-This decision is about the submitted evidence and review cost, not about guessing which tools were used. If you want to try again, please first open or join an issue, confirm the intended approach with a maintainer, and submit the smallest change with reproducible verification.
+- the approved issue or maintainer request;
+- one specific problem and the minimal change addressing it;
+- a reproduction or failing test before the fix;
+- exact verification results;
+- permission, data-flow, compatibility, and rollback effects;
+- confirmation that an accountable human understands and owns the submission.
+
+If a vulnerability is involved, do not add details here; use the repository's private security-reporting route. This decision concerns reviewability, not authorship or intent.
