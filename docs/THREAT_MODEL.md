@@ -16,6 +16,8 @@ Protect maintainer decision capacity, repository integrity, release authority, c
 
 The auditor crosses only the final boundary. It reads files but does not execute repository code, follow links, call remote APIs, or mutate the checkout.
 
+The [trust-boundaries diagram](diagrams/trust-boundaries.html) presents that boundary visually: repository evidence stays in a local read-only path through findings and a reviewable patch; a human owner gates any optional apply; live GitHub settings remain external and unverified.
+
 ## Attacker capabilities considered
 
 - Submit crafted patches, metadata, comments, issue bodies, and workflow artifacts.

@@ -31,4 +31,10 @@ English is the canonical product contract. Vietnamese and Japanese cover the ess
 
 Localized essentials: [Tiếng Việt](vi/README.md) · [日本語](ja/README.md).
 
+## Architecture diagrams
+
+- [Trust boundaries](diagrams/trust-boundaries.html): the local read-only audit path and the live GitHub state it cannot inspect.
+- [Audit to action](diagrams/audit-to-action.html): the evidence, governance, and output contract at each stage, with owner authorization as the decision gate.
+- [Consent to evidence](diagrams/consent-to-evidence.html): the disclosure-controlled path from maintainer consent to a reproducible evidence bundle.
+
 Documentation claims must distinguish local tested behavior from live GitHub state and field effectiveness. Generated pages are rebuilt from structured sources; edit their source data rather than the generated Markdown.
