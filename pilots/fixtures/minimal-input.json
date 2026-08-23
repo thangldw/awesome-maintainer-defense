@@ -1,0 +1,61 @@
+{
+  "metadata": {
+    "pilot_id": "example-minimal",
+    "disclosure": "public",
+    "pilot_type": "internal-owner-directed",
+    "run_at": "2026-08-23T12:00:00Z",
+    "auditor_version": "1.1.0",
+    "source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "standalone_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "command": "python3 maintainer-defense-kit.py audit . --format json",
+    "target_repository": "example/project",
+    "target_commit": "cccccccccccccccccccccccccccccccccccccccc",
+    "allow_aggregate_metrics": false,
+    "limitations": ["Example input only; not field evidence."]
+  },
+  "raw_report": {
+    "schema_version": 1,
+    "tool": {"name": "maintainer-defense", "version": "1.1.0"},
+    "target": "/tmp/example",
+    "summary": {
+      "total": 1,
+      "by_severity": {"critical": 0, "high": 0, "medium": 1, "low": 0, "note": 0}
+    },
+    "findings": [
+      {
+        "rule_id": "MD-WF-003",
+        "severity": "medium",
+        "confidence": "high",
+        "location": {"path": ".github/workflows/ci.yml", "line": 9, "column": 15},
+        "message": "Action is not pinned.",
+        "threat_scenario": "A mutable tag can move.",
+        "recommendation": "Pin the reviewed commit.",
+        "fingerprint": "0123456789abcdef01234567",
+        "fix": {"available": false}
+      }
+    ]
+  },
+  "effective_report": {
+    "schema_version": 1,
+    "tool": {"name": "maintainer-defense", "version": "1.1.0"},
+    "target": "/tmp/example",
+    "summary": {
+      "total": 1,
+      "by_severity": {"critical": 0, "high": 0, "medium": 1, "low": 0, "note": 0}
+    },
+    "findings": [
+      {
+        "rule_id": "MD-WF-003",
+        "severity": "medium",
+        "confidence": "high",
+        "location": {"path": ".github/workflows/ci.yml", "line": 9, "column": 15},
+        "message": "Action is not pinned.",
+        "threat_scenario": "A mutable tag can move.",
+        "recommendation": "Pin the reviewed commit.",
+        "fingerprint": "0123456789abcdef01234567",
+        "fix": {"available": false}
+      }
+    ]
+  },
+  "labels": {}
+}

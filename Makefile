@@ -1,4 +1,4 @@
-.PHONY: audit audit-evaluate audit-test distribution-test kit-test links metadata package pins quickstart-test render standalone test validate
+.PHONY: audit audit-evaluate audit-test distribution-test kit-test links metadata package pilot-test pins quickstart-test render standalone test validate
 
 audit:
 	python3 scripts/install_kit.py audit .
@@ -15,7 +15,10 @@ kit-test:
 quickstart-test:
 	python3 scripts/test_quickstart.py
 
-test: audit-test kit-test quickstart-test
+pilot-test:
+	python3 scripts/test_pilot_bundle.py
+
+test: audit-test kit-test quickstart-test pilot-test
 
 standalone:
 	python3 scripts/build_standalone.py
