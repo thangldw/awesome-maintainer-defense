@@ -1,17 +1,19 @@
 # Security policy
 
-> Private reporting route and support boundary for the auditor, installer, shipped workflows, and release artifacts.
+## Supported code
 
-## Reporting a vulnerability
+Security fixes are maintained for the latest published release and the current default branch. Older artifacts may remain downloadable but are not supported.
 
-Use GitHub private vulnerability reporting for vulnerabilities in the auditor, installer, starter-kit workflows, or release artifacts. Include the affected version and file, realistic impact, minimal reproduction, and a mitigation when available.
+## Private reporting
 
-Do not open a public issue containing credentials, exploit details for an unpatched vulnerability, or personal information.
+Report suspected vulnerabilities through this repository's GitHub private vulnerability reporting interface. Include the affected version or commit, affected file, realistic impact, a minimal reproduction, and any known mitigation.
 
-## Listed projects
+Do not place credentials, personal data, or unpatched exploit details in a public issue. If private reporting is unavailable, contact the repository owner through the private contact route on their GitHub profile.
 
-A catalog entry is not maintained by this project and is not a security endorsement. Report vulnerabilities in a listed resource to that resource's maintainers. You may open a normal issue here to flag a dead link, an abandoned project, a misleading description, or a resource that no longer meets the inclusion bar.
+## Scope boundary
 
-## Supported versions
+This policy covers the auditor, installer, packaged skills, shipped workflows, build and release automation, and release artifacts. Catalog entries are independent projects; report their vulnerabilities to their own maintainers.
 
-Only `v1.0.0` and the latest commit on the default branch are maintained. Verify release checksums, pin Actions, review upstream changes, and test defenses in a non-critical repository before deployment.
+## Safe handling
+
+Verify release checksums, review generated patches before application, pin third-party Actions to reviewed commits, and test workflow changes in a non-critical repository. A clean local audit does not establish that live GitHub settings or external services are secure.

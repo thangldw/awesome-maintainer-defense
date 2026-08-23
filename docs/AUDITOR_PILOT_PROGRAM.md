@@ -1,42 +1,26 @@
-# OSS maintainer pilot program
+# Auditor pilot program
 
-> Consent, review, and publication contract for independently reviewed repository pilots. Return to the [auditor reference](AUDITOR.md).
+The pilot program collects maintainer-reviewed evidence without ranking repositories or claiming authorship detection.
 
-## Purpose
+## Authority and consent
 
-The synthetic corpus measures deterministic regression behavior, and the first public-repository smoke test exposed parser and applicability failures. The next evidence step is maintainer-reviewed classification: whether each finding is correct, useful, actionable, and appropriately severe in the repository's real operating context.
+A repository maintainer or explicitly authorized representative starts a pilot through the [pilot issue form](https://github.com/thangldw/awesome-maintainer-defense/issues/new?template=auditor-pilot.yml). They identify the public repository, pin a full target commit SHA, state their role, choose a disclosure level, and consent to the selected publication. Silence, a public URL, or an unsolicited audit is not publication consent.
 
-## Participation contract
+## Procedure
 
-1. A maintainer or explicitly authorized representative volunteers a public repository and full commit SHA through the [pilot issue form](https://github.com/thangldw/awesome-maintainer-defense/issues/new?template=auditor-pilot.yml).
-2. The auditor runs offline against that pinned checkout. Repository code is not executed, and no repository files or settings are changed.
-3. The maintainer reviews each result as true positive, false positive, not applicable, or unresolved, and records the missing external context separately.
-4. No repository score or ranking is produced. Results are published only at the participant's selected disclosure level.
-5. Any parser or rule correction receives a minimal regression fixture before a new evaluation is published.
+1. Pin the auditor source revision, product version, target revision, and standalone SHA-256.
+2. Run the auditor offline without executing target code or changing repository state.
+3. Preserve raw and effective schema-v1 reports separately.
+4. Have the authorized reviewer label each finding `true_positive`, `false_positive`, `not_applicable`, or `unresolved` and assess whether remediation is safe and practical.
+5. Add a regression fixture before publishing any parser or rule correction.
+6. Build and validate the reproducible bundle against `pilot.schema.json`.
 
-## Minimum evidence
+## Publication gate
 
-- auditor version and full source revision;
-- repository revision and declared external-policy boundary;
-- per-rule TP, FP, not-applicable, and unresolved counts;
-- whether the recommendation was safe and practical;
-- sanitized qualitative feedback on usefulness and maintainer effort;
-- reviewer role and explicit publication consent.
+Publish only the fields allowed by the participant's disclosure choice. Remove credentials, personal data, private issue content, and unnecessary repository material. The bundle must state reviewer authority, whether review is independent, unresolved context, and limitations.
 
-Precision and recall will not be aggregated until the sample has independent labels, explicit applicability decisions, and enough positive and negative cases per rule to avoid presenting a misleading rate.
+Owner-directed dogfood is labeled non-independent and non-representative. It can demonstrate reproducibility and product workflow, but it cannot establish field precision or external usefulness.
 
-## Reproducible bundle
+No repository score, leaderboard, contributor profile, or aggregate precision/recall claim is produced until independent labels and adequate positive and negative samples support that analysis.
 
-Capture the pinned metadata, raw schema-v1 report, effective post-suppression report, and optional maintainer labels, then run:
-
-```bash
-python3 scripts/build_pilot_bundle.py \
-  --metadata metadata.json \
-  --raw-report raw-report.json \
-  --effective-report effective-report.json \
-  --labels labels.json \
-  --json-output pilot.json \
-  --markdown-output README.md
-```
-
-The [`pilot.schema.json`](../pilot.schema.json) contract preserves unresolved labels and raw/effective evidence separately. The [pilot evidence directory](../pilots/README.md) defines the publication layout. Owner-directed dogfood must remain labeled non-independent and non-representative.
+Reproducible bundles and their required files are described in [Pilot evidence](../pilots/README.md).

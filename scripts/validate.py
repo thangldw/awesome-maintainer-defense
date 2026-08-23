@@ -490,12 +490,12 @@ def main() -> None:
     catalog = validate_catalog()
     audits = validate_audits(catalog)
     pins = validate_pins()
-    validate_readme(catalog)
     validate_repository_contracts()
     validate_workflows(pins)
     validate_kit_safety()
     validate_issue_forms()
     validate_auditor_assets()
+    validate_readme(catalog)
     validate_local_markdown_links()
     validate_generated_files()
     print(

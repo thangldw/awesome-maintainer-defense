@@ -1,78 +1,25 @@
 # Contributing
 
-> Contribution contract for catalog evidence, product changes, translations, and release safety.
+Contributions must strengthen repository safety, reduce maintainer review cost, or improve evidence quality without expanding authority silently.
 
-Contributions are welcome when they make maintainer defenses safer, more useful, or easier to verify. Read the [documentation map](docs/README.md) before adding a new concept or duplicating an existing contract.
+## Change contract
 
-## Start with a bounded issue
+1. Open or reference a bounded issue and state the affected contract.
+2. Measure current behavior and add a regression fixture before changing auditor or installer behavior.
+3. Keep audit output deterministic, remediation patch-only, installation conflict-safe, and workflows least-privileged.
+4. Update the canonical English document first; update localized essentials when the user-facing contract changes.
+5. Run `make test`, `make validate`, `make standalone`, and the self-audit.
 
-These issues are intentionally small and include acceptance criteria:
+Do not add authorship detection, identity/history risk scoring, hidden network access, destructive default moderation, mutable Action references, or unreviewed write permissions.
 
-- [Add a Windows PowerShell checksum quick start](https://github.com/thangldw/awesome-maintainer-defense/issues/11) — documentation only;
-- [Add a documentation-correction issue form](https://github.com/thangldw/awesome-maintainer-defense/issues/10) — GitHub issue-form YAML;
-- [Add an auditor regression test for repository paths with spaces](https://github.com/thangldw/awesome-maintainer-defense/issues/12) — one focused CLI test.
+## Catalog entries
 
-Comment on the issue before starting so work is not duplicated. A maintainer will confirm scope; being listed here does not reserve the issue indefinitely.
+Edit `catalog.json`, `audits.json`, and both translation registries. Provide official HTTPS evidence for deployment, permissions, data handling, maximum effects, limitations, maintenance state, and license. Descriptions must be factual. Stars, sponsorship, reciprocal promotion, and affiliation do not buy inclusion.
 
-## Add or update a catalog resource
+## Pull requests
 
-1. Search `catalog.json` and open pull requests for duplicates.
-2. Confirm the resource has public documentation and a concrete maintainer use case.
-3. Review required permissions, external data sharing, destructive actions, false-positive controls, maintenance activity, and license.
-4. Add one entry to `catalog.json`. Keep the description factual and under 160 characters when practical.
-5. Add a matching record to `audits.json` with official evidence for deployment, default behavior, maximum effects, data boundaries, access, limitations, repository activity, and license detection.
-6. Add Vietnamese and Japanese descriptions to `i18n/vi.json` and `i18n/ja.json`. Product names remain unchanged; descriptions must preserve risk qualifications.
-7. Run:
+Keep scope reviewable, disclose relationships and generated assistance, identify security or privacy effects, and include verification evidence. Human review remains required for generated code and patches. Complete the repository pull-request template.
 
-   ```bash
-   make render
-   make validate
-   make links
-   make metadata
-   ```
+## Reports and translations
 
-8. Complete the pull-request template and disclose your relationship to the resource.
-
-## Evidence bar
-
-Resources should materially reduce at least one of these burdens:
-
-- spam, harassment, or coordinated repository abuse;
-- low-quality or unsolicited contribution review;
-- unsafe issue, pull-request, or security-report intake;
-- malicious workflow, dependency, credential, or merge-path changes;
-- inconsistent policy or incident response.
-
-Open-source projects are preferred. A proprietary service may be considered only when it has a useful free tier, clear documentation, disclosed data handling, and no misleading detection claims. Reusable software or templates without a license do not meet the inclusion bar.
-
-We generally reject abandoned proofs of concept, undisclosed affiliate links, generic developer tools, paywalled-only products, duplicate wrappers, and tools that present automated authorship guesses as proof of misconduct.
-
-## Write factual descriptions
-
-Describe what the resource does—not what its marketing page claims. Avoid words such as “best,” “revolutionary,” “perfect,” and “100% accurate.” Note when a resource can close, lock, delete, block, execute untrusted code, or send repository data to an external service.
-
-## Edit canonical sources
-
-The resource tables in all three README files and `docs/RESOURCE_AUDIT.md` are generated. Edit the catalog, audit, and translation data, then run `make render`. CI fails if generated content is stale, audit coverage differs, a translation is missing, or an audit is more than 180 days old.
-
-## Audit impact labels
-
-- `low`: read-only analysis or documentation in normal use;
-- `medium`: can label, comment, fail checks, publish reports, or modify local files;
-- `high`: can close, lock, delete, block, limit interactions, or change repository settings.
-
-Use the maximum documented capability, even when the default configuration is safer. Impact is not a quality score.
-
-## Change the auditor or kit
-
-Product changes receive a higher safety review. Add corpus cases for auditor behavior; preserve JSON/SARIF contracts; keep installation conflict-safe; use least-privilege workflow permissions; pin Actions to full SHAs; and avoid privileged execution of untrusted code. Automatic closing, locking, or blocking remains opt-in.
-
-Run `make test`, `make validate`, `make standalone`, and the self-audit before opening a pull request. Workflow changes must also pass zizmor in CI.
-
-## Diagrams
-
-Follow [`docs/VISUAL_STYLE.md`](docs/VISUAL_STYLE.md): give each diagram one clear purpose, use standard notation and consistent visual grammar, and provide language parity when the diagram affects adoption decisions.
-
-## No pay-to-play
-
-Listings cannot be purchased. Stars, backlinks, sponsorships, gifts, employment, or reciprocal promotion do not guarantee inclusion or featured status.
+Remove repository secrets and contributor identities from public evidence. Vietnamese and Japanese changes should preserve technical qualifications rather than translate promotional claims.

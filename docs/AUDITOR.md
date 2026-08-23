@@ -1,69 +1,65 @@
-# Repository auditor
+# Auditor CLI
 
-> Product reference for commands, rule families, output contracts, fixes, and offline limits. Return to the [documentation hub](README.md).
+The auditor performs deterministic static inspection of a local checkout. It reads supported governance files, `.github` issue configuration, GitHub Actions YAML, and local Git metadata. It does not contact GitHub, resolve organization policy, inspect live rulesets, or run repository code.
 
-The dependency-free repository auditor checks local GitHub governance, workflow trust boundaries, and moderation automation. It is designed to complement—not replace—specialized GitHub Actions analyzers such as zizmor.
+## Command grammar
 
-Its contract is: **find risky GitHub settings and automated jobs without changing your repository**. The default human output leads with severity counts and then shows the source evidence, risk, safe remediation, and stable rule link for every finding.
+```text
+maintainer-defense audit [TARGET]
+  [--format human|summary|json|sarif]
+  [--output PATH]
+  [--fail-on critical|high|medium|low|note]
+  [--baseline REPORT.json | --compare-ref GIT_REF]
+  [--config PATH]
+  [--new-only]
 
-## Commands
-
-From a source checkout:
-
-```bash
-python3 scripts/install_kit.py audit .
-python3 scripts/install_kit.py audit . --format summary
-python3 scripts/install_kit.py audit . --format json
-python3 scripts/install_kit.py audit . --format sarif > maintainer-defense.sarif
-python3 scripts/install_kit.py audit . --fail-on high
-python3 scripts/install_kit.py audit . --baseline previous.json --new-only --format json
-python3 scripts/install_kit.py audit . --compare-ref origin/main --new-only --fail-on high
-python3 scripts/install_kit.py audit . --config .maintainer-defense.json --format json
-python3 scripts/install_kit.py fix . --output recommended.patch
-python3 scripts/install_kit.py fix . --safe-only
+maintainer-defense fix [TARGET]
+  [--output PATH]
+  [--safe-only]
+  [--dry-run]
 ```
 
-The standalone artifact accepts the same `audit` and `fix` subcommands. The original installer interface remains supported, both with legacy flags and through `install`:
+`TARGET` defaults to the current directory.
+
+## Audit behavior
+
+- `human` is the default and includes evidence and remediation guidance.
+- `summary` emits aggregate counts only.
+- `json` conforms to `auditor.schema.json` and preserves fingerprints and locations.
+- `sarif` emits SARIF 2.1.0 with stable help links to [Auditor rules](AUDITOR_RULES.md).
+- `--output` writes atomically to the chosen local path; otherwise output goes to standard output.
+- `--fail-on` returns 2 for a matching effective finding, 1 for a usage or input error, and 0 otherwise.
+
+Severity represents the plausible authority or impact of the detected pattern, not exploitability proof.
+
+## New-finding comparison
+
+Exactly one comparison source is required with `--new-only`:
 
 ```bash
-python3 maintainer-defense.py --target . --profile observe
-python3 maintainer-defense.py install --target . --profile observe
+maintainer-defense audit . --baseline previous.json --new-only --format json
+maintainer-defense audit . --compare-ref origin/main --new-only --fail-on high
 ```
 
-The v1.1.0 release provides the verified standalone artifact, a wheel for `pipx`, a Homebrew formula, and a deterministic skills-only ChatGPT/Codex plugin bundle. It adds complete GitHub write-scope modeling, direct shell-injection detection, cross-workflow artifact trust paths, baseline/Git-ref deltas, governed suppressions, and reproducible pilot evidence. Distribution commands and checksums are documented in the repository README.
+`--baseline` accepts a schema-v1 JSON report. `--compare-ref` archives and audits a local Git revision in a temporary directory; it does not check out the revision or execute it. A finding is new when its 24-character fingerprint is absent from the comparison.
 
-`fix` never edits the target, changes GitHub settings, commits, pushes, or opens a pull request. It emits a unified diff for human review. `--dry-run` is accepted for clarity but is redundant because patch-only behavior is unconditional.
+## Suppressions
 
-`--new-only` requires exactly one comparison source. `--baseline` reads fingerprints from a schema-v1 JSON audit report. `--compare-ref` resolves a local Git commit, archives it into a temporary directory, and audits that snapshot without checking it out or executing repository code. The emitted summary, SARIF/JSON findings, and `--fail-on` threshold contain only fingerprints absent from the comparison. A changed rule message changes its fingerprint and is therefore reported as new.
+The auditor discovers only `TARGET/.maintainer-defense.json` by default. `--config PATH` selects another file explicitly. Suppressions are applied before comparison and threshold evaluation. Invalid, duplicate, unknown, or unmatched active selectors fail closed. See [Configuration](CONFIGURATION.md).
 
-The auditor discovers only `TARGET/.maintainer-defense.json`, unless `--config PATH` is explicit. Each suppression requires `rule_id`, non-empty `reason` and `owner`, an ISO `expires_on`, and at least one exact `path` or `fingerprint` selector. Expired entries warn and stop suppressing; unknown rules, malformed or duplicate selectors, and active selectors that match no current finding fail closed. Suppressions affect emitted findings and `--fail-on`, never the raw repository or fix patches. The strict format is defined by [`maintainer-defense-config.schema.json`](../maintainer-defense-config.schema.json).
+## Patch generation
 
-## Rule families
+`fix` writes a unified diff to standard output or `--output`. It never changes repository files, Git state, GitHub settings, branches, or pull requests. `--safe-only` omits proposals that require contextual review. `--dry-run` is a compatibility flag; all fixes are patch-only.
 
-| Family | Scope |
-| --- | --- |
-| `MD-GOV` | SECURITY, CODEOWNERS, issue forms, dependency updates, and documented branch-protection expectations |
-| `MD-WF` | Token boundaries, immutable Action pins, privileged events, untrusted checkout/execution, secrets, and persisted credentials |
-| `MD-MOD` | Destructive moderation, identity/history proxies, and appeal paths |
+## Installer compatibility
 
-Every finding includes a stable rule ID, source location, severity, confidence, threat scenario, recommendation, stable fingerprint, and patch metadata. The [rule reference](AUDITOR_RULES.md) adds detection evidence, false-positive guidance, safe remediation, and OpenSSF/CWE mappings where the mapping is useful. JSON output follows [`auditor.schema.json`](../auditor.schema.json). SARIF output follows SARIF 2.1.0 and links each result to its rule documentation.
+The same artifact exposes the defense-kit installer:
 
-## GitHub Action and Security tab
+```bash
+maintainer-defense install --target . --profile observe --language en
+maintainer-defense install --target . --profile observe --language en --apply
+maintainer-defense install --target . --verify
+maintainer-defense install --target . --uninstall
+```
 
-The copyable [`auditor-sarif.yml`](examples/auditor-sarif.yml) workflow scans on `push`, a weekly schedule, or manual dispatch and uploads SARIF to GitHub code scanning. The auditor itself is read-only: it neither executes repository code nor changes repository contents or settings. The upload step does require `security-events: write`; that permission writes analysis results to the Security tab, not source code. Code scanning is available for public repositories on GitHub.com and for eligible private or internal repositories with GitHub Code Security enabled. Review both prerequisites and the upload boundary before adoption.
-
-## Offline boundary
-
-The auditor does not make network or GitHub API calls. It cannot prove the actual state of rulesets, branch protections, default token settings, labels, private vulnerability reporting, or organization policy. It checks only repository files and reports undocumented expectations separately. Do not interpret a clean local audit as a certification.
-
-## Evidence and testing
-
-The labeled corpus in [`tests/fixtures/auditor/corpus.json`](../tests/fixtures/auditor/corpus.json) covers safe and unsafe governance, workflow, and moderation configurations. Tests also mutate token permissions, Action pins, and checkout credential persistence, then require the corresponding rule to detect each mutation.
-
-Corpus accuracy is a regression measurement over the published cases, not a claim about all GitHub repositories. New rules should add positive, negative, and non-applicable examples before their behavior is advertised.
-
-Published per-rule precision, recall, exact-case agreement, mutation score, and their interpretation boundary are in [`AUDITOR_EVALUATION.md`](AUDITOR_EVALUATION.md).
-
-The first public-repository smoke test, pinned source revisions, corrections it produced, and why it does not claim real-world precision are documented in [`AUDITOR_PILOT.md`](AUDITOR_PILOT.md).
-
-Independent OSS maintainers can join the consent-based next phase through the [`AUDITOR_PILOT_PROGRAM.md`](AUDITOR_PILOT_PROGRAM.md) protocol.
+Preview is the default. Install, verify, and uninstall behavior is documented by the [deployable kit](../kits/maintainer-defense-kit/README.md).

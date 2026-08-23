@@ -1,7 +1,9 @@
-# Terms of Use
+# Terms of use
 
-Last updated: 2026-08-02
+Last updated: 2026-08-24
 
-Awesome Maintainer Defense is provided under the MIT License. Findings are review inputs, not proof of authorship, intent, compromise, or repository safety. Generated patches require human review before application.
+Awesome Maintainer Defense is licensed under the MIT License. The repository [LICENSE](LICENSE) is the controlling open-source license text.
 
-Users are responsible for repository authorization, appropriate disclosure of security findings, backup and review procedures, and compliance with their hosting provider's terms. The software is provided without warranty, to the extent permitted by applicable law. The repository `LICENSE` contains the controlling open-source license terms.
+Auditor findings, catalog records, generated patches, and playbooks are review inputs. They are not proof of authorship, intent, compromise, compliance, or repository safety, and they are not legal, security-certification, or incident-response services.
+
+Users are responsible for authorization to inspect a repository, protection of sensitive output, coordinated vulnerability disclosure, review and backup before applying a patch, and compliance with platform and third-party terms. The software is provided without warranty to the extent permitted by law.

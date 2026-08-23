@@ -1,66 +1,43 @@
-# Maintainer-defense threat model
+# Threat model
 
-> Risk model for assets, actors, trust boundaries, abuse paths, safety invariants, and explicit non-goals. Return to the [documentation hub](README.md).
+## Security objective
 
-## Scope
+Protect maintainer decision capacity, repository integrity, release authority, credentials, private reports, and contributor appeal rights. The product reduces detectable governance and automation risks; it does not establish that a repository or person is trustworthy.
 
-The defended system is an open-source repository that accepts public issues, pull requests, discussions, or vulnerability reports. The goal is to preserve maintainer attention, contributor safety, code integrity, and recoverability without excluding legitimate newcomers by default.
+## Inputs and trust boundaries
 
-## Assets
-
-- maintainer time, wellbeing, and decision quality;
-- repository code, releases, tags, and branch protections;
-- workflow tokens, organization secrets, caches, and build artifacts;
-- contributor trust and the project's public reputation;
-- private vulnerability reports and embargoed evidence;
-- moderation evidence needed for an appeal or platform report.
-
-## Actors
-
-- good-faith new and established contributors;
-- inexperienced or heavily automated contributors;
-- spam, SEO, bounty, reputation, or activity farmers;
-- harassers and coordinated abuse campaigns;
-- attackers using pull requests, issues, comments, dependencies, or workflows as an execution path;
-- compromised maintainer, contributor, Action, package, or bot accounts;
-- imperfect classifiers and misconfigured automation.
-
-## Trust boundaries
-
-1. **Public input → repository:** issue bodies, PR metadata, patches, comments, links, and uploaded artifacts are untrusted.
-2. **Repository → privileged workflow:** `pull_request_target`, `issue_comment`, `workflow_run`, and similar events may receive write tokens or secrets.
-3. **Workflow → third party:** Actions, model endpoints, hosted dashboards, package registries, and credential-verification services receive data or execution authority.
-4. **Configuration → organization:** centralized settings Apps can change protections across many repositories.
-5. **Classifier → enforcement:** a probabilistic label becomes harmful when it automatically closes, locks, blocks, or publicly accuses a person.
-
-## Primary threat scenarios
-
-| Scenario | Failure mode | Preferred controls |
+| Boundary | Untrusted or external input | Protected side |
 | --- | --- | --- |
-| PR/issue flood | Maintainers cannot find legitimate work | Structured forms, queue labels, temporary interaction limits, bounded incident mode |
-| Low-effort automated contributions | Review cost exceeds contribution value | Prior approval for large work, evidence requirements, review-first triage |
-| Harassment or coordinated pressure | Burnout, unsafe discussions, reputation attacks | Preserve evidence, moderate consistently, limit interactions, report abuse |
-| Pwn request | Untrusted PR code steals a write token or secret | Never execute PR code in a privileged event; isolate workflows and minimize permissions |
-| Poisoned workflow artifact | A privileged `workflow_run` job executes files produced by untrusted PR code | Treat artifacts as untrusted data; verify and parse without execution, or rebuild from trusted source |
-| Malicious dependency or Action | Build or release compromise | Dependency review, immutable Action pins, secret scanning, runtime egress monitoring |
-| Configuration takeover | Branch protections or admin access are weakened | CODEOWNERS for `.github/`, required independent review, versioned settings, small blast radius |
-| Classifier false positive | Legitimate contributor is publicly penalized | Dry-run, reversible labels, private review, appeal path, bias monitoring |
-| Sensitive-data leakage | Private reports or secrets reach logs/models/vendors | Data minimization, redaction, documented boundaries, local processing when needed |
+| Public contribution → repository | Pull-request revisions, issue text, comments, links, artifacts | Maintainer queue and repository content |
+| Repository → privileged workflow | Event payloads, checked-out refs, generated scripts | `GITHUB_TOKEN`, secrets, OIDC, release authority |
+| Workflow → dependency/service | Actions, packages, APIs, hosted models | Source, metadata, credentials, execution environment |
+| Classifier → enforcement | Heuristic or probabilistic result | Close, lock, block, label, and public accusation decisions |
+| Local checkout → auditor | Governance files, workflow YAML, local Git metadata | Local report and generated patch |
 
-## GitHub Actions safety invariant
+The auditor crosses only the final boundary. It reads files but does not execute repository code, follow links, call remote APIs, or mutate the checkout.
 
-Never fetch and execute untrusted pull-request code in a job that has repository secrets or a privileged token. GitHub documents that `pull_request_target` runs with the base repository's trust and becomes dangerous when a workflow fetches a fork's code and executes build scripts, dependencies, or configuration. See [Securely using `pull_request_target`](https://docs.github.com/en/actions/reference/security/securely-using-pull_request_target).
+## Attacker capabilities considered
 
-The balanced starter kit does **not** use `pull_request_target`. It uses the unprivileged `pull_request` event, read-only permissions, a full-SHA Action pin, and no checkout of PR code. Quality results become a status check; any merge enforcement is configured separately through a native ruleset. This reduces risk but does not eliminate the need to review upstream Action changes before updating the pin.
+- Submit crafted patches, metadata, comments, issue bodies, and workflow artifacts.
+- Influence a fork revision or mutable dependency reference.
+- Trigger public workflow events and attempt to reach tokens, secrets, OIDC, caches, or release jobs.
+- Flood intake, hide valid work in noise, or exploit destructive moderation and appeal gaps.
+- Compromise a contributor, bot, Action, package, or maintainer account.
 
-## Non-goals
+## Required invariants
 
-- proving whether text or code was generated by AI;
-- assigning moral intent from account age, writing style, or merge history;
-- replacing human moderation, incident response, or legal advice;
-- guaranteeing that a scanner or trust system is unbiased;
-- preventing every software supply-chain attack.
+- Untrusted contributor code is never executed in a job holding secrets or write authority.
+- Workflow permissions default to empty and are granted per job.
+- Third-party Actions resolve to reviewed full commit SHAs.
+- Cross-workflow artifacts remain untrusted unless verified and parsed without execution or rebuilt from trusted source.
+- Generated remediation remains a patch until a human owner reviews and applies it.
+- Destructive moderation is not a default and always has an owner, expiry, rollback, and appeal path.
+- Identity and history characteristics are not treated as proof of contribution quality or malicious intent.
 
-## Safe default
+## Excluded state
 
-Start with evidence requirements and reversible labels. Move to closing, locking, admission control, or interaction limits only after measuring the problem, documenting the rule, assigning an owner, and defining when the stronger control will be removed.
+A local audit cannot observe live rulesets, branch protection, organization policy, secret values, installed GitHub Apps, repository role eligibility, label existence, private vulnerability settings, external service behavior, or changes after the checkout revision. [MD-GOV-006](AUDITOR_RULES.md#md-gov-006) therefore records local expectations rather than asserting live configuration.
+
+## Residual risk
+
+Static matching may miss dynamically constructed paths, reusable-workflow behavior, custom scripts, and novel source-to-sink flows. It can also flag patterns made safe by external controls. Third-party provenance does not prove dependency safety. Human review, platform settings verification, specialized analyzers, and incident procedures remain necessary.
