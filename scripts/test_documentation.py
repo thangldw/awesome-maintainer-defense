@@ -13,6 +13,9 @@ from documentation_contract import (
     validate_documentation_contract,
 )
 
+ROOT = Path(__file__).resolve().parents[1]
+MANIFEST = json.loads(ROOT.joinpath("documentation-manifest.json").read_text(encoding="utf-8"))
+
 
 def write_manifest(
     root: Path,
@@ -99,6 +102,26 @@ class DocumentationContractTests(unittest.TestCase):
 
             with self.assertRaisesRegex(DocumentationContractError, "normalized unique relative paths"):
                 validate_documentation_contract(root)
+
+
+class RepositoryDocumentationTests(unittest.TestCase):
+    def test_english_product_journey_paths_exist(self) -> None:
+        for relative in (
+            "docs/GETTING_STARTED.md",
+            "docs/AUDITOR.md",
+            "docs/CONFIGURATION.md",
+            "docs/THREAT_MODEL.md",
+            "docs/KIT_ASSURANCE.md",
+            "docs/AUDITOR_PILOT_PROGRAM.md",
+            "docs/DISTRIBUTION.md",
+        ):
+            with self.subTest(path=relative):
+                self.assertTrue(ROOT.joinpath(relative).is_file(), relative)
+
+    def test_approved_legacy_paths_are_absent(self) -> None:
+        for relative in MANIFEST["forbidden_paths"]:
+            with self.subTest(path=relative):
+                self.assertFalse(ROOT.joinpath(relative).exists(), relative)
 
 
 if __name__ == "__main__":

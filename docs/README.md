@@ -1,58 +1,34 @@
 # Documentation
 
-> One entry point for product reference, operating guidance, evidence, and deployable assets.
+English is the canonical product contract. Vietnamese and Japanese cover the essential adoption and safety journey; runtime kit assets remain structurally aligned across all three languages.
 
-Start with the repository [README](../README.md). Use this page when you need to understand a decision, operate a defense, or verify a claim.
+## Start and operate
 
-## Product reference
-
-| Need | Canonical document |
+| Goal | Document |
 | --- | --- |
-| Run the repository auditor | [Auditor reference](AUDITOR.md) |
-| Understand a finding or rule ID | [Auditor rule reference](AUDITOR_RULES.md) |
-| Upload read-only audit results to GitHub | [SARIF workflow example](examples/auditor-sarif.yml) |
-| Understand every PR-quality signal | [Signal contract](PROFILE_SIGNALS.md) |
-| Install, verify, or remove the kit | [Kit guide](../kits/maintainer-defense-kit/README.md) |
-| Know what the kit actually guarantees | [Kit assurance case](KIT_ASSURANCE.md) |
-| See which outcomes come next | [Outcome roadmap](../ROADMAP.md) |
+| Build, verify, and run the first audit | [Getting started](GETTING_STARTED.md) |
+| Use every auditor command and output | [Auditor CLI](AUDITOR.md) |
+| Review a finding by stable rule ID | [Auditor rules](AUDITOR_RULES.md) |
+| Govern suppressions and expiry | [Configuration](CONFIGURATION.md) |
+| Triage, authorize, roll out, and roll back controls | [Playbook](PLAYBOOK.md) |
 
-## Operate safely
+## Decide whether to adopt
 
-1. Review [native GitHub controls](NATIVE_CONTROLS.md).
-2. Use the [threat model](THREAT_MODEL.md) to identify assets and trust boundaries.
-3. Choose a control level with the [maturity model](MATURITY_MODEL.md).
-4. Follow the [defense playbook](PLAYBOOK.md) for baseline, observation, enforcement, incidents, and recovery.
-
-Deployment translations:
-
-- [Vietnamese playbook](vi/PLAYBOOK.md) and [assurance case](vi/KIT_ASSURANCE.md)
-- [Japanese playbook](ja/PLAYBOOK.md) and [assurance case](ja/KIT_ASSURANCE.md)
-
-## Verify the evidence
-
-| Question | Evidence |
+| Question | Document |
 | --- | --- |
-| How are catalog entries selected? | [Evaluation method](EVALUATION.md) |
-| What access, effects, and limitations does each resource have? | [Resource audit](RESOURCE_AUDIT.md) |
-| What did the synthetic corpus measure? | [Auditor evaluation](AUDITOR_EVALUATION.md) |
-| What changed after testing public repositories? | [Auditor pilot](AUDITOR_PILOT.md) |
-| How can an OSS maintainer join an independent pilot? | [Auditor pilot program](AUDITOR_PILOT_PROGRAM.md) |
-| Where are reproducible pilot bundles published? | [Pilot evidence](../pilots/README.md) |
-| What material corrections have been made? | [Audit log](AUDIT_LOG.md) |
+| What inputs and authority cross trust boundaries? | [Threat model](THREAT_MODEL.md) |
+| Which claims have automated evidence? | [Kit assurance](KIT_ASSURANCE.md) |
+| What does the labeled corpus measure? | [Auditor evaluation](AUDITOR_EVALUATION.md) |
+| How can a maintainer authorize a pilot? | [Pilot program](AUDITOR_PILOT_PROGRAM.md) |
+| Which artifacts and channels are release-authoritative? | [Distribution](DISTRIBUTION.md) |
 
-## Deployable assets
+## Browse and extend
 
-- [AI-assisted contribution policy](../policies/AI_CONTRIBUTIONS.md)
-- [Unsolicited pull-request policy](../policies/UNSOLICITED_PULL_REQUESTS.md)
-- [Low-quality submission response](../responses/low-quality-pr.md)
-- [Reproduction-needed response](../responses/reproduction-needed.md)
-- [Balanced starter kit](../kits/balanced/README.md)
-- [Workflow-hardening kit](../kits/workflow-hardening/README.md)
+- [Evidence-reviewed catalog](CATALOG.md)
+- [Pilot evidence](../pilots/README.md)
+- [Deployable kit](../kits/maintainer-defense-kit/README.md)
+- [Contribution contract](../CONTRIBUTING.md)
 
-## Documentation rules
+Localized essentials: [Tiếng Việt](vi/README.md) · [日本語](ja/README.md).
 
-- Keep one canonical document for each contract.
-- Link to evidence instead of repeating claims.
-- Separate tested engineering behavior from field effectiveness.
-- Keep English, Vietnamese, and Japanese deployment assets structurally aligned.
-- Edit generated sources—not generated tables—and run `make validate` before merging.
+Documentation claims must distinguish local tested behavior from live GitHub state and field effectiveness. Generated pages are rebuilt from structured sources; edit their source data rather than the generated Markdown.

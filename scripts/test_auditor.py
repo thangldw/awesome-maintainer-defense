@@ -201,23 +201,47 @@ class AuditorTests(unittest.TestCase):
             self.assertIn("Safe remediation:", output)
             self.assertIn("AUDITOR_RULES.md#md-wf-003", output)
 
-    def test_readme_output_matches_published_corpus_case(self) -> None:
+    def test_documented_quickstart_artifact_matches_json_contract(self) -> None:
+        readme = ROOT.joinpath("README.md").read_text(encoding="utf-8")
+        command = re.search(
+            r"^python3\s+(\S*maintainer-defense-kit\.py)\s+audit\s+\.$",
+            readme,
+            re.MULTILINE,
+        )
+        self.assertIsNotNone(command)
+        subprocess.run(
+            [sys.executable, "scripts/build_standalone.py"],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=True,
+        )
         corpus = json.loads(CORPUS.read_text(encoding="utf-8"))
         case = next(item for item in corpus["cases"] if item["id"] == "pwn-request")
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp)
             materialize(target, case)
-            summary = module.render_summary(module.audit_repository(target))
-            expected = "```text\n" + summary + "```"
-        readme = ROOT.joinpath("README.md").read_text(encoding="utf-8")
-        documented = readme.split("<!-- auditor-output:start -->", 1)[1].split(
-            "<!-- auditor-output:end -->", 1
-        )[0].strip()
-        self.assertEqual(documented, expected)
-        screenshot = ROOT.joinpath("assets/audit-result.svg").read_text(encoding="utf-8")
-        for line in summary.splitlines():
-            if line:
-                self.assertIn(line, screenshot)
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / command.group(1)),
+                    "audit",
+                    str(target),
+                    "--format",
+                    "json",
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+        report = json.loads(result.stdout)
+        self.assertEqual(report["schema_version"], 1)
+        self.assertEqual(report["summary"]["total"], 3)
+        self.assertEqual(
+            {item["rule_id"] for item in report["findings"]},
+            {"MD-WF-004", "MD-WF-005", "MD-WF-006"},
+        )
 
     def test_rule_registry_matches_implementation_docs_and_corpus(self) -> None:
         registry = module.rule_catalog()
