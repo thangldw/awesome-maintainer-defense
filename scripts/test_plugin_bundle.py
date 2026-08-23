@@ -14,7 +14,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / "dist"
-EXPECTED_VERSION = "1.1.0"
+EXPECTED_VERSION = "1.1.1"
 BUNDLE = DIST / f"awesome-maintainer-defense-openai-skills-v{EXPECTED_VERSION}.zip"
 BUILDER = ROOT / "scripts/build_plugin_bundle.py"
 
@@ -34,6 +34,7 @@ class PluginBundleTests(unittest.TestCase):
     def test_manifest_is_read_only_and_current(self) -> None:
         manifest = json.loads((ROOT / ".codex-plugin/plugin.json").read_text(encoding="utf-8"))
         self.assertEqual(manifest["version"], EXPECTED_VERSION)
+        self.assertEqual(manifest["interface"]["category"], "Security")
         self.assertEqual(manifest["interface"]["capabilities"], ["Read"])
         self.assertEqual(manifest["skills"], "./skills/")
 

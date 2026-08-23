@@ -12,7 +12,13 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+EXPECTED_VERSION = "1.1.1"
 READMES = ("README.md", "README.vi.md", "README.ja.md")
+INSTALL_PAGES = READMES + (
+    "docs/GETTING_STARTED.md",
+    "docs/vi/GETTING_STARTED.md",
+    "docs/ja/GETTING_STARTED.md",
+)
 AUDIT_COMMAND = re.compile(
     r"^python3\s+(?P<path>\S*maintainer-defense-kit\.py)\s+audit\s+\.$",
     re.MULTILINE,
@@ -24,6 +30,16 @@ SOURCE_QUICKSTART = re.compile(
 
 
 class QuickstartTests(unittest.TestCase):
+    def test_public_install_paths_are_pinned_to_release_version(self) -> None:
+        expected_pipx = f"pipx install maintainer-defense-kit=={EXPECTED_VERSION}"
+        expected_release = f"/releases/download/v{EXPECTED_VERSION}/maintainer-defense-kit.py"
+        for filename in INSTALL_PAGES:
+            with self.subTest(page=filename):
+                text = (ROOT / filename).read_text(encoding="utf-8")
+                self.assertIn(expected_pipx, text)
+                if filename in {"README.md", "docs/GETTING_STARTED.md"}:
+                    self.assertIn(expected_release, text)
+
     def test_root_locale_audit_commands_use_the_same_artifact(self) -> None:
         paths = {}
         for filename in READMES:
