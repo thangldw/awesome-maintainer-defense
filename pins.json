@@ -85,6 +85,13 @@
       "sha": "dc37677b2e1c63e2034f94d8a5b11f265b73ba33",
       "metadata_path": "action.yml",
       "commit_verified": true
+    },
+    {
+      "repository": "zizmorcore/zizmor-action",
+      "tag": "v0.6.4",
+      "sha": "cc914d7f3750a2d13d75c7f184a1060aa0e9d482",
+      "metadata_path": "action.yml",
+      "commit_verified": true
     }
   ]
 }
