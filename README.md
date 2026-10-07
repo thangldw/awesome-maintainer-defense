@@ -1,5 +1,7 @@
 # Awesome Maintainer Defense
 
+Product introduction: [Maintainer Defense](https://thangldw.github.io/awesome-maintainer-defense/). Latest published distribution: [v1.1.1](https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.1.1). Source/CI pin updates on main do not republish the standalone release or prove live organization protection.
+
 [English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
 
 Awesome Maintainer Defense is an offline, read-only repository auditor and a set of reversible maintainer controls. It inspects local governance files and GitHub Actions trust boundaries without a token or network request. It does not execute repository code, inspect live GitHub settings, or identify who wrote a contribution.

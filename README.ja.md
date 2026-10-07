@@ -1,5 +1,7 @@
 # Awesome Maintainer Defense
 
+紹介ページ: [Maintainer Defense](https://thangldw.github.io/awesome-maintainer-defense/)。最新の公開 distribution は [v1.1.1](https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.1.1) です。Main の source/CI pin 更新は standalone release の再公開や実際の組織保護の証明ではありません。
+
 [English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
 
 Awesome Maintainer Defense は、オフラインかつ読み取り専用のリポジトリ監査ツールと、元に戻せるメンテナー向け防御策です。トークンやネットワーク接続なしで、ローカルのガバナンス文書と GitHub Actions の信頼境界を確認します。リポジトリのコードは実行せず、GitHub のオンライン設定も取得せず、コントリビューションの作者も判定しません。

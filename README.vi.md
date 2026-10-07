@@ -1,5 +1,7 @@
 # Awesome Maintainer Defense
 
+Trang giới thiệu: [Maintainer Defense](https://thangldw.github.io/awesome-maintainer-defense/). Bản phân phối đã phát hành mới nhất: [v1.1.1](https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.1.1). Cập nhật source/CI pin trên main không phát hành lại standalone release và không chứng minh tổ chức đang được bảo vệ thực tế.
+
 [English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
 
 Awesome Maintainer Defense là auditor chạy offline, chỉ đọc và bộ kiểm soát có thể hoàn tác dành cho maintainer. Công cụ kiểm tra policy cục bộ và ranh giới tin cậy của GitHub Actions mà không cần token hay kết nối mạng. Công cụ không chạy mã nguồn của repo, không đọc setting GitHub trực tuyến và không xác định ai đã viết contribution.
