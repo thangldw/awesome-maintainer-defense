@@ -1,6 +1,6 @@
 # Awesome Maintainer Defense
 
-Product introduction: [Maintainer Defense](https://thangldw.github.io/awesome-maintainer-defense/). Latest published distribution: [v1.1.1](https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.1.1). Source/CI pin updates on main do not republish the standalone release or prove live organization protection.
+Product introduction: [Maintainer Defense](https://thangldw.github.io/awesome-maintainer-defense/). Latest published distribution: [v1.2.0](https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.2.0). Source/CI pin updates on main do not republish the standalone release or prove live organization protection.
 
 [English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
 
@@ -47,15 +47,15 @@ Tested contracts cover deterministic detection, JSON/SARIF output, patch-only re
 PyPI with an isolated application environment:
 
 ```bash
-pipx install maintainer-defense-kit==1.1.1
+pipx install maintainer-defense-kit==1.2.0
 maintainer-defense audit .
 ```
 
 Verified standalone on POSIX systems:
 
 ```bash
-curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1.1/maintainer-defense-kit.py
-curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1.1/maintainer-defense-kit.py.sha256
+curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.2.0/maintainer-defense-kit.py
+curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.2.0/maintainer-defense-kit.py.sha256
 shasum -a 256 -c maintainer-defense-kit.py.sha256
 python3 maintainer-defense-kit.py audit .
 ```
@@ -63,8 +63,8 @@ python3 maintainer-defense-kit.py audit .
 Verified standalone on PowerShell:
 
 ```powershell
-Invoke-WebRequest https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1.1/maintainer-defense-kit.py -OutFile maintainer-defense-kit.py
-Invoke-WebRequest https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1.1/maintainer-defense-kit.py.sha256 -OutFile maintainer-defense-kit.py.sha256
+Invoke-WebRequest https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.2.0/maintainer-defense-kit.py -OutFile maintainer-defense-kit.py
+Invoke-WebRequest https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.2.0/maintainer-defense-kit.py.sha256 -OutFile maintainer-defense-kit.py.sha256
 $Expected = ((Get-Content maintainer-defense-kit.py.sha256 -Raw).Trim() -split '\s+')[0].ToLowerInvariant()
 $Actual = (Get-FileHash maintainer-defense-kit.py -Algorithm SHA256).Hash.ToLowerInvariant()
 if ($Actual -ne $Expected) { Write-Error "SHA-256 mismatch"; exit 1 }

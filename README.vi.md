@@ -1,6 +1,6 @@
 # Awesome Maintainer Defense
 
-Trang giới thiệu: [Maintainer Defense](https://thangldw.github.io/awesome-maintainer-defense/). Bản phân phối đã phát hành mới nhất: [v1.1.1](https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.1.1). Cập nhật source/CI pin trên main không phát hành lại standalone release và không chứng minh tổ chức đang được bảo vệ thực tế.
+Trang giới thiệu: [Maintainer Defense](https://thangldw.github.io/awesome-maintainer-defense/). Bản phân phối đã phát hành mới nhất: [v1.2.0](https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.2.0). Cập nhật source/CI pin trên main không phát hành lại standalone release và không chứng minh tổ chức đang được bảo vệ thực tế.
 
 [English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
 
@@ -41,7 +41,7 @@ Test hiện tại xác minh detection có tính xác định, JSON/SARIF, remedi
 ## Cài đặt
 
 ```bash
-pipx install maintainer-defense-kit==1.1.1
+pipx install maintainer-defense-kit==1.2.0
 maintainer-defense audit .
 ```
 
