@@ -7,10 +7,10 @@
 - Pilot type: `internal-owner-directed`
 - Disclosure: `repository-and-sanitized-results`
 - Reviewer role: `implementation-agent-under-owner-direction`
-- Run timestamp: `2026-11-11T13:14:36Z`
-- Auditor: `1.2.0` at `f1014dab950a5f2834f30bade213499a68d8cf20`
+- Run timestamp: `2026-11-11T15:12:38Z`
+- Auditor: `1.2.0` at `2200ef860f033211547451d979a06c41cdd8dc0f`
 - Standalone SHA-256: `cbbd51fc6600ca8f006065a51e2e36a15a8e2728ade0b33a769747ededee4401`
-- Target: `thangldw/awesome-maintainer-defense@f1014dab950a5f2834f30bade213499a68d8cf20`
+- Target: `thangldw/awesome-maintainer-defense@2200ef860f033211547451d979a06c41cdd8dc0f`
 - Command: `python3 dist/maintainer-defense-kit.py audit . --format json`
 
 The report represents the pinned auditor and target revisions. It does not claim that a historical auditor equals the current runtime.
