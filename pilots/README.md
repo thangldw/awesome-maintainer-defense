@@ -10,7 +10,8 @@ Owner-directed dogfood must be labeled non-independent and non-representative. A
 
 ## Published evidence
 
-- [1.1.1 owner-directed dogfood](2026-08-24-awesome-maintainer-defense/README.md): current release-candidate reproducibility evidence; zero findings; not independent or representative.
+- [1.2.0 owner-directed dogfood](2026-11-11-awesome-maintainer-defense/README.md): current release-candidate reproducibility evidence; zero findings; not independent or representative.
+- [1.1.1 owner-directed dogfood](2026-08-24-awesome-maintainer-defense/README.md): historical reproducibility evidence at its pinned runtime; zero findings.
 - [1.1.0 owner-directed dogfood](2026-08-23-awesome-maintainer-defense/README.md): historical reproducibility evidence at its pinned runtime.
 
 `fixtures/minimal-input.json` demonstrates the schema and is not field evidence. Participation authority, disclosure choices, and publication limits are defined in the [pilot program](../docs/AUDITOR_PILOT_PROGRAM.md).
