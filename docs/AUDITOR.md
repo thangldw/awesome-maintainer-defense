@@ -17,6 +17,9 @@ maintainer-defense fix [TARGET]
   [--output PATH]
   [--safe-only]
   [--dry-run]
+  [--verify]
+
+maintainer-defense explain [RULE_ID]
 ```
 
 `TARGET` defaults to the current directory.
@@ -50,6 +53,20 @@ The auditor discovers only `TARGET/.maintainer-defense.json` by default. `--conf
 ## Patch generation
 
 `fix` writes a unified diff to standard output or `--output`. It never changes repository files, Git state, GitHub settings, branches, or pull requests. `--safe-only` omits proposals that require contextual review. `--dry-run` is a compatibility flag; all fixes are patch-only.
+
+### Verifying a patch
+
+`fix --verify` still emits the patch as usual, then writes the same proposed file content into a scratch copy of the target (excluding `.git`, `node_modules`, `.venv`), re-runs the audit there, and prints a summary on standard error:
+
+- **resolved**: findings the patch targeted that no longer appear.
+- **unresolved**: targeted findings that still appear.
+- **introduced**: findings that appear only after the patch.
+
+The command returns 2 when anything is unresolved or introduced, otherwise 0. The target is never modified. This checks the audit result of the patched content, not whether your workflow still behaves correctly: review the diff and run your normal CI before merging.
+
+## Rule explanations
+
+`explain` lists every rule ID with its severity and title. `explain MD-WF-002` (case-insensitive) prints the rule's rationale, safe remediation, help link, and framework mappings from the bundled rule registry. It reads no repository and needs no network.
 
 ## Installer compatibility
 

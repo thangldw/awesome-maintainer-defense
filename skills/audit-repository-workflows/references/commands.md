@@ -12,9 +12,11 @@ python3 scripts/run_auditor.py audit TARGET --compare-ref origin/main --new-only
 python3 scripts/run_auditor.py audit TARGET --config TARGET/.maintainer-defense.json --format json
 python3 scripts/run_auditor.py fix TARGET --output recommended.patch
 python3 scripts/run_auditor.py fix TARGET --safe-only --output recommended.patch
+python3 scripts/run_auditor.py fix TARGET --verify --output recommended.patch
+python3 scripts/run_auditor.py explain MD-WF-002
 ```
 
-`audit` is read-only. `fix` generates a unified diff and writes only `--output`; it never applies the patch or changes the target repository.
+`audit` is read-only. `fix` generates a unified diff and writes only `--output`; it never applies the patch or changes the target repository. `fix --verify` additionally re-audits a scratch copy carrying the proposed content and exits 2 if a targeted finding remains or a new one appears. `explain [RULE_ID]` prints rule rationale and remediation from the bundled registry.
 
 `--new-only` requires exactly one comparison source. `--baseline` reads a schema-v1 report. `--compare-ref` uses an already-present local Git object and audits a temporary archive; it does not fetch or check out the ref. Fetching requires separate network authorization.
 
