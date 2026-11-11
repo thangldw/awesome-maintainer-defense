@@ -14,7 +14,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / "dist"
-EXPECTED_VERSION = "1.1.1"
+EXPECTED_VERSION = "1.2.0"
 BUNDLE = DIST / f"awesome-maintainer-defense-openai-skills-v{EXPECTED_VERSION}.zip"
 BUILDER = ROOT / "scripts/build_plugin_bundle.py"
 

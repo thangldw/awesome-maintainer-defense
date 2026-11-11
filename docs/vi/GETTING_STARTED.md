@@ -16,7 +16,7 @@ Auditor chỉ đọc file policy, workflow và Git metadata cục bộ; không c
 ## Cài bằng pipx
 
 ```bash
-pipx install maintainer-defense-kit==1.1.1
+pipx install maintainer-defense-kit==1.2.0
 maintainer-defense audit /path/to/repository
 ```
 

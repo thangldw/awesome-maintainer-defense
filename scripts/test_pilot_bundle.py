@@ -87,13 +87,13 @@ class PilotBundleTests(unittest.TestCase):
     def test_historical_pilot_does_not_claim_current_runtime(self) -> None:
         metadata = {"auditor_version": "1.1.0", "source_commit": "1" * 40}
         self.assertFalse(
-            verifier.requires_head_runtime_match(metadata, current_version="1.1.1")
+            verifier.requires_head_runtime_match(metadata, current_version="1.2.0")
         )
 
     def test_current_pilot_requires_head_runtime_match(self) -> None:
-        metadata = {"auditor_version": "1.1.1", "source_commit": "2" * 40}
+        metadata = {"auditor_version": "1.2.0", "source_commit": "2" * 40}
         self.assertTrue(
-            verifier.requires_head_runtime_match(metadata, current_version="1.1.1")
+            verifier.requires_head_runtime_match(metadata, current_version="1.2.0")
         )
 
     def test_checked_in_pilots_match_pinned_revisions(self) -> None:

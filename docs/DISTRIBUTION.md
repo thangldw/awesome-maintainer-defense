@@ -1,16 +1,16 @@
 # Distribution
 
-Version `1.1.1` is distributed through one source repository, one PyPI project, GitHub release artifacts, and the existing ChatGPT/Codex plugin listing. A channel is verified only after its public artifact is fetched and checked.
+Version `1.2.0` is distributed through one source repository, one PyPI project, GitHub release artifacts, and the existing ChatGPT/Codex plugin listing. A channel is verified only after its public artifact is fetched and checked.
 
 ## Release artifacts
 
 - `maintainer-defense-kit.py` and its SHA-256 file.
 - Compatibility standalone `maintainer-defense.py` and its SHA-256 file.
 - Python wheel and source distribution for `maintainer-defense-kit`.
-- Deterministic `awesome-maintainer-defense-openai-skills-v1.1.1.zip`.
+- Deterministic `awesome-maintainer-defense-openai-skills-v1.2.0.zip`.
 - `SHA256SUMS.txt` covering every public release asset.
 
-The tag, package metadata, CLI version, plugin manifests, formula URL/checksum, artifact names, and release title must all resolve to `1.1.1` before tagging.
+The tag, package metadata, CLI version, plugin manifests, formula URL/checksum, artifact names, and release title must all resolve to `1.2.0` before tagging.
 
 ## Publication controls
 
@@ -22,7 +22,7 @@ The OpenAI bundle updates the existing listing [`plugins_6a6edab2886c81918be9c97
 
 ## Consumer verification
 
-Download `SHA256SUMS.txt` and verify the required artifact before execution. For PyPI, pin `maintainer-defense-kit==1.1.1` in an isolated environment and confirm `maintainer-defense --version`. For the plugin, confirm the public directory displays `1.1.1` and the expected skill before treating publication as complete.
+Download `SHA256SUMS.txt` and verify the required artifact before execution. For PyPI, pin `maintainer-defense-kit==1.2.0` in an isolated environment and confirm `maintainer-defense --version`. For the plugin, confirm the public directory displays `1.2.0` and the expected skill before treating publication as complete.
 
 ## Recovery
 

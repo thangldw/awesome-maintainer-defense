@@ -16,7 +16,7 @@ python3 dist/maintainer-defense-kit.py audit .
 ## pipx でインストール
 
 ```bash
-pipx install maintainer-defense-kit==1.1.1
+pipx install maintainer-defense-kit==1.2.0
 maintainer-defense audit /path/to/repository
 ```
 
