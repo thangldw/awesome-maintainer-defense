@@ -13,6 +13,7 @@ import json
 import os
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 import tarfile
@@ -1429,16 +1430,20 @@ def render_sarif(report: dict) -> dict:
     }
 
 
-def combined_patch(report: dict, safe_only: bool) -> str:
-    selected = [
+def selected_fixes(report: dict, safe_only: bool) -> list[dict]:
+    return [
         finding for finding in report["findings"]
         if finding["fix"]["available"]
         and (not safe_only or finding["fix"]["safety"] == "safe")
     ]
+
+
+def patched_files(report: dict, safe_only: bool) -> dict[str, tuple[str, str]]:
+    """Map each changed repository-relative path to its (before, after) text."""
     by_path: dict[str, list[dict]] = {}
-    for finding in selected:
+    for finding in selected_fixes(report, safe_only):
         by_path.setdefault(finding["location"]["path"], []).append(finding)
-    patches: list[str] = []
+    changes: dict[str, tuple[str, str]] = {}
     target = Path(report["target"])
     for relative, file_findings in sorted(by_path.items()):
         path = target / relative
@@ -1462,8 +1467,67 @@ def combined_patch(report: dict, safe_only: bool) -> str:
             first_end = after.find("\n") + 1 if re.match(r"^name\s*:", after) else 0
             after = after[:first_end] + "permissions: {}\n\n" + after[first_end:]
         if before != after:
-            patches.append(unified_patch(relative, before, after))
-    return "".join(patches)
+            changes[relative] = (before, after)
+    return changes
+
+
+def combined_patch(report: dict, safe_only: bool) -> str:
+    return "".join(
+        unified_patch(relative, before, after)
+        for relative, (before, after) in sorted(patched_files(report, safe_only).items())
+    )
+
+
+def verify_patches(report: dict, safe_only: bool) -> dict:
+    """Re-audit a scratch copy carrying the proposed content; never touch the target."""
+    changes = patched_files(report, safe_only)
+    targeted = {item["fingerprint"] for item in selected_fixes(report, safe_only)}
+    before = {item["fingerprint"] for item in report["findings"]}
+    if not changes:
+        return {"patched_files": 0, "resolved": [], "unresolved": [], "introduced": []}
+    target = Path(report["target"])
+    with tempfile.TemporaryDirectory(prefix="maintainer-defense-verify-") as tmp:
+        scratch = Path(tmp) / "snapshot"
+        shutil.copytree(
+            target, scratch, symlinks=True,
+            ignore=shutil.ignore_patterns(".git", "node_modules", ".venv", "__pycache__"),
+        )
+        for relative, (_, after) in changes.items():
+            destination = scratch / relative
+            if destination.is_symlink():
+                raise KitError(f"refusing to verify a patch through a symlink: {relative}")
+            destination.write_text(after, encoding="utf-8")
+        rerun = audit_repository(scratch)
+    after_findings = {item["fingerprint"]: item for item in rerun["findings"]}
+    by_fingerprint = {item["fingerprint"]: item for item in report["findings"]}
+
+    def describe(item: dict) -> dict:
+        return {
+            "rule_id": item["rule_id"],
+            "path": item["location"]["path"],
+            "message": item["message"],
+        }
+
+    return {
+        "patched_files": len(changes),
+        "resolved": [describe(by_fingerprint[key]) for key in sorted(targeted - set(after_findings))],
+        "unresolved": [describe(by_fingerprint[key]) for key in sorted(targeted & set(after_findings))],
+        "introduced": [describe(after_findings[key]) for key in sorted(set(after_findings) - before)],
+    }
+
+
+def render_verification(result: dict) -> str:
+    if result["patched_files"] == 0:
+        return "Verify: no applicable patches to verify.\n"
+    rows = [
+        f"Verify: {len(result['resolved'])} resolved, {len(result['unresolved'])} unresolved, "
+        f"{len(result['introduced'])} introduced across {result['patched_files']} patched file(s)."
+    ]
+    for label in ("unresolved", "introduced"):
+        for item in result[label]:
+            rows.append(f"  {label.upper()}: {item['rule_id']} {item['path']}  {item['message']}")
+    rows.append("Verified on a scratch copy; the target was not modified.")
+    return "\n".join(rows) + "\n"
 
 
 def parse_install_args(arguments: list[str] | None = None) -> argparse.Namespace:
@@ -1509,6 +1573,11 @@ def parse_audit_args(command: str, arguments: list[str]) -> argparse.Namespace:
             "--dry-run", action="store_true",
             help="compatibility flag; fix always emits a patch and never edits files",
         )
+        parser.add_argument(
+            "--verify", action="store_true",
+            help="re-audit a scratch copy with the patch content; exit 2 if a targeted finding "
+                 "remains or a new one appears (summary on stderr)",
+        )
     args = parser.parse_args(arguments)
     if command == "audit":
         has_comparison = bool(args.baseline or args.compare_ref)
@@ -1540,6 +1609,43 @@ def emit_output(content: str, output: Path | None) -> None:
     print(f"WROTE {output}", file=sys.stderr)
 
 
+def render_rule_list() -> str:
+    rows = [
+        f"{rule['id']}  {rule['default_severity'].upper():8} {rule['title']}"
+        for rule in sorted(rule_catalog().values(), key=lambda item: item["id"])
+    ]
+    return "\n".join(rows) + "\n"
+
+
+def render_rule(rule_id: str) -> str:
+    rule = rule_metadata(rule_id)
+    rows = [
+        f"{rule['id']} · {rule['default_severity'].upper()}",
+        rule["title"],
+        "",
+        f"Why it matters: {rule['description']}",
+        f"Safe remediation: {rule['safe_remediation']}",
+        f"Rule: {rule_help_uri(rule['id'])}",
+    ]
+    if rule["mappings"]:
+        rows.append("References:")
+        rows.extend(f"  {item['framework']} {item['id']}  {item['url']}" for item in rule["mappings"])
+    return "\n".join(rows) + "\n"
+
+
+def run_explain(arguments: list[str]) -> None:
+    parser = UsageArgumentParser(prog="maintainer-defense explain")
+    parser.add_argument("rule_id", nargs="?", help="rule ID such as MD-WF-002 (omit to list all rules)")
+    args = parser.parse_args(arguments)
+    if args.rule_id is None:
+        sys.stdout.write(render_rule_list())
+        return
+    rule_id = args.rule_id.upper()
+    if rule_id not in rule_catalog():
+        raise KitError(f"unknown rule ID: {args.rule_id} (run 'explain' without an ID to list rules)")
+    sys.stdout.write(render_rule(rule_id))
+
+
 def run_auditor(command: str, arguments: list[str]) -> None:
     args = parse_audit_args(command, arguments)
     target = args.target.expanduser().resolve()
@@ -1549,6 +1655,11 @@ def run_auditor(command: str, arguments: list[str]) -> None:
     if command == "fix":
         patch = combined_patch(report, args.safe_only)
         emit_output(patch, args.output)
+        if args.verify:
+            result = verify_patches(report, args.safe_only)
+            sys.stderr.write(render_verification(result))
+            if result["unresolved"] or result["introduced"]:
+                raise SystemExit(2)
         return
     config_path = args.config.expanduser() if args.config else target / ".maintainer-defense.json"
     if args.config or config_path.is_file():
@@ -1587,14 +1698,22 @@ def main() -> None:
         return
     if len(sys.argv) == 1:
         print(
-            "usage: maintainer-defense {audit,fix,install} ...\n"
+            "usage: maintainer-defense {audit,fix,explain,install} ...\n"
             "       maintainer-defense --target REPOSITORY [legacy installer options]\n\n"
             "commands:\n"
             "  audit    inspect local governance, workflows, and moderation automation\n"
             "  fix      emit a reviewable unified diff; never modify the target\n"
+            "  explain  show what a rule detects and how to remediate it\n"
             "  install  preview or install a defense-kit profile\n\n"
             "Run a command with --help for details."
         )
+        return
+    if len(sys.argv) > 1 and sys.argv[1] == "explain":
+        try:
+            run_explain(sys.argv[2:])
+        except (KitError, OSError) as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            raise SystemExit(1) from exc
         return
     if len(sys.argv) > 1 and sys.argv[1] in {"audit", "fix"}:
         try:

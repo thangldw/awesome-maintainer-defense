@@ -280,6 +280,68 @@ class AuditorTests(unittest.TestCase):
             self.assertIn("close-pr: false", result.stdout)
             self.assertIn("min-account-age: 0", result.stdout)
 
+    def test_fix_verify_confirms_patch_on_scratch_copy(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            materialize(target, {"id": "verify", "workflow": "name: triage\non: [issues]\npermissions: write-all\njobs:\n  triage:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: owner/moderator@0123456789abcdef0123456789abcdef01234567\n        with:\n          close-pr: true\n"})
+            workflow = target / ".github/workflows/ci.yml"
+            before = workflow.read_bytes()
+            result = subprocess.run(
+                [sys.executable, str(CLI), "fix", str(target), "--verify"],
+                text=True, capture_output=True, check=True,
+            )
+            self.assertEqual(workflow.read_bytes(), before)
+            self.assertIn("permissions: {}", result.stdout)
+            self.assertIn("0 unresolved, 0 introduced", result.stderr)
+            self.assertIn("target was not modified", result.stderr)
+
+    def test_fix_verify_with_no_patches_is_a_noop(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            materialize(target, {"id": "verify-noop"})
+            report = module.audit_repository(target)
+            result = module.verify_patches(report, safe_only=False)
+            self.assertEqual(result["patched_files"], 0)
+            self.assertIn("no applicable patches", module.render_verification(result))
+
+    def test_verify_patches_flags_unresolved_and_introduced_findings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            materialize(target, {"id": "verify-fail", "workflow": "name: triage\non: [issues]\npermissions: write-all\njobs:\n  triage:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: owner/moderator@0123456789abcdef0123456789abcdef01234567\n"})
+            report = module.audit_repository(target)
+            fixable = next(item for item in report["findings"] if item["fix"]["available"])
+            # A re-audit that still reports the targeted finding plus a new one.
+            introduced = dict(fixable, fingerprint="f" * 24, message="synthetic regression")
+            rerun = module.report_with_findings(report, [fixable, introduced])
+            with mock.patch.object(module, "audit_repository", return_value=rerun):
+                result = module.verify_patches(report, safe_only=False)
+            self.assertEqual([item["rule_id"] for item in result["unresolved"]], [fixable["rule_id"]])
+            self.assertEqual([item["message"] for item in result["introduced"]], ["synthetic regression"])
+            rendered = module.render_verification(result)
+            self.assertIn("UNRESOLVED", rendered)
+            self.assertIn("INTRODUCED", rendered)
+            with mock.patch.object(module, "verify_patches", return_value=result), \
+                    self.assertRaises(SystemExit) as raised:
+                module.run_auditor("fix", [str(target), "--verify", "--output", str(target / "p.patch")])
+            self.assertEqual(raised.exception.code, 2)
+
+    def test_explain_lists_registry_and_describes_one_rule(self) -> None:
+        listing = subprocess.run(
+            [sys.executable, str(CLI), "explain"], text=True, capture_output=True, check=True,
+        ).stdout
+        registry = json.loads((ROOT / "auditor-rules.json").read_text(encoding="utf-8"))["rules"]
+        self.assertEqual({line.split()[0] for line in listing.splitlines()}, {item["id"] for item in registry})
+        detail = subprocess.run(
+            [sys.executable, str(CLI), "explain", "md-wf-002"], text=True, capture_output=True, check=True,
+        ).stdout
+        self.assertIn("MD-WF-002 · HIGH", detail)
+        self.assertIn("Safe remediation:", detail)
+        unknown = subprocess.run(
+            [sys.executable, str(CLI), "explain", "MD-XX-999"], text=True, capture_output=True,
+        )
+        self.assertEqual(unknown.returncode, 1)
+        self.assertIn("unknown rule ID", unknown.stderr)
+
     def test_fingerprint_survives_unrelated_line_shift(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp)
