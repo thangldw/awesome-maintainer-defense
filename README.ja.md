@@ -1,6 +1,6 @@
 # Awesome Maintainer Defense
 
-紹介ページ: [Maintainer Defense](https://thangldw.github.io/awesome-maintainer-defense/)。最新の公開 distribution は [v1.1.1](https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.1.1) です。Main の source/CI pin 更新は standalone release の再公開や実際の組織保護の証明ではありません。
+紹介ページ: [Maintainer Defense](https://thangldw.github.io/awesome-maintainer-defense/)。最新の公開 distribution は [v1.2.0](https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.2.0) です。Main の source/CI pin 更新は standalone release の再公開や実際の組織保護の証明ではありません。
 
 [English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
 
@@ -41,7 +41,7 @@ git apply --check recommended.patch
 ## インストール
 
 ```bash
-pipx install maintainer-defense-kit==1.1.1
+pipx install maintainer-defense-kit==1.2.0
 maintainer-defense audit .
 ```
 

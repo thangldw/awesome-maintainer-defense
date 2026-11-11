@@ -12,7 +12,7 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED_VERSION = "1.1.1"
+EXPECTED_VERSION = "1.2.0"
 READMES = ("README.md", "README.vi.md", "README.ja.md")
 INSTALL_PAGES = READMES + (
     "docs/GETTING_STARTED.md",
