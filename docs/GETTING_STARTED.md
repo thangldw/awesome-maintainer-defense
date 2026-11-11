@@ -16,7 +16,7 @@ python3 dist/maintainer-defense-kit.py audit .
 ## PyPI with pipx
 
 ```bash
-pipx install maintainer-defense-kit==1.1.1
+pipx install maintainer-defense-kit==1.2.0
 maintainer-defense audit /path/to/repository
 ```
 
@@ -25,8 +25,8 @@ maintainer-defense audit /path/to/repository
 On POSIX systems:
 
 ```bash
-curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1.1/maintainer-defense-kit.py
-curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1.1/maintainer-defense-kit.py.sha256
+curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.2.0/maintainer-defense-kit.py
+curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.2.0/maintainer-defense-kit.py.sha256
 shasum -a 256 -c maintainer-defense-kit.py.sha256
 python3 maintainer-defense-kit.py audit /path/to/repository
 ```
@@ -34,8 +34,8 @@ python3 maintainer-defense-kit.py audit /path/to/repository
 On PowerShell:
 
 ```powershell
-Invoke-WebRequest https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1.1/maintainer-defense-kit.py -OutFile maintainer-defense-kit.py
-Invoke-WebRequest https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.1.1/maintainer-defense-kit.py.sha256 -OutFile maintainer-defense-kit.py.sha256
+Invoke-WebRequest https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.2.0/maintainer-defense-kit.py -OutFile maintainer-defense-kit.py
+Invoke-WebRequest https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.2.0/maintainer-defense-kit.py.sha256 -OutFile maintainer-defense-kit.py.sha256
 $Expected = ((Get-Content maintainer-defense-kit.py.sha256 -Raw).Trim() -split '\s+')[0].ToLowerInvariant()
 $Actual = (Get-FileHash maintainer-defense-kit.py -Algorithm SHA256).Hash.ToLowerInvariant()
 if ($Actual -ne $Expected) { Write-Error "SHA-256 mismatch"; exit 1 }
