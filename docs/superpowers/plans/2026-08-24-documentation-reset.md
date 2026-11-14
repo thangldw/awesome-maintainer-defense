@@ -263,7 +263,7 @@ Security boundary summary
 
 The quickstart must include `make standalone` followed by `python3 dist/maintainer-defense-kit.py audit .`. Install examples use `maintainer-defense-kit==1.1.1`, verify SHA-256 on POSIX and PowerShell, and never claim repository mutation or online GitHub-settings inspection.
 
-Rewrite the six root public-contract files from their current factual behavior. Preserve the private GitHub Security Advisory route, canonical support URL, local/offline processing statement, warranty limitation, and MIT license reference.
+Rewrite the six root public-contract files from their current factual behavior. Preserve the private GitHub Security Advisory route, canonical support URL, local/offline processing statement, warranty limitation, and Apache-2.0 license reference.
 
 - [ ] **Step 5: Write the canonical English references**
 
