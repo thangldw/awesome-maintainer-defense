@@ -8,6 +8,6 @@
   },
   "homepage": "https://github.com/thangldw/awesome-maintainer-defense",
   "repository": "https://github.com/thangldw/awesome-maintainer-defense",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "keywords": ["github-actions", "repository-security", "governance", "audit"]
 }
