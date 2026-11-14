@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-24
 
-Awesome Maintainer Defense is licensed under the MIT License. The repository [LICENSE](LICENSE) is the controlling open-source license text.
+Awesome Maintainer Defense is licensed under the Apache License, Version 2.0. The repository [LICENSE](LICENSE) is the controlling open-source license text.
 
 Auditor findings, catalog records, generated patches, and playbooks are review inputs. They are not proof of authorship, intent, compromise, compliance, or repository safety, and they are not legal, security-certification, or incident-response services.
 
