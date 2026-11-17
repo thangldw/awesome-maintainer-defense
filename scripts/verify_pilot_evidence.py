@@ -20,6 +20,7 @@ RUNTIME_PATHS = (
     "auditor-rules.json",
     "maintainer-defense-config.schema.json",
     ":(glob)kits/maintainer-defense-kit/**",
+    ":(exclude,glob)kits/maintainer-defense-kit/README*.md",  # not embedded in the standalone
     ":(glob)kits/balanced/.github/**",
     ":(glob)kits/workflow-hardening/.github/**",
     ":(glob)policies/**",
@@ -81,6 +82,28 @@ def verify_ancestor(root: Path, revision: str, release_revision: str) -> None:
         )
     if result.returncode:
         raise PilotEvidenceError(f"cannot verify ancestry for recorded revision {revision}")
+
+
+def verify_on_release_history(root: Path, revision: str, release_revision: str) -> None:
+    """Accept an ancestor, or a commit whose tree equals one in the release history.
+
+    Squash merges replace a pull-request head with a new commit that carries the
+    identical tree, so the recorded revision is no longer an ancestor even though
+    the exact content it pins is on the release branch.
+    """
+    try:
+        verify_ancestor(root, revision, release_revision)
+        return
+    except PilotEvidenceError as exc:
+        if "is not an ancestor" not in str(exc):
+            raise
+    tree = run_git(root, "rev-parse", f"{revision}^{{tree}}", capture=True).stdout.decode().strip()
+    history = run_git(root, "log", "--format=%T", release_revision, capture=True).stdout.decode().split()
+    if tree not in history:
+        raise PilotEvidenceError(
+            f"recorded revision {revision} is neither an ancestor of {release_revision} "
+            "nor tree-identical to a commit in its history"
+        )
 
 
 def normalize_report_target(report: dict, expected: dict) -> dict:
@@ -147,7 +170,7 @@ def verify_provenance(
     target_commit = metadata["target_commit"]
     for revision in (source_commit, target_commit):
         run_git(root, "cat-file", "-e", f"{revision}^{{commit}}", capture=True)
-        verify_ancestor(root, revision, "HEAD")
+        verify_on_release_history(root, revision, "HEAD")
     release_version = current_version or current_package_version(root)
     if requires_head_runtime_match(metadata, release_version):
         diff = subprocess.run(

@@ -135,6 +135,36 @@ class PilotBundleTests(unittest.TestCase):
             with self.assertRaises(verifier.PilotEvidenceError):
                 verifier.verify_ancestor(repository, candidate, "HEAD")
 
+    def test_squash_equivalent_revision_is_accepted_but_unrelated_tree_is_not(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+
+            def git(*args: str) -> str:
+                return subprocess.run(
+                    ["git", "-C", str(repo), "-c", "user.name=t", "-c", "user.email=t@example.com", *args],
+                    check=True, capture_output=True, text=True,
+                ).stdout.strip()
+
+            git("init", "-q", "-b", "main")
+            repo.joinpath("a.txt").write_text("base\n")
+            git("add", "."); git("commit", "-qm", "base")
+            git("checkout", "-qb", "feature")
+            repo.joinpath("a.txt").write_text("feature\n")
+            git("commit", "-qam", "feature")
+            feature = git("rev-parse", "HEAD")
+            git("checkout", "-q", "main")
+            git("merge", "--squash", "feature")
+            git("commit", "-qm", "squashed")
+            git("checkout", "-qb", "other")
+            repo.joinpath("a.txt").write_text("other\n")
+            git("commit", "-qam", "other")
+            other = git("rev-parse", "HEAD")
+            git("checkout", "-q", "main")
+
+            verifier.verify_on_release_history(repo, feature, "HEAD")
+            with self.assertRaises(verifier.PilotEvidenceError):
+                verifier.verify_on_release_history(repo, other, "HEAD")
+
     def test_checked_in_minimal_fixture_builds(self) -> None:
         fixture = json.loads(
             (ROOT / "pilots/fixtures/minimal-input.json").read_text(encoding="utf-8")
