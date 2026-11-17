@@ -13,11 +13,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_VERSION = "1.2.0"
-READMES = ("README.md", "README.vi.md", "README.ja.md")
+READMES = ("README.md",)
 INSTALL_PAGES = READMES + (
     "docs/GETTING_STARTED.md",
-    "docs/vi/GETTING_STARTED.md",
-    "docs/ja/GETTING_STARTED.md",
 )
 AUDIT_COMMAND = re.compile(
     r"^python3\s+(?P<path>\S*maintainer-defense-kit\.py)\s+audit\s+\.$",

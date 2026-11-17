@@ -1,7 +1,5 @@
 # Documentation
 
-English is the canonical product contract. Vietnamese and Japanese cover the essential adoption and safety journey; runtime kit assets remain structurally aligned across all three languages.
-
 ## Start and operate
 
 | Goal | Document |
@@ -28,8 +26,6 @@ English is the canonical product contract. Vietnamese and Japanese cover the ess
 - [Pilot evidence](../pilots/README.md)
 - [Deployable kit](../kits/maintainer-defense-kit/README.md)
 - [Contribution contract](../CONTRIBUTING.md)
-
-Localized essentials: [Tiếng Việt](vi/README.md) · [日本語](ja/README.md).
 
 ## Architecture diagrams
 

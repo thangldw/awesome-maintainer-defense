@@ -28,7 +28,8 @@ def render_catalog(catalog: dict, audit_data: dict) -> str:
         "## Reading the evidence",
         "",
         f"Official project sources were last reviewed on **{audit_data['verified_on']}**. "
-        "The snapshot is not an endorsement, certification, or promise of future maintenance.",
+        "The snapshot is not an endorsement, certification, or promise of future maintenance. "
+        "Access, data boundaries, and repository snapshots are recorded in `audits.json`.",
         "",
         "Impact records the maximum documented automation effect: `low` is normally read-only; "
         "`medium` can publish, fail checks, comment, label, or modify local files; `high` can close, "
@@ -42,7 +43,6 @@ def render_catalog(catalog: dict, audit_data: dict) -> str:
         ]
         for resource in resources:
             audit = audits[resource["id"]]
-            snapshot = audit["repo_snapshot"]
             featured = " · featured" if resource.get("featured") else ""
             lines.extend(
                 [
@@ -50,15 +50,10 @@ def render_catalog(catalog: dict, audit_data: dict) -> str:
                     "",
                     inline(resource["description"]),
                     "",
-                    f"- **Classification:** `{resource['type']}` · `{resource['license']}`{featured}",
-                    f"- **Deployment/default:** {inline(audit['deployment'])}; {inline(audit['default_mode'])}",
-                    f"- **Maximum impact:** `{audit['automation_impact']}` — "
-                    + ", ".join(inline(item) for item in audit["maximum_effects"]),
-                    f"- **Data boundaries:** {', '.join(inline(item) for item in audit['data_boundaries'])}",
-                    f"- **Access:** {inline(audit['access'])}",
+                    f"- `{resource['type']}` · `{resource['license']}`{featured} · "
+                    f"impact `{audit['automation_impact']}` ({', '.join(inline(item) for item in audit['maximum_effects'])})",
+                    f"- **Default:** {inline(audit['default_mode'])}",
                     f"- **Limitation:** {inline(audit['limitations'])}",
-                    f"- **Repository snapshot:** archived=`{str(snapshot['archived']).lower()}`, "
-                    f"last push=`{snapshot['pushed_at']}`, license detection=`{snapshot['license_detected']}`",
                     f"- **Evidence:** {link_evidence(audit['evidence'])}",
                     "",
                 ]

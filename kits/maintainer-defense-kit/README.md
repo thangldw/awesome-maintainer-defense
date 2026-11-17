@@ -1,7 +1,5 @@
 # Maintainer Defense Kit
 
-[English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
-
 The kit installs reversible repository policy and read-only workflow controls. Preview is the default. Apply never overwrites different content, records file ownership and hashes, rejects unsafe paths and symlinks, and refuses to remove modified files.
 
 ## Profiles

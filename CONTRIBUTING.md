@@ -14,12 +14,12 @@ Do not add authorship detection, identity/history risk scoring, hidden network a
 
 ## Catalog entries
 
-Edit `catalog.json`, `audits.json`, and both translation registries. Provide official HTTPS evidence for deployment, permissions, data handling, maximum effects, limitations, maintenance state, and license. Descriptions must be factual. Stars, sponsorship, reciprocal promotion, and affiliation do not buy inclusion.
+Edit `catalog.json` and `audits.json`. Provide official HTTPS evidence for deployment, permissions, data handling, maximum effects, limitations, maintenance state, and license. Descriptions must be factual. Stars, sponsorship, reciprocal promotion, and affiliation do not buy inclusion.
 
 ## Pull requests
 
 Keep scope reviewable, disclose relationships and generated assistance, identify security or privacy effects, and include verification evidence. Human review remains required for generated code and patches. Complete the repository pull-request template.
 
-## Reports and translations
+## Reports
 
-Remove repository secrets and contributor identities from public evidence. Vietnamese and Japanese changes should preserve technical qualifications rather than translate promotional claims.
+Remove repository secrets and contributor identities from public evidence.

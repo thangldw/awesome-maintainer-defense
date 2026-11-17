@@ -373,7 +373,7 @@ def validate_repository_contracts(root: Path = ROOT) -> None:
         r"^python3\s+(?P<path>\S*maintainer-defense-kit\.py)\s+audit\s+\.$",
         re.MULTILINE,
     )
-    for filename in ("README.md", "README.vi.md", "README.ja.md"):
+    for filename in ("README.md",):
         text = (root / filename).read_text(encoding="utf-8")
         match = audit_command.search(text)
         if not match or match.group("path") != "dist/maintainer-defense-kit.py":

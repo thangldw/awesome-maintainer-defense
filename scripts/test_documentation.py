@@ -130,11 +130,9 @@ class RepositoryDocumentationTests(unittest.TestCase):
             root.joinpath("docs").mkdir()
             root.joinpath("catalog.json").write_bytes(ROOT.joinpath("catalog.json").read_bytes())
             root.joinpath("audits.json").write_bytes(ROOT.joinpath("audits.json").read_bytes())
-            readmes = {}
-            for filename in ("README.md", "README.vi.md", "README.ja.md"):
-                path = root / filename
-                path.write_text(f"# sentinel {filename}\n", encoding="utf-8")
-                readmes[filename] = path.read_bytes()
+            readme = root / "README.md"
+            readme.write_text("# sentinel\n", encoding="utf-8")
+            readme_before = readme.read_bytes()
 
             with mock.patch.object(render_module, "ROOT", root):
                 render_module.main()
@@ -144,8 +142,7 @@ class RepositoryDocumentationTests(unittest.TestCase):
 
             self.assertEqual(first, second)
             self.assertIn(b"Generated", first)
-            for filename, before in readmes.items():
-                self.assertEqual(root.joinpath(filename).read_bytes(), before)
+            self.assertEqual(readme.read_bytes(), readme_before)
 
     def test_english_product_journey_paths_exist(self) -> None:
         for relative in (
@@ -164,30 +161,6 @@ class RepositoryDocumentationTests(unittest.TestCase):
         for relative in MANIFEST["forbidden_paths"]:
             with self.subTest(path=relative):
                 self.assertFalse(ROOT.joinpath(relative).exists(), relative)
-
-    def test_locale_essential_paths_exist(self) -> None:
-        for language in ("vi", "ja"):
-            for filename in ("README.md", "GETTING_STARTED.md", "SAFETY.md", "PILOTS.md", "PLAYBOOK.md"):
-                relative = f"docs/{language}/{filename}"
-                with self.subTest(path=relative):
-                    self.assertTrue(ROOT.joinpath(relative).is_file(), relative)
-
-    def test_locale_essential_local_links_resolve(self) -> None:
-        link_pattern = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
-        generated = {ROOT.joinpath(relative).resolve() for relative in MANIFEST["generated_markdown"]}
-        paths = [ROOT / "README.vi.md", ROOT / "README.ja.md"]
-        paths.extend(ROOT.glob("docs/vi/*.md"))
-        paths.extend(ROOT.glob("docs/ja/*.md"))
-        for path in paths:
-            for target in link_pattern.findall(path.read_text(encoding="utf-8")):
-                parsed = urlparse(target.strip().split(" ", 1)[0].strip("<>"))
-                if parsed.scheme or target.startswith("#") or not parsed.path:
-                    continue
-                resolved = (path.parent / unquote(parsed.path)).resolve()
-                if resolved in generated and not resolved.exists():
-                    continue
-                with self.subTest(source=path.relative_to(ROOT), target=target):
-                    self.assertTrue(resolved.exists(), target)
 
 
 if __name__ == "__main__":
