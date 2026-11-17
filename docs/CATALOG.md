@@ -36,7 +36,7 @@ Model-powered Action that labels spam, link spam, and content it infers to be AI
 
 - `github-action` · `MIT` · impact `medium` (label, minimize comment)
 - **Default:** Applies moderation output unless dry-run is enabled
-- **Limitation:** Repository content is sent to a model endpoint and model judgments can be wrong. Its built-in AI-authorship prompt is not proof of authorship; disable it for enforcement. GitHub Models paid usage may apply after free limits.
+- **Limitation:** Repository content is sent to a model endpoint and model judgments can be wrong. Its built-in AI-authorship prompt is not proof of authorship; disable it for enforcement. GitHub Models paid usage may apply after free limits. The upstream repository is now archived and no longer maintained.
 - **Evidence:** [source 1](https://github.com/github/ai-moderator#usage) · [source 2](https://github.com/github/ai-moderator#inputs)
 
 ### [AI Community Moderator](https://github.com/benbalter/ai-community-moderator)
@@ -45,7 +45,7 @@ Moderates community interactions against a project's contributing guide and code
 
 - `github-action` · `MIT` · impact `high` (comment, hide content, lock discussion, limit interactions)
 - **Default:** Model-driven moderation using project guidelines
-- **Limitation:** A language model interprets community standards; ambiguous or multilingual content needs human review and an appeal path.
+- **Limitation:** A language model interprets community standards; ambiguous or multilingual content needs human review and an appeal path. The upstream repository is now archived and no longer maintained.
 - **Evidence:** [source 1](https://github.com/benbalter/ai-community-moderator#features) · [source 2](https://github.com/benbalter/ai-community-moderator#permissions)
 
 ### [AI Assessment Comment Labeler](https://github.com/github/ai-assessment-comment-labeler)
