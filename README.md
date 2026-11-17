@@ -1,8 +1,6 @@
 # Awesome Maintainer Defense
 
-Product introduction: [Maintainer Defense](https://thangldw.github.io/awesome-maintainer-defense/). Latest published distribution: [v1.2.0](https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.2.0). Source/CI pin updates on main do not republish the standalone release or prove live organization protection.
-
-[English](README.md) · [Tiếng Việt](README.vi.md) · [日本語](README.ja.md)
+[Website](https://thangldw.github.io/awesome-maintainer-defense/) · [Latest release v1.2.0](https://github.com/thangldw/awesome-maintainer-defense/releases/tag/v1.2.0)
 
 Awesome Maintainer Defense is an offline, read-only repository auditor and a set of reversible maintainer controls. It inspects local governance files and GitHub Actions trust boundaries without a token or network request. It does not execute repository code, inspect live GitHub settings, or identify who wrote a contribution.
 
@@ -42,16 +40,14 @@ The [audit-to-action diagram](docs/diagrams/audit-to-action.html) shows the comp
 
 Tested contracts cover deterministic detection, JSON/SARIF output, patch-only remediation, installer conflict handling, and shipped workflow invariants. The project does not claim field accuracy across representative repositories, live GitHub-settings coverage, compliance, or proof of authorship or intent. See [Kit assurance](docs/KIT_ASSURANCE.md) and [Threat model](docs/THREAT_MODEL.md).
 
-## Install options
-
-PyPI with an isolated application environment:
+## Install
 
 ```bash
 pipx install maintainer-defense-kit==1.2.0
 maintainer-defense audit .
 ```
 
-Verified standalone on POSIX systems:
+Or download the standalone file and verify its checksum (POSIX shown; PowerShell is in [Getting started](docs/GETTING_STARTED.md)):
 
 ```bash
 curl -fLO https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.2.0/maintainer-defense-kit.py
@@ -60,18 +56,7 @@ shasum -a 256 -c maintainer-defense-kit.py.sha256
 python3 maintainer-defense-kit.py audit .
 ```
 
-Verified standalone on PowerShell:
-
-```powershell
-Invoke-WebRequest https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.2.0/maintainer-defense-kit.py -OutFile maintainer-defense-kit.py
-Invoke-WebRequest https://github.com/thangldw/awesome-maintainer-defense/releases/download/v1.2.0/maintainer-defense-kit.py.sha256 -OutFile maintainer-defense-kit.py.sha256
-$Expected = ((Get-Content maintainer-defense-kit.py.sha256 -Raw).Trim() -split '\s+')[0].ToLowerInvariant()
-$Actual = (Get-FileHash maintainer-defense-kit.py -Algorithm SHA256).Hash.ToLowerInvariant()
-if ($Actual -ne $Expected) { Write-Error "SHA-256 mismatch"; exit 1 }
-python maintainer-defense-kit.py audit .
-```
-
-Release channels and recovery rules are documented in [Distribution](docs/DISTRIBUTION.md).
+Release channels and recovery rules: [Distribution](docs/DISTRIBUTION.md).
 
 ## Documentation
 
@@ -83,11 +68,11 @@ Release channels and recovery rules are documented in [Distribution](docs/DISTRI
 
 ## Curated catalog
 
-The catalog is a secondary, evidence-reviewed index of maintainer-defense resources. Inclusion is not an endorsement. Review permissions, data boundaries, maximum effects, maintenance state, and licensing before adoption. See the generated [catalog](docs/CATALOG.md).
+The catalog is a secondary, evidence-reviewed index of maintainer-defense resources. Inclusion is not an endorsement. Review permissions, data boundaries (see `audits.json`), maximum effects, maintenance state, and licensing before adoption. See the generated [catalog](docs/CATALOG.md).
 
 ## Contributing and support
 
-Read [Contributing](CONTRIBUTING.md) before proposing a rule, product change, translation, or catalog entry. Use [Support](SUPPORT.md) for public requests and [Security](SECURITY.md) for private vulnerability reporting.
+Read [Contributing](CONTRIBUTING.md) before proposing a rule, product change, or catalog entry. Use [Support](SUPPORT.md) for public requests and [Security](SECURITY.md) for private vulnerability reporting.
 
 ## License
 
